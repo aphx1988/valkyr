@@ -25,6 +25,9 @@
     <Filter Include="vrender">
       <UniqueIdentifier>{44928bad-95db-4a78-b556-99c579a1b0fa}</UniqueIdentifier>
     </Filter>
+    <Filter Include="vmalloc">
+      <UniqueIdentifier>{78b81790-0af4-47c9-ab97-a50b50880bb0}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="framework.h">
@@ -56,6 +59,12 @@
     </ClInclude>
     <ClInclude Include="..\..\vcore\array.h">
       <Filter>vcore</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\vcore\queue.h">
+      <Filter>vcore</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\vmalloc\Pool.h">
+      <Filter>vmalloc</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
