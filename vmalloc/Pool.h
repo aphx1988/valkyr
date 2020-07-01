@@ -105,7 +105,7 @@ namespace valkyr {
 		}
 
 		void Remove(int num) {
-			//first chunk has pool desc, can not remove
+			//first chunk has pool desc, will remove last
 			if (num <1 ) {
 				return;
 			}
@@ -113,26 +113,26 @@ namespace valkyr {
 				Clear();
 				return;
 			}
-			Chunk* curr = mDesc->firstChunk->next;
-			for (int i = 1; i < num; i++) {
-				ChunkAllocator::Free(curr);
-				curr = curr->next;
+			for (int i = 0; i < num; ++i) {
+				ChunkAllocator::Free(mDesc->lastChunk);
+				mDesc->lastChunk = mDesc->lastChunk->next;
+				mDesc->chunkCount--;
 			}
-			mDesc->firstChunk = curr;
 		}
 
 		void Clear() {
 			Chunk* next = nullptr;
-			Chunk* curr = mFirstChunk->next;
-			ChunkAllocator::Free(mFirstChunk);
-			for (int i = 1; i < mChunkSize; i++) {
+			Chunk* curr = mDesc->firstChunk->next;
+			//ChunkAllocator::Free(mFirstChunk);
+			for (int i = 1; i < mDesc->chunkCount; i++) {
 				next = curr->next;
 				ChunkAllocator::Free(curr);
 				curr = next;
 			}
-			mLastChunk = nullptr;
-			mFirstChunk = nullptr;
-			mChunkSize = 0;
+			mDesc->lastChunk = nullptr;
+			mDesc->chunkCount = 0;
+			ChunkAllocator::Free(mDesc->firstChunk);
+			mDesc->firstChunk = nullptr;
 		}
 
 		~Pool() {
