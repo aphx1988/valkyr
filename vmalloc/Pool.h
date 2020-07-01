@@ -42,31 +42,43 @@ namespace valkyr {
 
 	};
 
+	struct PoolDesc {
+		Chunk* lastChunk;
+		Chunk* firstChunk;
+		size_t chunkCount;
+		char pad[4];
+	};
+
 	class Pool {
-		Chunk* mLastChunk;
-		Chunk* mFirstChunk;
-		size_t mChunkSize;
+		PoolDesc* mDesc;
 
 		Pool() {
-			mChunkSize = 0;
-			mLastChunk = nullptr;
-			mFirstChunk = nullptr;
-			for (int i = 0; i < INIT_CHUNK_COUNT; i++) {
+			Chunk* chunk = ChunkAllocator::Malloc();
+			ChunkInfo* firstChunkInfo = GetInfo(chunk);
+			mDesc = new(chunk->buff+ firstChunkInfo->head) PoolDesc();
+			firstChunkInfo->head += sizeof(PoolDesc);
+			mDesc->firstChunk = chunk;
+			mDesc->lastChunk = chunk;
+			mDesc->chunkCount = 1;
+			for (int i = 1; i < INIT_CHUNK_COUNT; i++) {
 				NewChunk();
 			}
-			
+			mDesc->chunkCount = INIT_CHUNK_COUNT;
+
 		}
 
 		void NewChunk() {
 			Chunk* chunk = ChunkAllocator::Malloc();
-			if (mLastChunk != nullptr) {
-				mLastChunk->next = chunk;
+			if (mDesc->lastChunk != nullptr) {
+				mDesc->lastChunk->next = chunk;
 			}
-			mLastChunk = chunk;
-			++mChunkSize;
-			if (mFirstChunk == nullptr) {
-				mFirstChunk = mLastChunk;
+			mDesc->lastChunk = chunk;
+			++mDesc->chunkCount;
+			/*
+			if (mInfo->firstChunk == nullptr) {
+				mInfo->firstChunk = mInfo->lastChunk;
 			}
+			*/
 		}
 
 		ChunkInfo* GetInfo(Chunk* chunk) {
@@ -75,7 +87,7 @@ namespace valkyr {
 
 		template <typename T>
 		T* Spawn() {
-			T* obj = new (mLastChunk->buff+mLastChunk->head)T();
+			T* obj = new (mDesc->lastChunk->buff+mDesc->lastChunk->info->head)T();
 			ChunkInfo* info = GetInfo(mLastChunk);
 			info->usedSize += sizeof(T);
 			if (info->usedSize >= MAX_CHUNK_SIZE) {
@@ -93,14 +105,20 @@ namespace valkyr {
 		}
 
 		void Remove(int num) {
-			if (num >= mChunkSize) 
+			//first chunk has pool desc, can not remove
+			if (num <1 ) {
+				return;
+			}
+			if (num >= mDesc->chunkCount) {
 				Clear();
-			Chunk* curr = mFirstChunk;
-			for (int i = 0; i < num; i++) {
+				return;
+			}
+			Chunk* curr = mDesc->firstChunk->next;
+			for (int i = 1; i < num; i++) {
 				ChunkAllocator::Free(curr);
 				curr = curr->next;
 			}
-			mFirstChunk = curr;
+			mDesc->firstChunk = curr;
 		}
 
 		void Clear() {
