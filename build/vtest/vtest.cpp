@@ -2,11 +2,26 @@
 //
 
 #include <iostream>
+#include "../../vmalloc/Pool.h"
+
+struct A {
+    int i0;
+    int i1;
+};
 
 int main()
 {
-    std::cout << "Hello World!\n";
+    using namespace valkyr;
+    Pool* pool = new Pool();
+    A* a = pool->Spawn<A>();
+    a->i0 = 1;
+    a->i1 = 10;
+    std::cout << "A* a:" << a;
+    std::cout << "a+sizeof(A):" << (a+sizeof(A));
+    ChunkInfo* lastChunkInfo = pool->GetLastChunkInfo();
+    std::cout << "pool->GetLastChunkInfo()->head" << lastChunkInfo->head;
     //_CrtDumpMemoryLeaks();
+    system("pause");
 }
 
 // 运行程序: Ctrl + F5 或调试 >“开始执行(不调试)”菜单

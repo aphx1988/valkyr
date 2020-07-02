@@ -16,6 +16,9 @@
     <Filter Include="vcore">
       <UniqueIdentifier>{14809a1e-7332-4bf6-aaf0-9b629fd3281c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="vmalloc">
+      <UniqueIdentifier>{333cbaf0-01b7-4c53-82fa-da2a44380c0e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="vtest.cpp">
@@ -34,6 +37,9 @@
     </ClInclude>
     <ClInclude Include="..\..\vcore\vector.h">
       <Filter>vcore</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\vmalloc\Pool.h">
+      <Filter>vmalloc</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

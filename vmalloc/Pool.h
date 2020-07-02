@@ -50,6 +50,7 @@ namespace valkyr {
 	};
 
 	class Pool {
+	public:
 		PoolDesc* mDesc;
 
 		Pool() {
@@ -83,6 +84,10 @@ namespace valkyr {
 
 		ChunkInfo* GetInfo(Chunk* chunk) {
 			return (ChunkInfo*)chunk->buff;
+		}
+
+		ChunkInfo* GetLastChunkInfo() {
+			return GetInfo(mDesc->lastChunk);
 		}
 
 		template <typename T>
