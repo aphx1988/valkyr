@@ -6,5 +6,5 @@ namespace valkyr {
 		void init();
 		void preFrame();
 		void render();
-	}
+	};
 };

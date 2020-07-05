@@ -12,14 +12,24 @@ struct A {
 int main()
 {
     using namespace valkyr;
-    Pool* pool = new Pool();
-    A* a = pool->Spawn<A>();
-    a->i0 = 1;
-    a->i1 = 10;
-    std::cout << "A* a:" << a;
-    std::cout << "a+sizeof(A):" << (a+sizeof(A));
-    ChunkInfo* lastChunkInfo = pool->GetLastChunkInfo();
-    std::cout << "pool->GetLastChunkInfo()->head" << lastChunkInfo->head;
+    Chunk* chunk = ChunkAllocator::Malloc();
+    ChunkInfo* info = ChunkUtil::GetInfo(chunk);
+    std::cout << "chunk address:" << chunk << std::endl;
+    std::cout<<
+
+    //Pool* pool = new Pool();
+    //A* a = pool->Spawn<A>();
+    //a->i0 = 1;
+    //a->i1 = 10;
+    //std::cout << "Pool pool:" << pool << std::endl;
+    //std::cout << "A* a:" << a << std::endl;
+    ////std::cout << "a+sizeof(A):" << (a+sizeof(A)) << std::endl;
+    //ChunkInfo* lastChunkInfo = pool->GetLastChunkInfo();
+    //char* pBuff = pool->mDesc->lastChunk->buff;
+    //A* aa = (A*)(pBuff + lastChunkInfo->head-sizeof(A));
+    //std::cout << "buff+head:" << (A*)(pBuff + lastChunkInfo->head) << std::endl;
+    //std::cout << "buff+head-sizeof(A):" << aa << std::endl;
+    //std::cout << "buff+head:" << pBuff+lastChunkInfo->head << std::endl;
     //_CrtDumpMemoryLeaks();
     system("pause");
 }
