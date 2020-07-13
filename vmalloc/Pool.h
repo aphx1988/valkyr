@@ -1,10 +1,11 @@
 #pragma once
+#ifdef WIN32
 #include <vcruntime_string.h>
+#endif
 #include <xmemory>
 
 namespace valkyr {
-	const int MAX_CHUNK_SIZE = 16 * 1024 * 1024;
-	const int INIT_CHUNK_COUNT = 4;
+	const int CHUNK_SIZE = 16 * 1024 * 1024;
 
 	struct ChunkInfo {
 		alignas(4) bool isFull;
@@ -16,19 +17,19 @@ namespace valkyr {
 			isFull = false;
 			head = sizeof(ChunkInfo);
 			usedSize = sizeof(ChunkInfo);
-			unUsedSize = MAX_CHUNK_SIZE - sizeof(ChunkInfo);
+			unUsedSize = CHUNK_SIZE - sizeof(ChunkInfo);
 		}
 	};
 
 	union Chunk {
-		char buff[MAX_CHUNK_SIZE];
+		char buff[CHUNK_SIZE];
 		Chunk* next;
 	};
 
 	class ChunkAllocator {
 	public:
 		static inline Chunk* Malloc() {
-			Chunk* chunk = (Chunk*)malloc(MAX_CHUNK_SIZE);
+			Chunk* chunk = (Chunk*)malloc(CHUNK_SIZE);
 			memset(chunk->buff, 0, sizeof(chunk));
 			ChunkInfo* info = new(chunk->buff) ChunkInfo();
 			chunk->next = nullptr;
@@ -48,17 +49,17 @@ namespace valkyr {
 		}
 
 		template <typename T>
-		static inline T Spawn(Chunk* chunk) {
+		static inline T* NewObjFrom(Chunk* chunk) {
 			ChunkInfo* info = GetInfo(chunk);
 			if (info->unUsedSize < sizeof(T)) {
 				return nullptr;
 			}
-			T* obj = new (mDesc->lastChunk->buff + info->head)T();
+			T* obj = new (chunk->buff + info->head)T();
 			info->usedSize += sizeof(T);
-			if (info->usedSize >= MAX_CHUNK_SIZE) {
-				info->usedSize = MAX_CHUNK_SIZE;
+			if (info->usedSize >= CHUNK_SIZE) {
+				info->usedSize = CHUNK_SIZE;
 				info->unUsedSize = 0;
-				info->head = MAX_CHUNK_SIZE;
+				info->head = CHUNK_SIZE;
 				info->isFull = true;
 			}
 			else {
@@ -68,20 +69,54 @@ namespace valkyr {
 			}
 			return obj;
 		}
+
+		template <typename T>
+		static inline T* GetFrom(int idx, Chunk* chunk) {
+			return (T*)(chunk->buff + idx);
+		}
 	};
 
-	struct PoolDesc {
+	struct Pool
+	{
 		Chunk* lastChunk;
 		Chunk* firstChunk;
 		size_t chunkCount;
 		char pad[4];
 	};
 
-	//class Pool {
+	class PoolUtil {
+	public:
+		static inline Pool* CreatePool(unsigned int chunkCount) {
+			if (chunkCount < 1) return nullptr;
+			Chunk* firstChunk = ChunkAllocator::Malloc();
+			Chunk* prevChunk;
+			Pool* pool = ChunkUtil::NewObjFrom<Pool>(firstChunk);
+			pool->firstChunk = firstChunk;
+			prevChunk = firstChunk;
+			if (chunkCount < 2) {
+				pool->lastChunk = firstChunk;
+			}
+			for (int i = 1; i < chunkCount - 1; i++) {
+				Chunk* chunk = ChunkAllocator::Malloc();
+				prevChunk->next = chunk;
+				if (i == chunkCount - 1) {
+					pool->lastChunk = chunk;
+				}
+			}
+			pool->chunkCount = chunkCount;
+			return pool;
+		}
+
+		template <typename T>
+		static inline T* Spawn() {
+		}
+	};
+
+	//class PoolUtil {
 	//public:
 	//	PoolDesc* mDesc=nullptr;
 
-	//	Pool() {
+	//	PoolUtil() {
 	//		Chunk* chunk = ChunkAllocator::Malloc();
 	//		ChunkInfo* firstChunkInfo = GetInfo(chunk);
 	//		mDesc = new(chunk->buff+ firstChunkInfo->head) PoolDesc();
@@ -126,10 +161,10 @@ namespace valkyr {
 	//		}
 	//		T* obj = new (mDesc->lastChunk->buff + info->head)T();
 	//		info->usedSize += sizeof(T);
-	//		if (info->usedSize >= MAX_CHUNK_SIZE) {
-	//			info->usedSize = MAX_CHUNK_SIZE;
+	//		if (info->usedSize >= CHUNK_SIZE) {
+	//			info->usedSize = CHUNK_SIZE;
 	//			info->unUsedSize = 0;
-	//			info->head = MAX_CHUNK_SIZE;
+	//			info->head = CHUNK_SIZE;
 	//			info->isFull = true;
 	//		}
 	//		else {
@@ -171,7 +206,7 @@ namespace valkyr {
 	//		mDesc->firstChunk = nullptr;
 	//	}
 
-	//	~Pool() {
+	//	~PoolUtil() {
 	//		Clear();
 	//	}
 

@@ -9,28 +9,58 @@ struct A {
     int i1;
 };
 
+void poolTest() {
+    using namespace valkyr;
+    Pool* pool = PoolUtil::CreatePool(8);
+    std::cout << "last pool address=" << pool->lastChunk << std::endl;
+    std::cout << "num of pool chunks=" << pool->chunkCount << std::endl;
+    std::cout << "num of pool chunks=" << pool->chunkCount << std::endl;
+}
+
 int main()
 {
     using namespace valkyr;
     Chunk* chunk = ChunkAllocator::Malloc();
     ChunkInfo* info = ChunkUtil::GetInfo(chunk);
-    std::cout << "chunk address:" << chunk << std::endl;
-    std::cout<<
-
-    //Pool* pool = new Pool();
-    //A* a = pool->Spawn<A>();
-    //a->i0 = 1;
-    //a->i1 = 10;
-    //std::cout << "Pool pool:" << pool << std::endl;
-    //std::cout << "A* a:" << a << std::endl;
-    ////std::cout << "a+sizeof(A):" << (a+sizeof(A)) << std::endl;
-    //ChunkInfo* lastChunkInfo = pool->GetLastChunkInfo();
-    //char* pBuff = pool->mDesc->lastChunk->buff;
-    //A* aa = (A*)(pBuff + lastChunkInfo->head-sizeof(A));
-    //std::cout << "buff+head:" << (A*)(pBuff + lastChunkInfo->head) << std::endl;
-    //std::cout << "buff+head-sizeof(A):" << aa << std::endl;
-    //std::cout << "buff+head:" << pBuff+lastChunkInfo->head << std::endl;
-    //_CrtDumpMemoryLeaks();
+    int aHead = info->head;
+    A* a = ChunkUtil::NewObjFrom<A>(chunk);
+    a->i0 = 10;
+    a->i1 = 100;
+    std::cout << "chunk address=" << chunk << std::endl;
+    std::cout << "info address=" << info << std::endl;
+    std::cout << "a address=" << a << std::endl;
+    std::cout << "a.i1=" << a->i1 << std::endl;
+    std::cout << "info.usedSize=" << info->usedSize << std::endl;
+    std::cout << "info.head=" << info->head << std::endl;
+    std::cout << "===============================" << std::endl;
+    A* a2 = ChunkUtil::NewObjFrom<A>(chunk);
+    a2->i0 = 0;
+    a2->i1 = 222;
+    std::cout << "a2 address=" << a2 << std::endl;
+    std::cout << "a2.i1=" << a2->i1 << std::endl;
+    std::cout << "info.usedSize=" << info->usedSize << std::endl;
+    std::cout << "info.head=" << info->head << std::endl;
+    A* aa = ChunkUtil::GetFrom<A>(aHead, chunk);
+    std::cout << "get a address=" << aa << std::endl;
+    std::cout << "get a.i1=" << aa->i1 << std::endl;
+    std::cout << "===============================" << std::endl;
+    Chunk* chunk2 = ChunkAllocator::Malloc();
+    chunk->next = chunk2;
+    int chunk2InitHead = ChunkUtil::GetInfo(chunk2)->head;
+    A* a3 = ChunkUtil::NewObjFrom<A>(chunk->next);
+    a3->i1 = 33;
+    std::cout << "chunk2InitHead=" << chunk2InitHead << std::endl;
+    std::cout << "a3.i1=" << a3->i1 << std::endl;
+    ChunkInfo* chunk2Info = ChunkUtil::GetInfo(chunk2);
+    std::cout<<"chunk2 info.usedSize="<< chunk2Info->usedSize << std::endl;
+    std::cout << "chunk->next info.usedSize=" << ChunkUtil::GetInfo(chunk->next)->usedSize << std::endl;
+    std::cout << "chunk2 info.head=" << ChunkUtil::GetInfo(chunk2)->head << std::endl;
+    std::cout << "chunk->next info.head=" << ChunkUtil::GetInfo(chunk->next)->head << std::endl;
+    std::cout << "===============================" << std::endl;
+    std::cout << "sizeof(typeid(A))=" << sizeof(typeid(A))<<",typeid(A).name=" <<typeid(A).name()<< std::endl;
+    poolTest();
+    ChunkAllocator::Free(chunk);
+    ChunkAllocator::Free(chunk2);
     system("pause");
 }
 
