@@ -11,10 +11,12 @@ struct A {
 
 void poolTest() {
     using namespace valkyr;
-    Pool* pool = PoolUtil::CreatePool(8);
-    std::cout << "last pool address=" << pool->lastChunk << std::endl;
+    Pool* pool = PoolUtil::CreatePool(4);
+    std::cout << "pool last chunk=" << pool->lastChunk << std::endl;
     std::cout << "num of pool chunks=" << pool->chunkCount << std::endl;
-    std::cout << "num of pool chunks=" << pool->chunkCount << std::endl;
+    std::cout << "first chunk=" << pool->firstChunk << std::endl;
+    ChunkInfo* info = ChunkUtil::GetInfo(pool->firstChunk);
+    std::cout << "first chunk used size=" << info->usedSize << std::endl;
 }
 
 int main()
@@ -58,6 +60,7 @@ int main()
     std::cout << "chunk->next info.head=" << ChunkUtil::GetInfo(chunk->next)->head << std::endl;
     std::cout << "===============================" << std::endl;
     std::cout << "sizeof(typeid(A))=" << sizeof(typeid(A))<<",typeid(A).name=" <<typeid(A).name()<< std::endl;
+    std::cout << "===============================" << std::endl;
     poolTest();
     ChunkAllocator::Free(chunk);
     ChunkAllocator::Free(chunk2);
