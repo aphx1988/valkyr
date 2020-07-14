@@ -93,7 +93,7 @@ namespace valkyr {
 			Pool* pool = ChunkUtil::NewObjFrom<Pool>(firstChunk);
 			pool->firstChunk = firstChunk;
 			prevChunk = firstChunk;
-			if (chunkCount < 2) {
+			if (chunkCount <=1) {
 				pool->lastChunk = firstChunk;
 			}
 			for (int i = 1; i < chunkCount - 1; i++) {
@@ -109,6 +109,22 @@ namespace valkyr {
 
 		template <typename T>
 		static inline T* Spawn() {
+		}
+
+		static inline void Clear(Pool* pool) {
+			if (pool->chunkCount == 0) return;
+			if (pool->firstChunk == nullptr) return;
+			if (pool->chunkCount ==1) {
+				ChunkAllocator::Free(pool->firstChunk);
+				return;
+			}
+			Chunk* curr = pool->firstChunk->next;
+			for (int i = 1; i < pool->chunkCount; ++i) {
+				Chunk* next = curr->next;
+				if (next == nullptr) return;
+				ChunkAllocator::Free(curr);
+				curr = next;
+			}
 		}
 	};
 
