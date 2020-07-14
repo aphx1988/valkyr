@@ -81,26 +81,33 @@ namespace valkyr {
 		Chunk* lastChunk;
 		Chunk* firstChunk;
 		size_t chunkCount;
-		char pad[4];
+		int pad;
 	};
 
 	class PoolUtil {
 	public:
 		static inline Pool* CreatePool(unsigned int chunkCount) {
+			//create chunk in loop
 			if (chunkCount < 1) return nullptr;
 			Chunk* firstChunk = ChunkAllocator::Malloc();
-			Chunk* prevChunk;
+			Chunk* prevChunk = firstChunk;
 			Pool* pool = ChunkUtil::NewObjFrom<Pool>(firstChunk);
 			pool->firstChunk = firstChunk;
-			prevChunk = firstChunk;
+			pool->lastChunk = nullptr;
 			if (chunkCount <=1) {
 				pool->lastChunk = firstChunk;
 			}
-			for (int i = 1; i < chunkCount - 1; i++) {
-				Chunk* chunk = ChunkAllocator::Malloc();
-				prevChunk->next = chunk;
-				if (i == chunkCount - 1) {
-					pool->lastChunk = chunk;
+			else {
+				for (int i = 1; i < chunkCount; ++i) {
+					Chunk* chunk = ChunkAllocator::Malloc();
+					prevChunk->next = chunk;
+					if (i == chunkCount - 1) {
+						pool->lastChunk = chunk;
+						break;
+					}
+					else {
+						prevChunk = chunk;
+					}
 				}
 			}
 			pool->chunkCount = chunkCount;
