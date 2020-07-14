@@ -12,7 +12,7 @@ struct A {
 };
 
 void poolTest() {
-    Pool* pool = PoolUtil::CreatePool(4);
+    Pool* pool = PoolUtil::CreatePool();
     std::cout << "pool first chunk=" << pool->firstChunk << std::endl;
     std::cout << "pool last chunk=" << pool->lastChunk << std::endl;
     std::cout << "num of pool chunks=" << pool->chunkCount << std::endl;

@@ -5,7 +5,8 @@
 #include <xmemory>
 
 namespace valkyr {
-	const int CHUNK_SIZE = 16 * 1024 * 1024;
+	const unsigned int CHUNK_SIZE = 16 * 1024 * 1024;
+	const unsigned int POOL_CHUNKS = 4;
 
 	struct ChunkInfo {
 		alignas(4) bool isFull;
@@ -21,9 +22,9 @@ namespace valkyr {
 		}
 	};
 
-	union Chunk {
+	struct Chunk {
 		char buff[CHUNK_SIZE];
-		Chunk* next;
+		//Chunk* next;
 	};
 
 	class ChunkAllocator {
@@ -46,6 +47,10 @@ namespace valkyr {
 	public:
 		static inline ChunkInfo* GetInfo(Chunk* chunk) {
 			return (ChunkInfo*)chunk->buff;
+		}
+
+		static inline Chunk* GetNext(Chunk* chunk) {
+			return (Chunk*)chunk->buff+sizeof(ChunkInfo);
 		}
 
 		template <typename T>
@@ -86,31 +91,18 @@ namespace valkyr {
 
 	class PoolUtil {
 	public:
-		static inline Pool* CreatePool(unsigned int chunkCount) {
-			//create chunk in loop
-			if (chunkCount < 1) return nullptr;
-			Chunk* firstChunk = ChunkAllocator::Malloc();
-			Chunk* prevChunk = firstChunk;
-			Pool* pool = ChunkUtil::NewObjFrom<Pool>(firstChunk);
-			pool->firstChunk = firstChunk;
-			pool->lastChunk = nullptr;
-			if (chunkCount <=1) {
-				pool->lastChunk = firstChunk;
-			}
-			else {
-				for (int i = 1; i < chunkCount; ++i) {
-					Chunk* chunk = ChunkAllocator::Malloc();
-					prevChunk->next = chunk;
-					if (i == chunkCount - 1) {
-						pool->lastChunk = chunk;
-						break;
-					}
-					else {
-						prevChunk = chunk;
-					}
+		static inline Pool* CreatePool() {
+			Chunk* chunks[POOL_CHUNKS];
+			for (int i = 0; i < POOL_CHUNKS; ++i) {
+				chunks[i] = ChunkAllocator::Malloc();
+				if (i > 0) {
+					chunks[i - 1]->next = chunks[i];
 				}
 			}
-			pool->chunkCount = chunkCount;
+			Pool* pool = ChunkUtil::NewObjFrom<Pool>(chunks[0]);
+			pool->chunkCount = POOL_CHUNKS;
+			pool->firstChunk = chunks[0];
+			pool->lastChunk = chunks[POOL_CHUNKS-1];
 			return pool;
 		}
 
