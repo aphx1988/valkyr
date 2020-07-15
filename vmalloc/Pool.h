@@ -9,13 +9,15 @@ namespace valkyr {
 	const unsigned int POOL_CHUNKS = 4;
 
 	struct ChunkInfo {
-		alignas(4) bool isFull;
+		//alignas(4) bool isFull;
+		Chunk* next;
 		int head;
 		size_t usedSize;
 		size_t unUsedSize;
 
 		ChunkInfo() {
-			isFull = false;
+			//isFull = false;
+			next = nullptr;
 			head = sizeof(ChunkInfo);
 			usedSize = sizeof(ChunkInfo);
 			unUsedSize = CHUNK_SIZE - sizeof(ChunkInfo);
@@ -33,12 +35,11 @@ namespace valkyr {
 			Chunk* chunk = (Chunk*)malloc(CHUNK_SIZE);
 			memset(chunk->buff, 0, sizeof(chunk));
 			ChunkInfo* info = new(chunk->buff) ChunkInfo();
-			chunk->next = nullptr;
 			return chunk;
 		}
 
 		static inline void Free(Chunk* chunk) {
-			chunk->next = nullptr;
+			//chunk->next = nullptr;
 			free(chunk->buff);
 		}
 	};
@@ -51,6 +52,21 @@ namespace valkyr {
 
 		static inline Chunk* GetNext(Chunk* chunk) {
 			return (Chunk*)chunk->buff+sizeof(ChunkInfo);
+		}
+
+		static inline bool IsFull(Chunk* chunk) {
+			ChunkInfo* info = ChunkUtil::GetInfo(chunk);
+			return info->unUsedSize == 0 ;
+		}
+
+		template <typename T>
+		static inline bool CanContain(Chunk* chunk) {
+			ChunkInfo* info = ChunkUtil::GetInfo(chunk);
+			return info->unUsedSize >= sizeof(T);
+		}
+
+		static inline void Connect(Chunk* chunk,Chunk* next) {
+			ChunkUtil::GetInfo(chunk)->next = next;
 		}
 
 		template <typename T>
@@ -96,7 +112,8 @@ namespace valkyr {
 			for (int i = 0; i < POOL_CHUNKS; ++i) {
 				chunks[i] = ChunkAllocator::Malloc();
 				if (i > 0) {
-					chunks[i - 1]->next = chunks[i];
+					/*chunks[i - 1]->next = chunks[i];*/
+					ChunkUtil::Connect(chunks[i - 1],chunks[i]);
 				}
 			}
 			Pool* pool = ChunkUtil::NewObjFrom<Pool>(chunks[0]);
