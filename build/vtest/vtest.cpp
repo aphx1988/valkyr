@@ -16,9 +16,19 @@ void poolTest() {
     A* a = PoolUtil::NewObjFrom<A>(pool);
     a->i0 = 333;
     a->i1 = 222;
-    PoolUtil::Traverse(pool, [pool](Chunk* chunk) {
-        ChunkInfo* chunkInfo
-     });
+    std::cout << "pool chu nk count:" << pool->chunkCount << std::endl;
+    A* a2 = ChunkUtil::GetFrom<A>(sizeof(ChunkInfo) + sizeof(Pool),pool->firstChunk);
+    std::cout << "a2:i0=" << a2->i0<<",i1="<<a2->i1 << std::endl;
+    PoolUtil::Traverse(pool, [pool](Chunk* chunk,int i) {
+        ChunkInfo* info = ChunkUtil::GetInfo(chunk);
+        std::cout << "chunk" << i << ":" << std::endl;
+        std::cout<<"  used size="<<info->usedSize << std::endl;
+        std::cout << "  head=" << info->head << std::endl;
+        if (pool->firstChunk == chunk)
+            std::cout << "  is first chunk" << std::endl;
+        if (pool->lastChunk == chunk)
+            std::cout << "  is last chunk" << std::endl;
+    });
     PoolUtil::Clear(pool);
 }
 
