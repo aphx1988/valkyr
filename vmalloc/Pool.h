@@ -9,6 +9,11 @@ namespace valkyr {
 	const unsigned int CHUNK_SIZE = 16 * 1024 * 1024;
 	const unsigned int POOL_CHUNKS = 4;
 
+	struct Chunk {
+		char buff[CHUNK_SIZE];
+		//Chunk* next;
+	};
+
 	struct ChunkInfo {
 		//alignas(4) bool isFull;
 		Chunk* next;
@@ -23,11 +28,6 @@ namespace valkyr {
 			usedSize = sizeof(ChunkInfo);
 			unUsedSize = CHUNK_SIZE - sizeof(ChunkInfo);
 		}
-	};
-
-	struct Chunk {
-		char buff[CHUNK_SIZE];
-		//Chunk* next;
 	};
 
 	class ChunkAllocator {
@@ -48,11 +48,13 @@ namespace valkyr {
 	class ChunkUtil {
 	public:
 		static inline ChunkInfo* GetInfo(Chunk* chunk) {
+			if (chunk == nullptr) return nullptr;
 			return (ChunkInfo*)chunk->buff;
 		}
 
 		static inline Chunk* GetNext(Chunk* chunk) {
-			return ((ChunkInfo*)chunk->buff)->next;
+			if (chunk == nullptr) return nullptr;
+			return GetInfo(chunk)->next;
 		}
 
 		static inline bool IsFull(Chunk* chunk) {
@@ -82,7 +84,6 @@ namespace valkyr {
 				info->usedSize = CHUNK_SIZE;
 				info->unUsedSize = 0;
 				info->head = CHUNK_SIZE;
-				info->isFull = true;
 			}
 			else {
 				info->head += sizeof(T);
@@ -137,16 +138,22 @@ namespace valkyr {
 				}
 				curr = next;
 			}
+			Chunk* chunk = ChunkAllocator::Malloc();
+			ChunkUtil::GetInfo(curr)->next = chunk;
+			pool->lastChunk = chunk;
+			obj = ChunkUtil::NewObjFrom<T>(chunk);
 			return obj;
 		}
 
-		static inline void Traverse(Pool* pool, std::function<void(Chunk*)> action) {
+		static inline void Traverse(Pool* pool, std::function<void(Chunk*,int)> action) {
 			Chunk* curr = pool->firstChunk;
-			for (int i = 0; i < pool->chunkCount; i++) {
-				action(curr);
+			int i = 0;
+			while (curr != pool->lastChunk) {
+				action(curr, i);
 				Chunk* next = ChunkUtil::GetNext(curr);
 				if (next != nullptr) {
 					curr = next;
+					++i;
 				}
 				else {
 					return;
@@ -157,7 +164,7 @@ namespace valkyr {
 
 		static inline void Clear(Pool* pool) {
 			pool->lastChunk = nullptr;
-			Traverse(pool,[pool](Chunk* chunk){
+			Traverse(pool,[pool](Chunk* chunk,int i){
 				if (pool->firstChunk != chunk) {
 					ChunkAllocator::Free(chunk);
 				}
