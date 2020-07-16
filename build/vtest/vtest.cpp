@@ -13,18 +13,12 @@ struct A {
 
 void poolTest() {
     Pool* pool = PoolUtil::CreatePool();
-    std::cout << "pool first chunk=" << pool->firstChunk << std::endl;
-    std::cout << "pool last chunk=" << pool->lastChunk << std::endl;
-    std::cout << "num of pool chunks=" << pool->chunkCount << std::endl;
-    Chunk* curr = pool->firstChunk;
-    for (int i = 0; i < 4; i++) {
-        std::cout << "pool's chunk" << i << ":" << curr << std::endl;
-        ChunkInfo* info2 = ChunkUtil::GetInfo(curr);
-        std::cout << "pool's chunk" << i << "info usedSize:" << info2->usedSize << std::endl;
-        curr = curr->next;
-    }
-    ChunkInfo* info = ChunkUtil::GetInfo(pool->firstChunk);
-    std::cout << "first chunk used size=" << info->usedSize << std::endl;
+    A* a = PoolUtil::NewObjFrom<A>(pool);
+    a->i0 = 333;
+    a->i1 = 222;
+    PoolUtil::Traverse(pool, [pool](Chunk* chunk) {
+        ChunkInfo* chunkInfo
+     });
     PoolUtil::Clear(pool);
 }
 

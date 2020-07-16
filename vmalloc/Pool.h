@@ -3,6 +3,7 @@
 #include <vcruntime_string.h>
 #endif
 #include <xmemory>
+#include <functional>
 
 namespace valkyr {
 	const unsigned int CHUNK_SIZE = 16 * 1024 * 1024;
@@ -51,7 +52,7 @@ namespace valkyr {
 		}
 
 		static inline Chunk* GetNext(Chunk* chunk) {
-			return (Chunk*)chunk->buff+sizeof(ChunkInfo);
+			return ((ChunkInfo*)chunk->buff)->next;
 		}
 
 		static inline bool IsFull(Chunk* chunk) {
@@ -124,123 +125,46 @@ namespace valkyr {
 		}
 
 		template <typename T>
-		static inline T* Spawn() {
-		}
-
-		static inline void Clear(Pool* pool) {
-			if (pool->chunkCount == 0) return;
-			if (pool->firstChunk == nullptr) return;
-			if (pool->chunkCount ==1) {
-				ChunkAllocator::Free(pool->firstChunk);
-				return;
-			}
-			Chunk* curr = pool->firstChunk->next;
-			for (int i = 1; i < pool->chunkCount; ++i) {
-				Chunk* next = curr->next;
-				if (next == nullptr) return;
-				ChunkAllocator::Free(curr);
+		static inline T* NewObjFrom(Pool* pool) {
+			Chunk* curr = pool->firstChunk;
+			T* obj = nullptr;
+			while (curr!=nullptr) {
+				ChunkInfo* info = ChunkUtil::GetInfo(curr);
+				Chunk* next = info->next;
+				obj = ChunkUtil::NewObjFrom<T>(curr);
+				if (obj != nullptr) {
+					return obj;
+				}
 				curr = next;
 			}
+			return obj;
 		}
+
+		static inline void Traverse(Pool* pool, std::function<void(Chunk*)> action) {
+			Chunk* curr = pool->firstChunk;
+			for (int i = 0; i < pool->chunkCount; i++) {
+				action(curr);
+				Chunk* next = ChunkUtil::GetNext(curr);
+				if (next != nullptr) {
+					curr = next;
+				}
+				else {
+					return;
+				}
+			}
+		}
+		
+
+		static inline void Clear(Pool* pool) {
+			pool->lastChunk = nullptr;
+			Traverse(pool,[pool](Chunk* chunk){
+				if (pool->firstChunk != chunk) {
+					ChunkAllocator::Free(chunk);
+				}
+			});
+			ChunkAllocator::Free(pool->firstChunk);
+			pool = nullptr;
+		}
+
 	};
-
-	//class PoolUtil {
-	//public:
-	//	PoolDesc* mDesc=nullptr;
-
-	//	PoolUtil() {
-	//		Chunk* chunk = ChunkAllocator::Malloc();
-	//		ChunkInfo* firstChunkInfo = GetInfo(chunk);
-	//		mDesc = new(chunk->buff+ firstChunkInfo->head) PoolDesc();
-	//		firstChunkInfo->head += sizeof(PoolDesc);
-	//		mDesc->firstChunk = chunk;
-	//		mDesc->lastChunk = chunk;
-	//		mDesc->chunkCount = 1;
-	//		for (int i = 1; i < INIT_CHUNK_COUNT; i++) {
-	//			NewChunk();
-	//		}
-	//		mDesc->chunkCount = INIT_CHUNK_COUNT;
-
-	//	}
-
-	//	void NewChunk() {
-	//		Chunk* chunk = ChunkAllocator::Malloc();
-	//		if (mDesc->lastChunk != nullptr) {
-	//			mDesc->lastChunk->next = chunk;
-	//		}
-	//		mDesc->lastChunk = chunk;
-	//		++mDesc->chunkCount;
-	//		/*
-	//		if (mInfo->firstChunk == nullptr) {
-	//			mInfo->firstChunk = mInfo->lastChunk;
-	//		}
-	//		*/
-	//	}
-
-	//	ChunkInfo* GetInfo(Chunk* chunk) {
-	//		return (ChunkInfo*)chunk->buff;
-	//	}
-
-	//	ChunkInfo* GetLastChunkInfo() {
-	//		return GetInfo(mDesc->lastChunk);
-	//	}
-
-	//	template <typename T>
-	//	T* Spawn() {
-	//		ChunkInfo* info = GetLastChunkInfo();
-	//		if (info->unUsedSize < sizeof(T)) {
-	//			return nullptr;
-	//		}
-	//		T* obj = new (mDesc->lastChunk->buff + info->head)T();
-	//		info->usedSize += sizeof(T);
-	//		if (info->usedSize >= CHUNK_SIZE) {
-	//			info->usedSize = CHUNK_SIZE;
-	//			info->unUsedSize = 0;
-	//			info->head = CHUNK_SIZE;
-	//			info->isFull = true;
-	//		}
-	//		else {
-	//			info->head += sizeof(T);
-	//			info->usedSize += sizeof(T);
-	//			info->unUsedSize -= sizeof(T);
-	//		}
-	//		return obj;
-	//	}
-
-	//	void Remove(int num) {
-	//		//first chunk has pool desc, will remove last
-	//		if (num <1 ) {
-	//			return;
-	//		}
-	//		if (num >= mDesc->chunkCount) {
-	//			Clear();
-	//			return;
-	//		}
-	//		for (int i = 0; i < num; ++i) {
-	//			ChunkAllocator::Free(mDesc->lastChunk);
-	//			mDesc->lastChunk = mDesc->lastChunk->next;
-	//			mDesc->chunkCount--;
-	//		}
-	//	}
-
-	//	void Clear() {
-	//		Chunk* next = nullptr;
-	//		Chunk* curr = mDesc->firstChunk->next;
-	//		//ChunkAllocator::Free(mFirstChunk);
-	//		for (int i = 1; i < mDesc->chunkCount; i++) {
-	//			next = curr->next;
-	//			ChunkAllocator::Free(curr);
-	//			curr = next;
-	//		}
-	//		mDesc->lastChunk = nullptr;
-	//		mDesc->chunkCount = 0;
-	//		ChunkAllocator::Free(mDesc->firstChunk);
-	//		mDesc->firstChunk = nullptr;
-	//	}
-
-	//	~PoolUtil() {
-	//		Clear();
-	//	}
-
-	//};
 };
