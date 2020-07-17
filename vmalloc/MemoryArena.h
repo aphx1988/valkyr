@@ -99,7 +99,7 @@ namespace valkyr {
 		}
 	};
 
-	struct Pool
+	struct Arena
 	{
 		Chunk* lastChunk;
 		Chunk* firstChunk;
@@ -107,9 +107,9 @@ namespace valkyr {
 		int pad;
 	};
 
-	class PoolUtil {
+	class ArenaUtil {
 	public:
-		static inline Pool* CreatePool() {
+		static inline Arena* Create() {
 			Chunk* chunks[POOL_CHUNKS];
 			for (int i = 0; i < POOL_CHUNKS; ++i) {
 				chunks[i] = ChunkAllocator::Malloc();
@@ -118,16 +118,16 @@ namespace valkyr {
 					ChunkUtil::Connect(chunks[i - 1],chunks[i]);
 				}
 			}
-			Pool* pool = ChunkUtil::NewObjFrom<Pool>(chunks[0]);
-			pool->chunkCount = POOL_CHUNKS;
-			pool->firstChunk = chunks[0];
-			pool->lastChunk = chunks[POOL_CHUNKS-1];
-			return pool;
+			Arena* arena = ChunkUtil::NewObjFrom<Arena>(chunks[0]);
+			arena->chunkCount = POOL_CHUNKS;
+			arena->firstChunk = chunks[0];
+			arena->lastChunk = chunks[POOL_CHUNKS-1];
+			return arena;
 		}
 
 		template <typename T>
-		static inline T* NewObjFrom(Pool* pool) {
-			Chunk* curr = pool->firstChunk;
+		static inline T* NewObjFrom(Arena* arena) {
+			Chunk* curr = arena->firstChunk;
 			T* obj = nullptr;
 			while (curr!=nullptr) {
 				ChunkInfo* info = ChunkUtil::GetInfo(curr);
@@ -140,15 +140,15 @@ namespace valkyr {
 			}
 			Chunk* chunk = ChunkAllocator::Malloc();
 			ChunkUtil::GetInfo(curr)->next = chunk;
-			pool->lastChunk = chunk;
-			pool->chunkCount++;
+			arena->lastChunk = chunk;
+			arena->chunkCount++;
 			obj = ChunkUtil::NewObjFrom<T>(chunk);
 			return obj;
 		}
 
-		static inline void Traverse(Pool* pool, std::function<void(Chunk*,int)> action) {
-			Chunk* curr = pool->firstChunk;
-			for (int i = 0; i < pool->chunkCount; i++) {
+		static inline void Traverse(Arena* arena, std::function<void(Chunk*,int)> action) {
+			Chunk* curr = arena->firstChunk;
+			for (int i = 0; i < arena->chunkCount; i++) {
 				if (curr == nullptr) return;
 				Chunk* next = ChunkUtil::GetNext(curr);
 				action(curr,i);
@@ -158,15 +158,15 @@ namespace valkyr {
 		}
 		
 
-		static inline void Clear(Pool* pool) {
-			pool->lastChunk = nullptr;
-			Traverse(pool,[pool](Chunk* chunk,int i){
-				if (pool->firstChunk != chunk) {
+		static inline void Clear(Arena* arena) {
+			arena->lastChunk = nullptr;
+			Traverse(arena,[arena](Chunk* chunk,int i){
+				if (arena->firstChunk != chunk) {
 					ChunkAllocator::Free(chunk);
 				}
 			});
-			ChunkAllocator::Free(pool->firstChunk);
-			pool = nullptr;
+			ChunkAllocator::Free(arena->firstChunk);
+			arena = nullptr;
 		}
 
 	};
