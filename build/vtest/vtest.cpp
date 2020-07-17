@@ -11,14 +11,28 @@ struct A {
     int i1;
 };
 
+struct B {
+    int code;
+    char big[CHUNK_SIZE - sizeof(ChunkInfo) - sizeof(int)];
+};
+
 void poolTest() {
     Pool* pool = PoolUtil::CreatePool();
     A* a = PoolUtil::NewObjFrom<A>(pool);
     a->i0 = 333;
     a->i1 = 222;
-    std::cout << "pool chu nk count:" << pool->chunkCount << std::endl;
+    std::cout << "pool chunk count:" << pool->chunkCount << std::endl;
     A* a2 = ChunkUtil::GetFrom<A>(sizeof(ChunkInfo) + sizeof(Pool),pool->firstChunk);
     std::cout << "a2:i0=" << a2->i0<<",i1="<<a2->i1 << std::endl;
+    B* b = PoolUtil::NewObjFrom<B>(pool);
+    b->code = 200;
+    B* b2 = ChunkUtil::GetFrom<B>(sizeof(ChunkInfo),ChunkUtil::GetInfo(pool->firstChunk)->next);
+    std::cout << "big one b2:code=" << b2->code << std::endl;
+    B* b3 = PoolUtil::NewObjFrom<B>(pool);
+    b3->code = 404;
+    //为了测试大容量表现，套一次娃，GetInfo有可能返回nullptr因此不安全，但这里预期是不会为空指针
+    B* b4 = ChunkUtil::GetFrom<B>(sizeof(ChunkInfo), ChunkUtil::GetInfo(ChunkUtil::GetInfo(pool->firstChunk)->next)->next);
+    std::cout << "big one b4:code=" << b4->code << std::endl;
     PoolUtil::Traverse(pool, [pool](Chunk* chunk,int i) {
         ChunkInfo* info = ChunkUtil::GetInfo(chunk);
         std::cout << "chunk" << i << ":" << std::endl;

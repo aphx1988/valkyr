@@ -141,23 +141,19 @@ namespace valkyr {
 			Chunk* chunk = ChunkAllocator::Malloc();
 			ChunkUtil::GetInfo(curr)->next = chunk;
 			pool->lastChunk = chunk;
+			pool->chunkCount++;
 			obj = ChunkUtil::NewObjFrom<T>(chunk);
 			return obj;
 		}
 
 		static inline void Traverse(Pool* pool, std::function<void(Chunk*,int)> action) {
 			Chunk* curr = pool->firstChunk;
-			int i = 0;
-			while (curr != pool->lastChunk) {
-				action(curr, i);
+			for (int i = 0; i < pool->chunkCount; i++) {
+				if (curr == nullptr) return;
 				Chunk* next = ChunkUtil::GetNext(curr);
-				if (next != nullptr) {
-					curr = next;
-					++i;
-				}
-				else {
-					return;
-				}
+				action(curr,i);
+				if (next == nullptr) return;
+				curr = next;
 			}
 		}
 		
