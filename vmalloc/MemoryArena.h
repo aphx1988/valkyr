@@ -151,7 +151,8 @@ namespace valkyr {
 			for (int i = 0; i < arena->chunkCount; i++) {
 				if (curr == nullptr) return;
 				Chunk* next = ChunkUtil::GetNext(curr);
-				action(curr,i);
+				if(action)
+					action(curr,i);
 				if (next == nullptr) return;
 				curr = next;
 			}
