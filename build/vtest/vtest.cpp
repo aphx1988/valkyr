@@ -2,7 +2,8 @@
 //
 
 #include <iostream>
-#include "../../vmalloc/MemoryArena.h"
+//#include "../../vmalloc/MemoryArena.h"
+#include "../../vmalloc/chunk.h"
 
 using namespace valkyr;
 
@@ -16,39 +17,53 @@ struct B {
     char big[CHUNK_SIZE - sizeof(ChunkInfo) - sizeof(int)];
 };
 
-void arenaTest() {
-    Arena* arena = ArenaUtil::Create();
-    A* a = ArenaUtil::NewObjFrom<A>(arena);
-    a->i0 = 333;
-    a->i1 = 222;
-    std::cout << "pool chunk count:" << arena->chunkCount << std::endl;
-    A* a2 = ChunkUtil::GetFrom<A>(sizeof(ChunkInfo) + sizeof(Arena),arena->firstChunk);
-    std::cout << "a2:i0=" << a2->i0<<",i1="<<a2->i1 << std::endl;
-    B* b = ArenaUtil::NewObjFrom<B>(arena);
-    b->code = 200;
-    B* b2 = ChunkUtil::GetFrom<B>(sizeof(ChunkInfo),ChunkUtil::GetInfo(arena->firstChunk)->next);
-    std::cout << "big one b2:code=" << b2->code << std::endl;
-    B* b3 = ArenaUtil::NewObjFrom<B>(arena);
-    b3->code = 404;
-    //为了测试大容量表现，套一次娃，GetInfo有可能返回nullptr因此不安全，但这里预期是不会为空指针
-    B* b4 = ChunkUtil::GetFrom<B>(sizeof(ChunkInfo), ChunkUtil::GetInfo(ChunkUtil::GetInfo(arena->firstChunk)->next)->next);
-    std::cout << "big one b4:code=" << b4->code << std::endl;
-    ArenaUtil::Traverse(arena, [arena](Chunk* chunk,int i) {
-        ChunkInfo* info = ChunkUtil::GetInfo(chunk);
-        std::cout << "chunk" << i << ":" << std::endl;
-        std::cout<<"  used size="<<info->usedSize << std::endl;
-        std::cout << "  head=" << info->head << std::endl;
-        if (arena->firstChunk == chunk)
-            std::cout << "  is first chunk" << std::endl;
-        if (arena->lastChunk == chunk)
-            std::cout << "  is last chunk" << std::endl;
-    });
-    ArenaUtil::Clear(arena);
-}
+//void arenaTest() {
+//    Arena* arena = ArenaUtil::Create();
+//    A* a = ArenaUtil::NewObjFrom<A>(arena);
+//    a->i0 = 333;
+//    a->i1 = 222;
+//    std::cout << "pool chunk count:" << arena->chunkCount << std::endl;
+//    A* a2 = ChunkUtil::GetFrom<A>(sizeof(ChunkInfo) + sizeof(Arena),arena->firstChunk);
+//    std::cout << "a2:i0=" << a2->i0<<",i1="<<a2->i1 << std::endl;
+//    B* b = ArenaUtil::NewObjFrom<B>(arena);
+//    b->code = 200;
+//    B* b2 = ChunkUtil::GetFrom<B>(sizeof(ChunkInfo),ChunkUtil::GetInfo(arena->firstChunk)->next);
+//    std::cout << "big one b2:code=" << b2->code << std::endl;
+//    B* b3 = ArenaUtil::NewObjFrom<B>(arena);
+//    b3->code = 404;
+//    //为了测试大容量表现，套一次娃，GetInfo有可能返回nullptr因此不安全，但这里预期是不会为空指针
+//    B* b4 = ChunkUtil::GetFrom<B>(sizeof(ChunkInfo), ChunkUtil::GetInfo(ChunkUtil::GetInfo(arena->firstChunk)->next)->next);
+//    std::cout << "big one b4:code=" << b4->code << std::endl;
+//    ArenaUtil::Traverse(arena, [arena](Chunk* chunk,int i) {
+//        ChunkInfo* info = ChunkUtil::GetInfo(chunk);
+//        std::cout << "chunk" << i << ":" << std::endl;
+//        std::cout<<"  used size="<<info->usedSize << std::endl;
+//        std::cout << "  head=" << info->head << std::endl;
+//        if (arena->firstChunk == chunk)
+//            std::cout << "  is first chunk" << std::endl;
+//        if (arena->lastChunk == chunk)
+//            std::cout << "  is last chunk" << std::endl;
+//    });
+//    A* aa = ArenaUtil::NewObjFrom<A>(arena);
+//    aa->i0 = 666;
+//    aa->i1 = 333;
+//    std::cout << "aa:i0=" << aa->i0 << ",i1=" << aa->i1 << std::endl;
+//    ArenaUtil::TraverseBackword(arena, [arena](Chunk* chunk, int i) {
+//        ChunkInfo* info = ChunkUtil::GetInfo(chunk);
+//        std::cout << "chunk" << i << ":" << std::endl;
+//        std::cout << "  used size=" << info->usedSize << std::endl;
+//        std::cout << "  head=" << info->head << std::endl;
+//        if (arena->firstChunk == chunk)
+//            std::cout << "  is first chunk" << std::endl;
+//        if (arena->lastChunk == chunk)
+//            std::cout << "  is last chunk" << std::endl;
+//    });
+//    ArenaUtil::Clear(arena);
+//}
 
 int main()
 {
-    arenaTest();
+    //arenaTest();
     system("pause");
 }
 

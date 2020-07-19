@@ -146,8 +146,8 @@
     <ClInclude Include="..\..\vcore\array.h" />
     <ClInclude Include="..\..\vcore\queue.h" />
     <ClInclude Include="..\..\vcore\vector.h" />
+    <ClInclude Include="..\..\vmalloc\chunk.h" />
     <ClInclude Include="..\..\vmalloc\MemoryArena.h" />
-    <ClInclude Include="..\..\vmalloc\ObjectPool.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

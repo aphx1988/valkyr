@@ -41,7 +41,7 @@
     <ClInclude Include="..\..\vmalloc\MemoryArena.h">
       <Filter>vmalloc</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\vmalloc\ObjectPool.h">
+    <ClInclude Include="..\..\vmalloc\chunk.h">
       <Filter>vmalloc</Filter>
     </ClInclude>
   </ItemGroup>
