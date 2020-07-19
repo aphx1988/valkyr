@@ -28,6 +28,9 @@
     <Filter Include="vmalloc">
       <UniqueIdentifier>{78b81790-0af4-47c9-ab97-a50b50880bb0}</UniqueIdentifier>
     </Filter>
+    <Filter Include="vecs">
+      <UniqueIdentifier>{80182357-7a0f-47ac-a0b9-cb6d798bf056}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="framework.h">
@@ -63,8 +66,11 @@
     <ClInclude Include="..\..\vcore\queue.h">
       <Filter>vcore</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\vmalloc\Pool.h">
+    <ClInclude Include="..\..\vmalloc\chunk.h">
       <Filter>vmalloc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\vecs\vecs.h">
+      <Filter>vecs</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

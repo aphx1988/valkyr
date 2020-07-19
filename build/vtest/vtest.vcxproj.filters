@@ -38,9 +38,6 @@
     <ClInclude Include="..\..\vcore\vector.h">
       <Filter>vcore</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\vmalloc\MemoryArena.h">
-      <Filter>vmalloc</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\vmalloc\chunk.h">
       <Filter>vmalloc</Filter>
     </ClInclude>

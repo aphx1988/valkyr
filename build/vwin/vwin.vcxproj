@@ -151,7 +151,8 @@
     <ClInclude Include="..\..\vcore\queue.h" />
     <ClInclude Include="..\..\vcore\vector.h" />
     <ClInclude Include="..\..\vd3d12rhi\d3d12rhi.h" />
-    <ClInclude Include="..\..\vmalloc\Pool.h" />
+    <ClInclude Include="..\..\vecs\vecs.h" />
+    <ClInclude Include="..\..\vmalloc\chunk.h" />
     <ClInclude Include="..\..\vrender\RenderEngine.h" />
     <ClInclude Include="..\..\vrhi\rhi.h" />
     <ClInclude Include="framework.h" />
