@@ -1,5 +1,5 @@
 #pragma once
-#include "../vmalloc/chunk.h"
+#include "../vcontainer/span.h"
 
 namespace valkyr {
 	struct Entity {
@@ -7,14 +7,18 @@ namespace valkyr {
 		unsigned int generation;
 	};
 
-	//template<typename T>
-	struct ArchCptNode {
-		//T* cpt;
-		void* cpt;
-		ArchCptNode* next;
-		ArchCptNode* prev;
-		int pad;
+	//arch's proxy in each chunk
+	//multiple ACN can be in one chunk
+	struct ArchChunkNode {
+		Chunk* chunk;
+		ChunkInfo* chunkInfo;
+		size_t size;
+		ArchChunkNode* next;
+		ArchChunkNode* prev;
+		//prototype cpts
 	};
+
+
 
 
 	//template<typename ...Ts>
@@ -31,7 +35,7 @@ namespace valkyr {
 	//};
 
 	struct Arch {
-		ArchCptNode* firstCpt;  //after init, create these cpts in chunk as template or ref
+		ArchChunkNode* firstCpt;  //after init, create these cpts in chunk as template or ref
 		unsigned int cptNum;
 		Chunk* firstChunk;
 		Chunk* lastChunkCanUse;  //unused size >= sizeof...(cpts)

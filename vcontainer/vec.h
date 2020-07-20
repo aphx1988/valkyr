@@ -4,7 +4,7 @@
 
 namespace valkyr {
 	template <typename T>
-	struct List {
+	struct Vec {
 		unsigned int length;
 		unsigned int chunkCount;
 		ContainerChunkNode<T>* firstChunkNode;
@@ -13,10 +13,10 @@ namespace valkyr {
 		int pad[3];
 	};
 
-	class ListUtil {
+	class VecUtil {
 	public:
 		template <typename T>
-		static inline List<T>* Create(Chunk* chunk,unsigned int num) {
+		static inline Vec<T>* Create(Chunk* chunk,unsigned int num) {
 			List<T>* list = ChunkUtil::NewObjFrom<List<T>>(chunk);
 			ContainerChunkNode<T>* chunkNode = ChunkUtil::NewObjFrom<ContainerChunkNode<T>>(chunk);
 			chunkNode->firstSpan = SpanUtil::Create(chunk, num);
@@ -25,7 +25,7 @@ namespace valkyr {
 		}
 
 		template <typename T>
-		static inline void AppendTo(T&& t, List<T>* list) {
+		static inline void PushTo(T&& t, Vec<T>* list) {
 
 		}
 	};
