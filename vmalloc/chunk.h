@@ -14,7 +14,7 @@ namespace valkyr {
 		//alignas(4) bool isFull;
 		Chunk* next;
 		Chunk* prev;
-		int head;
+		unsigned int head;
 		size_t usedSize;
 
 		ChunkInfo() {
@@ -98,7 +98,7 @@ namespace valkyr {
 		}
 
 		template <typename T>
-		static inline T* GetFrom(int idx, Chunk* chunk) {
+		static inline T* GetFrom(unsigned int idx, Chunk* chunk) {
 			return (T*)(chunk->buff + idx);
 		}
 	};

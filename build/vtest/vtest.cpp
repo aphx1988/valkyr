@@ -3,7 +3,7 @@
 
 #include <iostream>
 //#include "../../vmalloc/MemoryArena.h"
-#include "../../vmalloc/chunk.h"
+#include "../../vcontainer/span.h"
 
 using namespace valkyr;
 
@@ -16,6 +16,42 @@ struct B {
     int code;
     char big[CHUNK_SIZE - sizeof(ChunkInfo) - sizeof(int)];
 };
+
+struct Rot {
+    float angle;
+};
+
+void spanTest() {
+    Chunk* chunk = ChunkAllocator::Malloc();
+    Span<A>* span = SpanUtil::Create<A>(chunk,8);
+    SpanUtil::Get(0, span)->i0 = 222;
+    SpanUtil::Get(3, span)->i1 = 333;
+    SpanUtil::Get(6, span)->i0 = 666666;
+    SpanUtil::ForEach<A>(span, [&](A* a, int i) {
+        std::cout << "a" << i << ":i0=" << a->i0 << ",i1=" << a->i1 << std::endl;
+    });
+    ChunkInfo* info = ChunkUtil::GetInfo(span->chunk);
+    std::cout << "span->chunk info:" << std::endl;
+    std::cout << "  usedSize:"<<info->usedSize << std::endl;
+    std::cout << "  head:" << info->head << std::endl;
+    A* ac = ChunkUtil::NewObjFrom<A>(chunk);
+    ac->i0 = 1;
+    ac->i1 = 2;
+    Span<Rot>* spanRot = SpanUtil::Create<Rot>(chunk, 2);
+    SpanUtil::Get(0, spanRot)->angle = 30.5f;
+    SpanUtil::Get(1, spanRot)->angle = 45.0f;
+    SpanUtil::ForEach<Rot>(spanRot, [&](Rot* r, int i) {
+        std::cout << "rot" << i << ":angle=" << r->angle << std::endl;
+     });
+    Span<A>* span2 = SpanUtil::Create<A>(chunk, 4);
+    SpanUtil::Get(0, span2)->i0 = 3322;
+    SpanUtil::Get(2, span2)->i1 = 2233;
+    SpanUtil::Connect(span, span2);
+    SpanUtil::ForEach<A>(span->next, [&](A* a, int i) {
+        std::cout << "a" << i << ":i0=" << a->i0 << ",i1=" << a->i1 << std::endl;
+    });
+    ChunkAllocator::Free(chunk);
+}
 
 //void arenaTest() {
 //    Arena* arena = ArenaUtil::Create();
@@ -64,6 +100,7 @@ struct B {
 int main()
 {
     //arenaTest();
+    spanTest();
     system("pause");
 }
 

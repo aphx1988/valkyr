@@ -31,6 +31,9 @@
     <Filter Include="vecs">
       <UniqueIdentifier>{80182357-7a0f-47ac-a0b9-cb6d798bf056}</UniqueIdentifier>
     </Filter>
+    <Filter Include="vcontainer">
+      <UniqueIdentifier>{db4e856c-8143-44fb-b108-740aef9119a6}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="framework.h">
@@ -71,6 +74,15 @@
     </ClInclude>
     <ClInclude Include="..\..\vecs\vecs.h">
       <Filter>vecs</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\vcontainer\span.h">
+      <Filter>vcontainer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\vcontainer\ContainerChunkNode.h">
+      <Filter>vcontainer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\vcontainer\list.h">
+      <Filter>vcontainer</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
