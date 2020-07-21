@@ -1,11 +1,21 @@
 #pragma once
-#include "../vcontainer/span.h"
+#include "../vcontainer/MultipleTypeSpan.h"
 
 namespace valkyr {
 	struct Entity {
 		unsigned int id;
 		unsigned int generation;
 	};
+
+	//can use its info for getting type
+	struct CptChunkNode {
+		unsigned int startIdx;
+		size_t size;
+		CptChunkNode* next;
+		CptChunkNode* prev;
+	};
+
+	
 
 	//arch's proxy in each chunk
 	//multiple ACN can be in one chunk
@@ -16,9 +26,9 @@ namespace valkyr {
 		ArchChunkNode* next;
 		ArchChunkNode* prev;
 		//prototype cpts
+		//Span<CptChunkNode>* firstCptSpan;
+		int pad[2];
 	};
-
-
 
 
 	//template<typename ...Ts>
@@ -39,5 +49,9 @@ namespace valkyr {
 		unsigned int cptNum;
 		Chunk* firstChunk;
 		Chunk* lastChunkCanUse;  //unused size >= sizeof...(cpts)
+	};
+
+	class ArchUtil {
+
 	};
 }

@@ -97,9 +97,30 @@ namespace valkyr {
 			return obj;
 		}
 
+		template <typename T, typename ...Args>
+		static inline T* NewObjFrom(Chunk* chunk, Args&&... args) {
+			ChunkInfo* info = GetInfo(chunk);
+			if (CHUNK_SIZE - info->usedSize < sizeof(T)) {
+				return nullptr;
+			}
+			T* obj = new (chunk->buff + info->head)T(std::forward<Args>(args)...);
+			info->usedSize += sizeof(T);
+			if (info->usedSize >= CHUNK_SIZE) {
+				info->usedSize = CHUNK_SIZE;
+				info->head = CHUNK_SIZE;
+			}
+			else {
+				info->head += sizeof(T);
+				info->usedSize += sizeof(T);
+			}
+			return obj;
+		}
+
 		template <typename T>
 		static inline T* GetFrom(unsigned int idx, Chunk* chunk) {
 			return (T*)(chunk->buff + idx);
 		}
+
+		
 	};
 }

@@ -2,8 +2,9 @@
 //
 
 #include <iostream>
-//#include "../../vmalloc/MemoryArena.h"
-#include "../../vcontainer/span.h"
+//#include "../../vcontainer/span.h"
+//#include "../../vmalloc/chunk.h"
+#include "../../vcontainer/MultipleTypeSpan.h"
 
 using namespace valkyr;
 
@@ -21,86 +22,74 @@ struct Rot {
     float angle;
 };
 
-void spanTest() {
+struct Float3 {
+    float x,y,z;
+
+    Float3(float x, float y, float z) :x(x), y(y), z(z){}
+};
+
+struct C {
+    float baseline;
+    int num;
+
+    C(float b,int n):baseline(b),num(n){}
+};
+
+void chunkTest() {
     Chunk* chunk = ChunkAllocator::Malloc();
-    Span<A>* span = SpanUtil::Create<A>(chunk,8);
-    SpanUtil::Get(0, span)->i0 = 222;
-    SpanUtil::Get(3, span)->i1 = 333;
-    SpanUtil::Get(6, span)->i0 = 666666;
-    SpanUtil::ForEach<A>(span, [&](A* a, int i) {
-        std::cout << "a" << i << ":i0=" << a->i0 << ",i1=" << a->i1 << std::endl;
-    });
-    ChunkInfo* info = ChunkUtil::GetInfo(span->chunk);
-    std::cout << "span->chunk info:" << std::endl;
-    std::cout << "  usedSize:"<<info->usedSize << std::endl;
-    std::cout << "  head:" << info->head << std::endl;
-    A* ac = ChunkUtil::NewObjFrom<A>(chunk);
-    ac->i0 = 1;
-    ac->i1 = 2;
-    Span<Rot>* spanRot = SpanUtil::Create<Rot>(chunk, 2);
-    SpanUtil::Get(0, spanRot)->angle = 30.5f;
-    SpanUtil::Get(1, spanRot)->angle = 45.0f;
-    SpanUtil::ForEach<Rot>(spanRot, [&](Rot* r, int i) {
-        std::cout << "rot" << i << ":angle=" << r->angle << std::endl;
-     });
-    Span<A>* span2 = SpanUtil::Create<A>(chunk, 4);
-    SpanUtil::Get(0, span2)->i0 = 3322;
-    SpanUtil::Get(2, span2)->i1 = 2233;
-    SpanUtil::Connect(span, span2);
-    SpanUtil::ForEach<A>(span->next, [&](A* a, int i) {
-        std::cout << "a" << i << ":i0=" << a->i0 << ",i1=" << a->i1 << std::endl;
-    });
+    C* c = ChunkUtil::NewObjFrom<C, float, int>(chunk, 0.5f, 65535);
+    std::cout << "c:baseline=" << c->baseline << ",num=" << c->num << std::endl;
+    C* c2 = ChunkUtil::NewObjFrom<C, float, int>(chunk, 100.999f, 2222);
+    std::cout << "c2:baseline=" << c2->baseline << ",num=" << c2->num << std::endl;
     ChunkAllocator::Free(chunk);
 }
 
-//void arenaTest() {
-//    Arena* arena = ArenaUtil::Create();
-//    A* a = ArenaUtil::NewObjFrom<A>(arena);
-//    a->i0 = 333;
-//    a->i1 = 222;
-//    std::cout << "pool chunk count:" << arena->chunkCount << std::endl;
-//    A* a2 = ChunkUtil::GetFrom<A>(sizeof(ChunkInfo) + sizeof(Arena),arena->firstChunk);
-//    std::cout << "a2:i0=" << a2->i0<<",i1="<<a2->i1 << std::endl;
-//    B* b = ArenaUtil::NewObjFrom<B>(arena);
-//    b->code = 200;
-//    B* b2 = ChunkUtil::GetFrom<B>(sizeof(ChunkInfo),ChunkUtil::GetInfo(arena->firstChunk)->next);
-//    std::cout << "big one b2:code=" << b2->code << std::endl;
-//    B* b3 = ArenaUtil::NewObjFrom<B>(arena);
-//    b3->code = 404;
-//    //为了测试大容量表现，套一次娃，GetInfo有可能返回nullptr因此不安全，但这里预期是不会为空指针
-//    B* b4 = ChunkUtil::GetFrom<B>(sizeof(ChunkInfo), ChunkUtil::GetInfo(ChunkUtil::GetInfo(arena->firstChunk)->next)->next);
-//    std::cout << "big one b4:code=" << b4->code << std::endl;
-//    ArenaUtil::Traverse(arena, [arena](Chunk* chunk,int i) {
-//        ChunkInfo* info = ChunkUtil::GetInfo(chunk);
-//        std::cout << "chunk" << i << ":" << std::endl;
-//        std::cout<<"  used size="<<info->usedSize << std::endl;
-//        std::cout << "  head=" << info->head << std::endl;
-//        if (arena->firstChunk == chunk)
-//            std::cout << "  is first chunk" << std::endl;
-//        if (arena->lastChunk == chunk)
-//            std::cout << "  is last chunk" << std::endl;
+void multiTypeSpanTest() {
+    Chunk* chunk = ChunkAllocator::Malloc();
+    C* c = ChunkUtil::NewObjFrom<C, float, int>(chunk, 0.5f, 65535);
+    MultiTypeSpan<A,C>* span = new MultiTypeSpan<A,C>(chunk);
+    std::cout << "sizeof(A,C)=" << (sizeof(A)+sizeof(C)) << std::endl;
+    std::cout << "span: elementSize=" << MultiTypeSpan<A,C>::ElementSize << ",startIdx="<<span->startIdx <<std::endl;
+    ChunkAllocator::Free(chunk);
+}
+
+//void spanTest() {
+//    Chunk* chunk = ChunkAllocator::Malloc();
+//    Span<A>* span = SpanUtil::Create<A>(chunk,8);
+//    SpanUtil::Get(0, span)->i0 = 222;
+//    SpanUtil::Get(3, span)->i1 = 333;
+//    SpanUtil::Get(6, span)->i0 = 666666;
+//    SpanUtil::ForEach<A>(span, [&](A* a, int i) {
+//        std::cout << "a" << i << ":i0=" << a->i0 << ",i1=" << a->i1 << std::endl;
 //    });
-//    A* aa = ArenaUtil::NewObjFrom<A>(arena);
-//    aa->i0 = 666;
-//    aa->i1 = 333;
-//    std::cout << "aa:i0=" << aa->i0 << ",i1=" << aa->i1 << std::endl;
-//    ArenaUtil::TraverseBackword(arena, [arena](Chunk* chunk, int i) {
-//        ChunkInfo* info = ChunkUtil::GetInfo(chunk);
-//        std::cout << "chunk" << i << ":" << std::endl;
-//        std::cout << "  used size=" << info->usedSize << std::endl;
-//        std::cout << "  head=" << info->head << std::endl;
-//        if (arena->firstChunk == chunk)
-//            std::cout << "  is first chunk" << std::endl;
-//        if (arena->lastChunk == chunk)
-//            std::cout << "  is last chunk" << std::endl;
+//    ChunkInfo* info = ChunkUtil::GetInfo(span->chunk);
+//    std::cout << "span->chunk info:" << std::endl;
+//    std::cout << "  usedSize:"<<info->usedSize << std::endl;
+//    std::cout << "  head:" << info->head << std::endl;
+//    A* ac = ChunkUtil::NewObjFrom<A>(chunk);
+//    ac->i0 = 1;
+//    ac->i1 = 2;
+//    Span<Rot>* spanRot = SpanUtil::Create<Rot>(chunk, 2);
+//    SpanUtil::Get(0, spanRot)->angle = 30.5f;
+//    SpanUtil::Get(1, spanRot)->angle = 45.0f;
+//    SpanUtil::ForEach<Rot>(spanRot, [&](Rot* r, int i) {
+//        std::cout << "rot" << i << ":angle=" << r->angle << std::endl;
+//     });
+//    Span<A>* span2 = SpanUtil::Create<A>(chunk, 4);
+//    SpanUtil::Get(0, span2)->i0 = 3322;
+//    SpanUtil::Get(2, span2)->i1 = 2233;
+//    SpanUtil::Connect(span, span2);
+//    SpanUtil::ForEach<A>(span->next, [&](A* a, int i) {
+//        std::cout << "a" << i << ":i0=" << a->i0 << ",i1=" << a->i1 << std::endl;
 //    });
-//    ArenaUtil::Clear(arena);
+//    ChunkAllocator::Free(chunk);
 //}
+
 
 int main()
 {
-    //arenaTest();
-    spanTest();
+    //chunkTest();
+    multiTypeSpanTest();
     system("pause");
 }
 
