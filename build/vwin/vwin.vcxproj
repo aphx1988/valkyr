@@ -151,6 +151,7 @@
     <ClInclude Include="..\..\vcontainer\MultipleTypeSpan.h" />
     <ClInclude Include="..\..\vcontainer\span.h" />
     <ClInclude Include="..\..\vcontainer\list.h" />
+    <ClInclude Include="..\..\vcontainer\tuple.h" />
     <ClInclude Include="..\..\vcore\array.h" />
     <ClInclude Include="..\..\vcore\queue.h" />
     <ClInclude Include="..\..\vcore\vector.h" />

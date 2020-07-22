@@ -2,9 +2,9 @@
 //
 
 #include <iostream>
-//#include "../../vcontainer/span.h"
 //#include "../../vmalloc/chunk.h"
-#include "../../vcontainer/MultipleTypeSpan.h"
+//#include "../../vcontainer/span.h"
+#include "../../vcontainer/tuple.h"
 
 using namespace valkyr;
 
@@ -22,10 +22,10 @@ struct Rot {
     float angle;
 };
 
-struct Float3 {
+struct Position {
     float x,y,z;
 
-    Float3(float x, float y, float z) :x(x), y(y), z(z){}
+    Position(float x, float y, float z) :x(x), y(y), z(z){}
 };
 
 struct C {
@@ -41,17 +41,25 @@ void chunkTest() {
     std::cout << "c:baseline=" << c->baseline << ",num=" << c->num << std::endl;
     C* c2 = ChunkUtil::NewObjFrom<C, float, int>(chunk, 100.999f, 2222);
     std::cout << "c2:baseline=" << c2->baseline << ",num=" << c2->num << std::endl;
+    Position* pos = ChunkUtil::NewObjFrom<Position, float, float, float>(chunk,100.9f,222.22f,333.333f);
+    std::cout << "pos:x=" << pos->x << ",y=" << pos->y<<",z="<<pos->z << std::endl;
     ChunkAllocator::Free(chunk);
 }
 
-void multiTypeSpanTest() {
-    Chunk* chunk = ChunkAllocator::Malloc();
-    C* c = ChunkUtil::NewObjFrom<C, float, int>(chunk, 0.5f, 65535);
-    MultiTypeSpan<A,C>* span = new MultiTypeSpan<A,C>(chunk);
-    std::cout << "sizeof(A,C)=" << (sizeof(A)+sizeof(C)) << std::endl;
-    std::cout << "span: elementSize=" << MultiTypeSpan<A,C>::ElementSize << ",startIdx="<<span->startIdx <<std::endl;
-    ChunkAllocator::Free(chunk);
+void tupleTest() {
+    Tuple<int, float, bool> tuple(10, 222.22f, false);
+    std::cout << tuple.value << std::endl;
+    std::cout << tuple.rest.value << std::endl;
 }
+
+//void multiTypeSpanTest() {
+//    Chunk* chunk = ChunkAllocator::Malloc();
+//    C* c = ChunkUtil::NewObjFrom<C, float, int>(chunk, 0.5f, 65535);
+//    Span<A,C>* span = new Span<A,C>(chunk);
+//    std::cout << "sizeof(A,C)=" << (sizeof(A)+sizeof(C)) << std::endl;
+//    std::cout << "span: elementSize=" << Span<A,C>::ElementSize << ",startIdx="<<span->startIdx <<std::endl;
+//    ChunkAllocator::Free(chunk);
+//}
 
 //void spanTest() {
 //    Chunk* chunk = ChunkAllocator::Malloc();
@@ -89,7 +97,7 @@ void multiTypeSpanTest() {
 int main()
 {
     //chunkTest();
-    multiTypeSpanTest();
+    //multiTypeSpanTest();
     system("pause");
 }
 
