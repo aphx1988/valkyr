@@ -46,10 +46,21 @@ void chunkTest() {
     ChunkAllocator::Free(chunk);
 }
 
+template<typename ...Ts>
+void testTuple2(Ts... args) {
+    std::cout << "sizeof...(args):" <<sizeof...(args) << std::endl;
+    ((std::cout << Ts << ','), ...);
+    std::cout << "\n";
+}
+
+
 void tupleTest() {
-    Tuple<int, float, bool> tuple(10, 222.22f, false);
+    /* Tuple<int, float, bool> tuple(10, 222.22f, false);
     std::cout << tuple.value << std::endl;
-    std::cout << tuple.rest.value << std::endl;
+    std::cout << tuple.rest.value << std::endl;*/
+    Tuple<A, C> tuple({ 22,333 }, {1.99f,99});
+    std::cout << Tuple<A,C>::Size << std::endl;
+    
 }
 
 //void multiTypeSpanTest() {
@@ -98,6 +109,8 @@ int main()
 {
     //chunkTest();
     //multiTypeSpanTest();
+    //tupleTest();
+    testTuple2<int,int,char,bool>(10,100,'a',true);
     system("pause");
 }
 
