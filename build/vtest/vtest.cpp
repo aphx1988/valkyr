@@ -49,8 +49,13 @@ void chunkTest() {
 template<typename ...Ts>
 void testTuple2(Ts... args) {
     std::cout << "sizeof...(args):" <<sizeof...(args) << std::endl;
-    ((std::cout << Ts << ','), ...);
-    std::cout << "\n";
+    //fold expression
+    (std::cout << ...<< args) << std::endl;
+    //Variadic Expressions 
+    auto tuple = std::make_tuple(1 + args...);
+    std::cout << "tuple 0:" << std::get<0>(tuple)<<std::endl;
+    //Variadic Indices
+    //std::cout << a[args]... << std::endl;
 }
 
 
@@ -110,7 +115,8 @@ int main()
     //chunkTest();
     //multiTypeSpanTest();
     //tupleTest();
-    testTuple2<int,int,char,bool>(10,100,'a',true);
+    /*testTuple2<int,int,char,bool>(10,100,'a',true);*/
+    testTuple2<int, int,int>(100,2,3,4);
     system("pause");
 }
 
