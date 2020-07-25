@@ -18,12 +18,12 @@ namespace valkyr
 	struct Tuple<Head, Rest...>
 	{
 		Head value;
-		Tuple<Rest...> rest;
+		/*Tuple<Rest...> rest;
 		enum {
 			Size = Tuple<Head>::Size + Tuple<Rest...>::Size
-		};
+		};*/
 
-		Tuple(Head h,Rest... r):value(h),rest(r...)
+		Tuple(Head h,Rest... r):value(h)/*,rest(r...)*/
 		{
 
 		}

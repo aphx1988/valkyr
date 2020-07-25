@@ -53,18 +53,62 @@ void testTuple2(Ts... args) {
     (std::cout << ...<< args) << std::endl;
     //Variadic Expressions 
     auto tuple = std::make_tuple(1 + args...);
+    std::cout <<"sizeof(tuple)"<< sizeof(tuple) << std::endl;
     std::cout << "tuple 0:" << std::get<0>(tuple)<<std::endl;
     //Variadic Indices
     //std::cout << a[args]... << std::endl;
 }
 
+template <typename ...T>
+void printElements(T... args){}
+
+template <typename H,typename ...T>
+void printElements(H h,T... args) {
+    int s = sizeof...(args);
+    std::cout << s << "->" << h << std::endl;
+    printElements(args...);
+}
+
+template <typename T>
+void printElements(T t) {
+    std::cout << 0 << "->" << t << std::endl;
+}
+
+struct ChunkObjInfo {
+    void* ptr;
+    int idx;
+    int pad;
+    size_t size;
+};
+
+template <typename ...T>
+void printAll(T... args) {
+    int s = sizeof...(args);
+    std::cout << "sizeof...args=" << s << std::endl;
+    std::initializer_list<void*> argList{
+        ([&] {
+            std::cout << args << std::endl; 
+        }(), &args)...
+    };
+    std::cout << "argList size=" << argList.size() << std::endl;
+    int idx = 0;
+    for (auto it = argList.begin(); it != argList.end(); it++) {
+        idx++;
+        int* pOrigin = (int*)*it;
+
+        std::cout << idx << ":"<<typeid(*it).name() << " " << *pOrigin << std::endl;
+    }
+}
 
 void tupleTest() {
-    /* Tuple<int, float, bool> tuple(10, 222.22f, false);
-    std::cout << tuple.value << std::endl;
-    std::cout << tuple.rest.value << std::endl;*/
-    Tuple<A, C> tuple({ 22,333 }, {1.99f,99});
-    std::cout << Tuple<A,C>::Size << std::endl;
+    //Tuple<int, float, bool> tuple(10, 222.22f, false);
+    //Tuple<A, C> tuple({ 22,333 }, {1.99f,99});
+    //printElements(20, 40, 'a', true);
+    printAll(10,20,'a',true);
+    
+   /* std::cout<<"sizeof(tuple)="<< sizeof(tuple) << std::endl;
+    std::cout << "sizeof(std::tuple)=" << sizeof(std::make_tuple<A,C>({ 22,333 }, { 1.99f,99 })) << std::endl;*/
+    //std::cout<<"Tuple<H,R...>::Size=" << Tuple<A,C>::Size << std::endl;
     
 }
 
@@ -114,9 +158,9 @@ int main()
 {
     //chunkTest();
     //multiTypeSpanTest();
-    //tupleTest();
+    tupleTest();
     /*testTuple2<int,int,char,bool>(10,100,'a',true);*/
-    testTuple2<int, int,int>(100,2,3,4);
+    /*testTuple2<int, int,int>(100,2,3,4);*/
     system("pause");
 }
 
