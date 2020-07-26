@@ -11,6 +11,9 @@ using namespace valkyr;
 struct A {
     int i0;
     int i1;
+
+    A():i0(0),i1(0){}
+    A(int a, int b) :i0(a), i1(b){}
 };
 
 struct B {
@@ -22,15 +25,23 @@ struct Rot {
     float angle;
 };
 
+struct Position2D {
+    float x, y;
+    Position2D():x(0),y(0){}
+    Position2D(float x, float y) :x(x), y(y) {}
+};
+
 struct Position {
     float x,y,z;
-
+    Position():x(0),y(0),z(0){}
     Position(float x, float y, float z) :x(x), y(y), z(z){}
 };
 
 struct C {
     float baseline;
     int num;
+
+    C():baseline(0), num(0){}
 
     C(float b,int n):baseline(b),num(n){}
 };
@@ -45,41 +56,6 @@ void chunkTest() {
     std::cout << "pos:x=" << pos->x << ",y=" << pos->y<<",z="<<pos->z << std::endl;
     ChunkAllocator::Free(chunk);
 }
-
-template<typename ...Ts>
-void testTuple2(Ts... args) {
-    std::cout << "sizeof...(args):" <<sizeof...(args) << std::endl;
-    //fold expression
-    (std::cout << ...<< args) << std::endl;
-    //Variadic Expressions 
-    auto tuple = std::make_tuple(1 + args...);
-    std::cout <<"sizeof(tuple)"<< sizeof(tuple) << std::endl;
-    std::cout << "tuple 0:" << std::get<0>(tuple)<<std::endl;
-    //Variadic Indices
-    //std::cout << a[args]... << std::endl;
-}
-
-template <typename ...T>
-void printElements(T... args){}
-
-template <typename H,typename ...T>
-void printElements(H h,T... args) {
-    int s = sizeof...(args);
-    std::cout << s << "->" << h << std::endl;
-    printElements(args...);
-}
-
-template <typename T>
-void printElements(T t) {
-    std::cout << 0 << "->" << t << std::endl;
-}
-
-struct ChunkObjInfo {
-    void* ptr;
-    int idx;
-    int pad;
-    size_t size;
-};
 
 template <typename ...T>
 void printAll(T... args) {
@@ -100,26 +76,55 @@ void printAll(T... args) {
     }
 }
 
-void tupleTest() {
-    //Tuple<int, float, bool> tuple(10, 222.22f, false);
-    //Tuple<A, C> tuple({ 22,333 }, {1.99f,99});
-    //printElements(20, 40, 'a', true);
-    printAll(10,20,'a',true);
-    
-   /* std::cout<<"sizeof(tuple)="<< sizeof(tuple) << std::endl;
-    std::cout << "sizeof(std::tuple)=" << sizeof(std::make_tuple<A,C>({ 22,333 }, { 1.99f,99 })) << std::endl;*/
-    //std::cout<<"Tuple<H,R...>::Size=" << Tuple<A,C>::Size << std::endl;
-    
+template <typename ...T>
+void CreateTuple(Chunk* chunk,T... prototypes) {
+    int arr[] = {
+        ([&] {
+            ChunkUtil::NewObjFrom<T>(chunk);
+        }(),0)...
+    };
 }
 
-//void multiTypeSpanTest() {
+
+//void tupleTest() {
+//    
 //    Chunk* chunk = ChunkAllocator::Malloc();
-//    C* c = ChunkUtil::NewObjFrom<C, float, int>(chunk, 0.5f, 65535);
-//    Span<A,C>* span = new Span<A,C>(chunk);
-//    std::cout << "sizeof(A,C)=" << (sizeof(A)+sizeof(C)) << std::endl;
-//    std::cout << "span: elementSize=" << Span<A,C>::ElementSize << ",startIdx="<<span->startIdx <<std::endl;
+//    ChunkInfo* info =  ChunkUtil::GetInfo(chunk);
+//    std::cout <<"info->head="<< info->head << std::endl;
+//    std::cout <<"target tuple size="<< Tuple<int, int, char, bool>::ElementSize << std::endl;
+//    CreateTuple(chunk, 10, 20, 'a', false);
+//    std::cout <<"after created,info->head="<< info->head << std::endl;
 //    ChunkAllocator::Free(chunk);
+//  
 //}
+
+//加x，size为4，只有方法则为1，有两个方法也为1
+struct F{
+    //int x;
+    int f() { return 333; }
+    int f3() { return 333; }
+};
+
+void myTupleTest() {
+    Tuple<int,double,char,bool> tuple(100,200.99f,'a',false);
+    std::cout << tuple.head << std::endl;
+    std::cout << tuple.tail().tail().head << std::endl;
+    std::cout << sizeof(tuple) << std::endl;
+    //std::cout << sizeof(F) << std::endl;
+    std::cout << get<1, int, double, char, bool>(tuple) << std::endl;
+}
+
+void multiTypeSpanTest() {
+    Chunk* chunk = ChunkAllocator::Malloc();
+    A* a = ChunkUtil::NewObjFrom<A, int, int>(chunk, 222, 333);
+    C* c = ChunkUtil::NewObjFrom<C, float, int>(chunk, 0.5f, 65535);
+    /*std::cout << "can create span<A,C>=" << SpanUtil::CanCreate<A, C>(chunk) << std::endl;*/
+    /*Span<A,C>* span = SpanUtil::Create(chunk,*a,*c);
+    std::cout << "sizeof(A)+sizeof(C)=" << (sizeof(A)+sizeof(C)) << std::endl;
+    std::cout << "span: elementSize=" << Span<A,C>::ElementSize << ",startIdx="<<span->startIdx <<std::endl;
+    std::cout << "sizeof((Span<A, C>)=" << sizeof(Span<A, C>) <<", while sizeof(span->ElementSize)="<<sizeof(Span<A,C>::ElementSize)<< std::endl;*/
+    ChunkAllocator::Free(chunk);
+}
 
 //void spanTest() {
 //    Chunk* chunk = ChunkAllocator::Malloc();
@@ -157,8 +162,8 @@ void tupleTest() {
 int main()
 {
     //chunkTest();
-    //multiTypeSpanTest();
-    tupleTest();
+    /*multiTypeSpanTest();*/
+    myTupleTest();
     /*testTuple2<int,int,char,bool>(10,100,'a',true);*/
     /*testTuple2<int, int,int>(100,2,3,4);*/
     system("pause");

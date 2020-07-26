@@ -152,7 +152,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="..\..\vcontainer\ContainerChunkNode.h" />
-    <ClInclude Include="..\..\vcontainer\MultipleTypeSpan.h" />
     <ClInclude Include="..\..\vcontainer\span.h" />
     <ClInclude Include="..\..\vcontainer\list.h" />
     <ClInclude Include="..\..\vcontainer\tuple.h" />

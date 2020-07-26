@@ -19,7 +19,7 @@ namespace valkyr{
 		Span<Head, Rest...>* prev;
 		/*Head* head;
 		MultiTypeSpan<Rest...>* rest;*/
-		int pad[2];
+		//int pad=0;
 		enum {
 			ElementSize = Span<Head>::ElementSize + Span<Rest...>::ElementSize,
 			//ElementIdx = Span<Head>::ElementIdx
@@ -27,13 +27,11 @@ namespace valkyr{
 
 		Span() : startIdx(0), count(0), chunk(nullptr), next(nullptr), prev(nullptr)
 		{
-			pad = { 0,0 };
 		}
 
 		Span(Chunk* chunk) :
 			count(0), chunk(chunk), next(nullptr), prev(nullptr) {
 			startIdx = ChunkUtil::GetInfo(chunk)->head;
-			pad = { 0,0 };
 		}
 	};
 
@@ -48,23 +46,26 @@ namespace valkyr{
 	class SpanUtil {
 	public:
 		template <typename ...T>
-		static inline Span<T...>* Create(Chunk* chunk,unsigned int count) {
+		static inline Span<T...>* Create(Chunk* chunk, T&&... ptototypes,int num) {
+			if (!CanCreate<T...>(chunk)) return;
 			Span<T...>* span = ChunkUtil::NewObjFrom<Span<T...>>(chunk);
-			span->next = nullptr;
-			span->prev = nullptr;
 			span->chunk = chunk;
-			span->count = 0;
-			span->startIdx = ChunkUtil::GetInfo(chunk)->head;
-			for (int i = 0; i < count; ++i) {
-				/*auto obj = ChunkUtil::NewObjFrom<T...>(chunk);*/
-				
-			}
-			span->count = count;
+			//then all types
+			//in memory:span-types...-types...
+
 			return span;
 		}
 
+		template <typename ...T>
+		static inline bool CanCreate(Chunk* chunk) {
+			size_t elementSize = Span<T...>::ElementSize;
+			size_t spanSize = sizeof(Span<T...>);
+			ChunkInfo* info = ChunkUtil::GetInfo(chunk);
+			return CHUNK_SIZE - info->usedSize >= elementSize + spanSize;
+		}
 
-		template <typename T>
+
+		/*template <typename T>
 		static inline T* Get(unsigned int idx, Span<T>* span) {
 			return ChunkUtil::GetFrom<T>(span->startIdx + idx * sizeof(T), span->chunk);
 		}
@@ -82,6 +83,6 @@ namespace valkyr{
 			for (int i = 0; i < span->count; ++i) {
 				func(Get(i,span),i);
 			}
-		}
+		}*/
 	};
 }

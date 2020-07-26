@@ -84,9 +84,6 @@
     <ClInclude Include="..\..\vcontainer\list.h">
       <Filter>vcontainer</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\vcontainer\MultipleTypeSpan.h">
-      <Filter>vcontainer</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\vcontainer\tuple.h">
       <Filter>vcontainer</Filter>
     </ClInclude>

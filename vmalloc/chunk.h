@@ -116,6 +116,7 @@ namespace valkyr {
 			return obj;
 		}
 
+
 		template <typename T>
 		static inline T* GetFrom(unsigned int idx, Chunk* chunk) {
 			return (T*)(chunk->buff + idx);
