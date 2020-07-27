@@ -46,6 +46,13 @@ struct C {
     C(float b,int n):baseline(b),num(n){}
 };
 
+//加x，size为4，只有方法则为1，有两个方法也为1
+struct F {
+    //int x;
+    int f() { return 333; }
+    int f3() { return 333; }
+};
+
 void chunkTest() {
     Chunk* chunk = ChunkAllocator::Malloc();
     C* c = ChunkUtil::NewObjFrom<C, float, int>(chunk, 0.5f, 65535);
@@ -86,32 +93,37 @@ void CreateTuple(Chunk* chunk,T... prototypes) {
 }
 
 
-//void tupleTest() {
-//    
-//    Chunk* chunk = ChunkAllocator::Malloc();
-//    ChunkInfo* info =  ChunkUtil::GetInfo(chunk);
-//    std::cout <<"info->head="<< info->head << std::endl;
-//    std::cout <<"target tuple size="<< Tuple<int, int, char, bool>::ElementSize << std::endl;
-//    CreateTuple(chunk, 10, 20, 'a', false);
-//    std::cout <<"after created,info->head="<< info->head << std::endl;
-//    ChunkAllocator::Free(chunk);
-//  
+//template<typename... Ts>
+//std::ostream& operator<<(std::ostream& os, Tuple<Ts...> const& theTuple)
+//{
+//    vapply
+//    (
+//        [&os](Ts const&... tupleArgs)
+//        {
+//            os << '[';
+//            std::size_t n{ 0 };
+//            ((os << tupleArgs << (++n != sizeof...(Ts) ? ", " : "")), ...);
+//            os << ']';
+//        }, theTuple
+//    );
+//    return os;
 //}
 
-//加x，size为4，只有方法则为1，有两个方法也为1
-struct F{
-    //int x;
-    int f() { return 333; }
-    int f3() { return 333; }
-};
-
 void myTupleTest() {
-    Tuple<int,double,char,bool> tuple(100,200.99f,'a',false);
-    std::cout << tuple.head << std::endl;
-    std::cout << tuple.tail().tail().head << std::endl;
-    std::cout << sizeof(tuple) << std::endl;
+    Chunk* chunk = ChunkAllocator::Malloc();
+    using Tuple_t = Tuple<int, double, char, bool>;
+    std::cout <<"chunk head=" << ChunkUtil::GetInfo(chunk)->head << std::endl;
+    Tuple_t* tuple = TupleUtil::Make<int,double,char,bool>(chunk,100,200.99f,'a',false);
+    std::cout << "tuple->head=" << tuple->head << std::endl;
+    std::cout << "tuple->tail().tail().head=" << tuple->tail().tail().head << std::endl;
+    std::cout <<"sizeof(*tuple)=" << sizeof(*tuple)<< std::endl;
+    std::cout << "TupleCount<Tuple<int,double,char,bool>>::value=" << TupleCountValue<Tuple_t> << std::endl;
     //std::cout << sizeof(F) << std::endl;
-    std::cout << get<1, int, double, char, bool>(tuple) << std::endl;
+    std::cout << "TupleUtil::Get<2>(*tuple)=" << TupleUtil::Get<2>(*tuple) << std::endl;
+    auto add_lambda = [](auto first, auto second) { return first + second; };
+    //std::cout << *tuple << '\n';
+    std::cout << "chunk head=" << ChunkUtil::GetInfo(chunk)->head << std::endl;
+    ChunkAllocator::Free(chunk);
 }
 
 void multiTypeSpanTest() {
