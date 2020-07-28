@@ -78,7 +78,6 @@ void printAll(T... args) {
     for (auto it = argList.begin(); it != argList.end(); it++) {
         idx++;
         int* pOrigin = (int*)*it;
-
         std::cout << idx << ":"<<typeid(*it).name() << " " << *pOrigin << std::endl;
     }
 }
