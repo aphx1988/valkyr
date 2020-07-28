@@ -23,7 +23,6 @@ namespace valkyr {
 
 	//ref(Chinese) https://zhuanlan.zhihu.com/p/143715615
 	//ref(Chinese) https://github.com/Humorly/wstd-tuple
-
 	template <size_t N,typename ...T>
 	struct _tuple_element;
 
@@ -67,55 +66,22 @@ namespace valkyr {
 			return ((class_type&)tuple).head;
 		}
 
+		template <size_t N, typename ...T>
+		static inline decltype(auto) GetPtr(Tuple<T...>* tuple)
+		{
+			using class_type = typename _tuple_element<N, Tuple<T...>>::rest_type;
+			return &(((class_type*)tuple)->head);
+		}
+
 		template <typename ...T>
-		static inline Tuple<T...>* Make(Chunk* chunk,T&&... args) {
+		static inline Tuple<T...> Make(Chunk* chunk, T&&... args) {
+			return *(ChunkUtil::NewObjFrom<Tuple<T...>>(chunk, std::forward<T>(args)...));
+		}
+
+		template <typename ...T>
+		static inline Tuple<T...>* MakePtr(Chunk* chunk,T&&... args) {
 			return ChunkUtil::NewObjFrom<Tuple<T...>>(chunk,std::forward<T>(args)...);
 		}
-
-		/*template <typename ...T, typename F, size_t N>
-		static inline void ForEach(Tuple<T...>& tuple, F f) {
-			f(T, N);
-			ForEach(tuple, N - 1);
-		}*/
-
-		/*template <typename ...T, typename F, size_t N>
-		static inline void ForEach(Tuple<T...>& tuple, std::function<void(Tuple<T...>& tuple,size_t)> f) {
-			f(tuple), N);
-			ForEach(tuple, N - 1);
-		}
-
-		template <typename ...T>
-		static inline void ForEach<T..., 0>(Tuple<T...>& tuple, std::function<void(Tuple<T...>& tuple, size_t)> f) {
-			f(tuple, 0);
-		}*/
-
-		/*template <typename ...T,typename F,size_t N>
-		static inline void ForEach(Tuple<T...>& tuple,std::function<void(decltype(Get<N>(tuple)),size_t)> f) {
-			f(Get<N>(tuple), N);
-			ForEach(tuple, N - 1);
-		}
-
-		template <typename ...T>
-		static inline void ForEach<T..., 0>(Tuple<T...>& tuple, std::function<void(decltype(Get<0>(tuple)), size_t)> f) {
-			f(Get<0>(tuple), 0);
-		}*/
-
-		/*template <typename F,typename ...T, typename std::enable_if_t<std::is_function_v<F>()> = 0>
-		static inline void ForEach(Tuple<T...>& tuple,F f) {
-			for (int i = 0; i < TupleCountValue<T...>; i++) {
-				f(Get<i>(tuple),i);
-			}
-		}*/
-		/*template <typename ...T>
-		static inline void ForEach(Tuple<T...>& tuple, std::function<void(Tuple<T...>&, int)> f) {
-			for (int i = 0; i < TupleCountValue<T...>; i++) {
-				f(tuple,i);
-			}
-		}*/
-		/*template <typename ...T>
-		static inline void ForEach(Tuple<T...>& tuple, std::function<void(T, int)>... f) {
-			f(T,)
-		}*/
 	};
 
 }

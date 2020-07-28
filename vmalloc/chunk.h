@@ -3,7 +3,6 @@
 
 namespace valkyr {
 	const unsigned int CHUNK_SIZE = 16 * 1024 * 1024;
-	const unsigned int POOL_CHUNKS = 4;
 
 	struct Chunk {
 		char buff[CHUNK_SIZE];

@@ -111,18 +111,28 @@ void CreateTuple(Chunk* chunk,T... prototypes) {
 
 void myTupleTest() {
     Chunk* chunk = ChunkAllocator::Malloc();
-    using Tuple_t = Tuple<int, double, char, bool>;
+    using Tuple_t = Tuple<int, double, char, bool,C>;
     std::cout <<"chunk head=" << ChunkUtil::GetInfo(chunk)->head << std::endl;
-    Tuple_t* tuple = TupleUtil::Make<int,double,char,bool>(chunk,100,200.99f,'a',false);
-    std::cout << "tuple->head=" << tuple->head << std::endl;
-    std::cout << "tuple->tail().tail().head=" << tuple->tail().tail().head << std::endl;
-    std::cout <<"sizeof(*tuple)=" << sizeof(*tuple)<< std::endl;
+    //makeptr needs declare all types, while make do not 
+    auto* pTuple = TupleUtil::MakePtr<int, double, char, bool, C>(chunk, 100, 200.99f, 'a', false, {0,10});
+    std::cout << "tuple->head=" << pTuple->head << std::endl;
+    std::cout << "tuple->tail().tail().head=" << pTuple->tail().tail().head << std::endl;
+    std::cout <<"sizeof(*tuple)=" << sizeof(*pTuple)<< std::endl;
     std::cout << "TupleCount<Tuple<int,double,char,bool>>::value=" << TupleCountValue<Tuple_t> << std::endl;
     //std::cout << sizeof(F) << std::endl;
-    std::cout << "TupleUtil::Get<2>(*tuple)=" << TupleUtil::Get<2>(*tuple) << std::endl;
-    auto add_lambda = [](auto first, auto second) { return first + second; };
-    //std::cout << *tuple << '\n';
+    std::cout << "TupleUtil::Get<2>(*tuple)=" << TupleUtil::Get<2>(*pTuple) << std::endl;
     std::cout << "chunk head=" << ChunkUtil::GetInfo(chunk)->head << std::endl;
+    C* pc = TupleUtil::GetPtr<4>(pTuple);
+    std::cout << "pc is  TupleUtil::GetPtr<4>(tuple)"<<std::endl;
+    std::cout << "TupleUtil::GetPtr<4>(tuple)->num=" << pc->num << std::endl;
+    pc->num = 222;
+    std::cout << "after change pc->num to 222,pc->num=" << pc->num << std::endl;
+    std::cout << "after change pc->num to 222,Get from tuple=" << TupleUtil::GetPtr<4>(pTuple)->num << std::endl;
+    auto tuple2 = TupleUtil::Make(chunk, 10, 20, C());
+    std::cout << "TupleUtil::Get<1>(tuple2)=" << TupleUtil::Get<1>(tuple2) << std::endl;
+    C* pc2 = TupleUtil::GetPtr<2>(&tuple2);
+    pc2->num = 333;
+    std::cout << "TupleUtil::GetPtr<2>(tuple2)->num=" << TupleUtil::GetPtr<2>(&tuple2)->num << std::endl;
     ChunkAllocator::Free(chunk);
 }
 
