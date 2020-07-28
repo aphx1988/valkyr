@@ -97,7 +97,7 @@ namespace valkyr {
 		}
 
 		template <typename T, typename ...Args>
-		static inline T* NewObjFrom(Chunk* chunk, Args&&... args) {
+		static inline T* NewObjFrom(Chunk* chunk, Args... args) {
 			ChunkInfo* info = GetInfo(chunk);
 			if (CHUNK_SIZE - info->usedSize < sizeof(T)) {
 				return nullptr;

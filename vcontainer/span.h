@@ -1,29 +1,20 @@
 #pragma once
 
 #include <functional>
-#include "../vmalloc/chunk.h"
+#include "./tuple.h"
 
 namespace valkyr{
 	//a continuous or linear memory store a type in a chunk
 	//can be multiple in a single chunk, so has prev and next for connection
 	//all elements are fixed, can not add more or remove
-	template <typename ...Ts>
-	struct Span;
 
-	template <typename Head, typename ...Rest>
-	struct Span<Head, Rest...> {
+	template <typename T>
+	struct Span {
 		unsigned int startIdx;
 		unsigned int count;
 		Chunk* chunk;
-		Span<Head, Rest...>* next;
-		Span<Head, Rest...>* prev;
-		/*Head* head;
-		MultiTypeSpan<Rest...>* rest;*/
-		//int pad=0;
-		enum {
-			ElementSize = Span<Head>::ElementSize + Span<Rest...>::ElementSize,
-			//ElementIdx = Span<Head>::ElementIdx
-		};
+		Span<T>* next;
+		Span<T>* prev;
 
 		Span() : startIdx(0), count(0), chunk(nullptr), next(nullptr), prev(nullptr)
 		{
@@ -33,14 +24,6 @@ namespace valkyr{
 			count(0), chunk(chunk), next(nullptr), prev(nullptr) {
 			startIdx = ChunkUtil::GetInfo(chunk)->head;
 		}
-	};
-
-	template<typename T>
-	struct Span<T> {
-		enum {
-			ElementSize = sizeof(T)
-			//ElementIdx = Span<Head>::ElementIdx
-		};
 	};
 
 	class SpanUtil {
