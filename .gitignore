@@ -1,3 +1,5 @@
 /build/x64
 /build/vtest/x64
 /build/vwin/Debug
+.vs
+Debug
