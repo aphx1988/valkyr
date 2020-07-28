@@ -81,10 +81,10 @@
     <ClInclude Include="..\..\vcontainer\ContainerChunkNode.h">
       <Filter>vcontainer</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\vcontainer\list.h">
+    <ClInclude Include="..\..\vcontainer\tuple.h">
       <Filter>vcontainer</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\vcontainer\tuple.h">
+    <ClInclude Include="..\..\vcontainer\vec.h">
       <Filter>vcontainer</Filter>
     </ClInclude>
   </ItemGroup>

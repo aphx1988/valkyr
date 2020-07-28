@@ -4,6 +4,8 @@
 
 namespace valkyr {
 
+	template <typename ...T>
+	using vtuple = std::tuple<T...>;
 
 	template <typename ...T>
 	std::tuple<T...>* vmake_tuple_ptr(Chunk* chunk) {

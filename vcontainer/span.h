@@ -1,7 +1,7 @@
 #pragma once
 
 #include <functional>
-#include "./tuple.h"
+#include "tuple.h"
 
 namespace valkyr{
 	//a continuous or linear memory store a type in a chunk
@@ -10,47 +10,104 @@ namespace valkyr{
 
 	template <typename T>
 	struct Span {
-		unsigned int startIdx;
+		unsigned int firstHead;
 		unsigned int count;
 		Chunk* chunk;
 		Span<T>* next;
 		Span<T>* prev;
 
-		Span() : startIdx(0), count(0), chunk(nullptr), next(nullptr), prev(nullptr)
+		Span() : firstHead(0), count(0), chunk(nullptr), next(nullptr), prev(nullptr)
 		{
 		}
 
 		Span(Chunk* chunk) :
 			count(0), chunk(chunk), next(nullptr), prev(nullptr) {
-			startIdx = ChunkUtil::GetInfo(chunk)->head;
+			firstHead = ChunkUtil::GetInfo(chunk)->head;
 		}
 	};
 
 	class SpanUtil {
 	public:
+
 		template <typename ...T>
-		static inline Span<T...>* Create(Chunk* chunk, T&&... ptototypes,int num) {
-			if (!CanCreate<T...>(chunk)) return;
-			Span<T...>* span = ChunkUtil::NewObjFrom<Span<T...>>(chunk);
+		static inline Span<vtuple<T...>>* Create(Chunk* chunk,int num) {
+			if (!CanCreate<T...>(chunk,num)) return nullptr;
+			Span<vtuple<T...>>* span = ChunkUtil::NewObjFrom<Span<vtuple<T...>>>(chunk);
 			span->chunk = chunk;
 			//then all types
 			//in memory:span-types...-types...
-
+			span->firstHead = ChunkUtil::GetInfo(chunk)->head;
+			for (int i = 0; i < num; i++) {
+				vmake_tuple<T...>(chunk);
+			}
+			span->count = num;
 			return span;
 		}
 
 		template <typename ...T>
-		static inline bool CanCreate(Chunk* chunk) {
-			size_t elementSize = Span<T...>::ElementSize;
-			size_t spanSize = sizeof(Span<T...>);
-			ChunkInfo* info = ChunkUtil::GetInfo(chunk);
-			return CHUNK_SIZE - info->usedSize >= elementSize + spanSize;
+		static inline Span<vtuple<T...>>* Create(Chunk* chunk, int num, T... prototype) {
+			if (!CanCreate<T...>(chunk, num)) return nullptr;
+			Span<vtuple<T...>>* span = ChunkUtil::NewObjFrom<Span<vtuple<T...>>>(chunk);
+			span->chunk = chunk;
+			span->firstHead = ChunkUtil::GetInfo(chunk)->head;
+			//then all types
+			//in memory:span-types...-types...
+			for (int i = 0; i < num; i++) {
+				vmake_tuple<T...>(chunk,prototype...);
+			}
+			span->count = num;
+			return span;
 		}
 
+		template <typename T, typename ...Args>
+		static inline Span<T>* Create(Chunk* chunk, int num, Args... args) {
+			if (!CanCreate<T>(chunk,num)) return nullptr;
+			Span<T>* span = ChunkUtil::NewObjFrom<Span<T>>(chunk);
+			span->chunk = chunk;
+			span->firstHead = ChunkUtil::GetInfo(chunk)->head;
+			//then all types
+			//in memory:span-types...-types...
+			for (int i = 0; i < num; i++) {
+				ChunkUtil::NewObjFrom<T>(chunk,args...);
+			}
+			span->count = num;
+			return span;
+		}
 
-		/*template <typename T>
+		template <typename T>
+		static inline Span<T>* Create(Chunk* chunk, int num) {
+			if (!CanCreate<T>(chunk, num)) return nullptr;
+			Span<T>* span = ChunkUtil::NewObjFrom<Span<T>>(chunk);
+			span->chunk = chunk;
+			span->firstHead = ChunkUtil::GetInfo(chunk)->head;
+			//then all types
+			//in memory:span-types...-types...
+			for (int i = 0; i < num; i++) {
+				ChunkUtil::NewObjFrom<T>(chunk);
+			}
+			span->count = num;
+			return span;
+		}
+
+		template <typename ...T>
+		static inline bool CanCreate(Chunk* chunk, int num) {
+			size_t elementSize = sizeof(vtuple<T...>);
+			size_t spanSize = sizeof(Span<vtuple<T...>>);
+			ChunkInfo* info = ChunkUtil::GetInfo(chunk);
+			return CHUNK_SIZE - info->usedSize >= elementSize * num + spanSize;
+		}
+
+		template <typename T>
+		static inline bool CanCreate(Chunk* chunk,int num) {
+			size_t elementSize = sizeof(T);
+			size_t spanSize = sizeof(Span<vtuple<T...>>);
+			ChunkInfo* info = ChunkUtil::GetInfo(chunk);
+			return CHUNK_SIZE - info->usedSize >= elementSize*num + spanSize;
+		}
+
+		template <typename T>
 		static inline T* Get(unsigned int idx, Span<T>* span) {
-			return ChunkUtil::GetFrom<T>(span->startIdx + idx * sizeof(T), span->chunk);
+			return ChunkUtil::Get<T>(span->firstHead + idx * sizeof(T), span->chunk);
 		}
 
 		template <typename T>
@@ -66,6 +123,6 @@ namespace valkyr{
 			for (int i = 0; i < span->count; ++i) {
 				func(Get(i,span),i);
 			}
-		}*/
+		}
 	};
 }

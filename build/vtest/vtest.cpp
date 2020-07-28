@@ -3,8 +3,8 @@
 
 #include <iostream>
 //#include "../../vmalloc/chunk.h"
-//#include "../../vcontainer/span.h"
-#include "../../vcontainer/tuple.h"
+#include "../../vcontainer/span.h"
+//#include "../../vcontainer/tuple.h"
 
 using namespace valkyr;
 
@@ -61,6 +61,7 @@ void chunkTest() {
     std::cout << "c2:baseline=" << c2->baseline << ",num=" << c2->num << std::endl;
     Position* pos = ChunkUtil::NewObjFrom<Position, float, float, float>(chunk,100.9f,222.22f,333.333f);
     std::cout << "pos:x=" << pos->x << ",y=" << pos->y<<",z="<<pos->z << std::endl;
+    std::cout << "chunk first.baseline=" << ChunkUtil::Get<C>(sizeof(ChunkInfo), chunk)->baseline<<std::endl;
     ChunkAllocator::Free(chunk);
 }
 
@@ -84,60 +85,49 @@ void printAll(T... args) {
 
 void myTupleTest() {
     Chunk* chunk = ChunkAllocator::Malloc();
-   /* using Tuple_t = Tuple<int, double, char, bool,C>;
-    std::cout <<"chunk head=" << ChunkUtil::GetInfo(chunk)->head << std::endl;
-    auto* pTuple = TupleUtil::MakePtr<int, double, char, bool, C>(chunk, 100, 200.99f, 'a', false, {0,10});
-    std::cout << "tuple->head=" << pTuple->head << std::endl;
-    std::cout << "tuple->tail().tail().head=" << pTuple->tail().tail().head << std::endl;
-    std::cout <<"sizeof(*tuple)=" << sizeof(*pTuple)<< std::endl;
-    std::cout << "TupleCount<Tuple<int,double,char,bool>>::value=" << TupleCountValue<Tuple_t> << std::endl;
-    std::cout << "TupleUtil::Get<2>(*tuple)=" << TupleUtil::Get<2>(*pTuple) << std::endl;
-    std::cout << "chunk head=" << ChunkUtil::GetInfo(chunk)->head << std::endl;
-    C* pc = TupleUtil::GetPtr<4>(pTuple);
-    std::cout << "pc is  TupleUtil::GetPtr<4>(tuple)"<<std::endl;
-    std::cout << "TupleUtil::GetPtr<4>(tuple)->num=" << pc->num << std::endl;
-    pc->num = 222;
-    std::cout << "after change pc->num to 222,pc->num=" << pc->num << std::endl;
-    std::cout << "after change pc->num to 222,Get from tuple=" << TupleUtil::GetPtr<4>(pTuple)->num << std::endl;
-    auto tuple2 = TupleUtil::Make(chunk, 10, 20, C());
-    std::cout << "TupleUtil::Get<1>(tuple2)=" << TupleUtil::Get<1>(tuple2) << std::endl;
-    C* pc2 = TupleUtil::GetPtr<2>(&tuple2);
-    pc2->num = 333;
-    std::cout << "TupleUtil::GetPtr<2>(tuple2)->num=" << TupleUtil::GetPtr<2>(&tuple2)->num << std::endl;
-    std::cout << "before std::tuple created,chunk head=" << ChunkUtil::GetInfo(chunk)->head << std::endl;*/
-    std::tuple<int, int, C>* sTuple = nullptr;
-    sTuple = vmake_tuple_ptr(chunk,10,20,C());
-    std::cout << "sizeof(*sTuple)=" << sizeof(*sTuple) << std::endl;
+    vtuple<int, int, C>* pSTuple = nullptr;
+    pSTuple = vmake_tuple_ptr(chunk,10,20,C());
+    std::cout << "sizeof(*pSTuple)=" << sizeof(*pSTuple) << std::endl;
     std::cout << "after std::tuple created,chunk head=" << ChunkUtil::GetInfo(chunk)->head << std::endl;
-    C* pc3 = &std::get<2>(*sTuple);
+    C* pc3 = &std::get<2>(*pSTuple);
     pc3->num = 666;
-    std::cout << "std::get<0>(*sTuple)=" << std::get<0>(*sTuple)<< std::endl;
-    std::cout <<"(&std::get<2>(*sTuple))->num="<< (&std::get<2>(*sTuple))->num << std::endl;
+    std::cout << "std::get<0>(*pSTuple)=" << vget<0>(*pSTuple)<< std::endl;
+    std::cout <<"(&std::get<2>(*pSTuple))->num="<< (&vget<2>(*pSTuple))->num << std::endl;
     auto atuple = vmake_tuple(chunk, 222, 333,C(222,333));
     std::cout << "after std::tuple created,chunk head=" << ChunkUtil::GetInfo(chunk)->head << std::endl;
     std::cout << "std::get<0>(atuple)=" << vget<0>(atuple) << std::endl;
-    std::tuple<int, int,C>* pATuple = &atuple;
+    vtuple<int, int,C>* pATuple = &atuple;
     C* pc4 = &std::get<2>(*pATuple);
     pc4->num = 3333;
     std::cout << "vget<2>(pATuple).num = std::get<2>(*pATuple).num=" << vget<2>(pATuple).num << std::endl;
     std::cout << "vget_ptr<C,2>(pATuple)->num=" << vget_ptr<C,2>(pATuple)->num << std::endl;
+    auto& [x, y, c] = atuple;
+    std::cout << x<<"," << y<<"," << c.num << std::endl;
+    auto* pTp = vmake_tuple_ptr<A,C>(chunk);
+    A* a = vget_ptr<A, 0>(pTp);
     ChunkAllocator::Free(chunk);
 }
 
 void multiTypeSpanTest() {
     Chunk* chunk = ChunkAllocator::Malloc();
-    A* a = ChunkUtil::NewObjFrom<A, int, int>(chunk, 222, 333);
-    C* c = ChunkUtil::NewObjFrom<C, float, int>(chunk, 0.5f, 65535);
+    Span<vtuple<A,C>>* span = SpanUtil::Create<A,C>(chunk, 8,A(2,3),C(222,333));
+    auto* p0 = SpanUtil::Get(0, span);
+    std::cout << "span 0: A a.i0=" << vget_ptr<A,0>(p0)->i0 << ",C c.num=" << vget<1>(p0).num << std::endl;
+    auto* p6 = SpanUtil::Get(6, span);
+    auto& [ar, cr] = *p6;
+    A* a = &ar; 
+    C* c = &cr;
+    a->i0 = 666;
+    c->num = 3333;
+    std::cout << "span 6: A a.i0=" << vget_ptr<A, 0>(p6)->i0 << ",C c.num=" << vget<1>(p6).num << std::endl;
     ChunkAllocator::Free(chunk);
 }
 
 int main()
 {
     //chunkTest();
-    /*multiTypeSpanTest();*/
-    myTupleTest();
-    /*testTuple2<int,int,char,bool>(10,100,'a',true);*/
-    /*testTuple2<int, int,int>(100,2,3,4);*/
+    multiTypeSpanTest();
+    //myTupleTest();
     system("pause");
 }
 

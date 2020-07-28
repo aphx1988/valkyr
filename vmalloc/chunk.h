@@ -118,9 +118,7 @@ namespace valkyr {
 
 		template <typename T>
 		static inline T* Get(unsigned int idx, Chunk* chunk) {
-			return (T*)(chunk->buff + idx);
+			return reinterpret_cast<T*>(chunk->buff + idx);
 		}
-
-		
 	};
 }

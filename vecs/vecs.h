@@ -9,7 +9,7 @@ namespace valkyr {
 
 	//can use its info for getting type
 	struct CptChunkNode {
-		unsigned int startIdx;
+		unsigned int firstHead;
 		size_t size;
 		CptChunkNode* next;
 		CptChunkNode* prev;
