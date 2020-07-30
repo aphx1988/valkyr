@@ -72,6 +72,18 @@ namespace valkyr {
 			return CHUNK_SIZE - info->usedSize >= sizeof(T);
 		}
 
+		template <typename T>
+		static inline bool CanContain(Chunk* chunk,size_t num) {
+			ChunkInfo* info = ChunkUtil::GetInfo(chunk);
+			return CHUNK_SIZE - info->usedSize >= sizeof(T)*num;
+		}
+
+		template <typename T>
+		static inline size_t GetMaxCount(Chunk* chunk) {
+			ChunkInfo* info = ChunkUtil::GetInfo(chunk);
+			return (CHUNK_SIZE - info->usedSize) / sizeof(T);
+		}
+
 		static inline void Connect(Chunk* chunk, Chunk* next) {
 			ChunkUtil::GetInfo(chunk)->next = next;
 			ChunkUtil::GetInfo(next)->prev = chunk;

@@ -17,11 +17,13 @@ namespace valkyr {
 	public:
 		template <typename T>
 		static inline Vec<T>* Create(Chunk* chunk,unsigned int num) {
+			//int numNeededChunks = num * size(T);
 			Vec<T>* list = ChunkUtil::NewObjFrom<Vec<T>>(chunk);
 			ContainerChunkNode<T>* chunkNode = ChunkUtil::NewObjFrom<ContainerChunkNode<T>>(chunk);
 			chunkNode->firstSpan = SpanUtil::Create(chunk, num);
 			list->length = 0;
-			list->m_chunkCount = 0;
+			list->m_chunkCount = 1;
+			return list;
 		}
 
 		template <typename T>

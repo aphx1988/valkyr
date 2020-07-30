@@ -4,7 +4,7 @@
 #include <iostream>
 //#include "../../vmalloc/chunk.h"
 #include "../../vcontainer/span.h"
-//#include "../../vmalloc/ChunkMgr.h"
+#include "../../vmalloc/ChunkMgr.h"
 #include "../../vcontainer/algorithm.h";
 //#include "../../vcontainer/tuple.h"
 
@@ -67,22 +67,22 @@ void chunkTest() {
 	ChunkAllocator::Free(chunk);
 }
 
-//void chunkMgrTest() {
-//	vfor_each(g_chunkMgr, [&](Chunk* chunk, int i) {
-//		std::cout <<i<<":head="<< ChunkUtil::GetInfo(chunk)->head << ",address=" << chunk << std::endl;
-//	});
-//	std::cout <<"g_currChunk="<<  g_currChunk << std::endl;
-//	Chunk* next = nullptr;
-//	for (int i = 0; i < MAX_USE_NEXT_CHUNK+6; i++) {
-//		next = g_chunkMgr->UseNextChunk([](Chunk* chunk) {g_currChunk = chunk; });
-//		std::cout << "next" << i << " address=" << next << ",after use next, curr" << i << " address:" << g_currChunk << std::endl;
-//	}
-//	g_chunkMgr->AddChunk();
-//	vfor_each(g_chunkMgr, [&](Chunk* chunk, int i) {
-//		std::cout << i << ":head=" << ChunkUtil::GetInfo(chunk)->head<<",address="<<chunk << std::endl;
-//		});
-//	g_chunkMgr->Destroy([]() {g_currChunk = nullptr; g_chunkMgr = nullptr; });
-//}
+void chunkMgrTest() {
+	vfor_each(g_chunkMgr, [&](Chunk* chunk, int i) {
+		std::cout <<i<<":head="<< ChunkUtil::GetInfo(chunk)->head << ",address=" << chunk << std::endl;
+	});
+	std::cout <<"g_currChunk="<<  g_currChunk << std::endl;
+	Chunk* next = nullptr;
+	for (int i = 0; i < MAX_USE_NEXT_CHUNK+6; i++) {
+		next = g_chunkMgr->UseNextChunk([](Chunk* chunk) {g_currChunk = chunk; });
+		std::cout << "next" << i << " address=" << next << ",after use next, curr" << i << " address:" << g_currChunk << std::endl;
+	}
+	g_chunkMgr->AddChunk();
+	vfor_each(g_chunkMgr, [&](Chunk* chunk, int i) {
+		std::cout << i << ":head=" << ChunkUtil::GetInfo(chunk)->head<<",address="<<chunk << std::endl;
+		});
+	g_chunkMgr->Destroy([]() {g_currChunk = nullptr; g_chunkMgr = nullptr; });
+}
 
 template <typename ...T>
 void printAll(T... args) {
@@ -141,7 +141,6 @@ void spanTest() {
 	vfor_each<Tuple<A, C>>(span, [&](auto* pv, int i) {
 		std::cout << "span" << i << ": A a.i0=" << vget_ptr<A, 0>(pv)->i0 << ",C c.num=" << vget<1>(pv).num << std::endl;
 	});
-	//ChunkUtil::Zero(chunk, span->firstHead + 6 * sizeof(Tuple<A, C>), p6);
 	SpanUtil::Zero(span, 6, 2);
 	std::cout << "span 6: A a.i0=" << vget_ptr<A, 0>(SpanUtil::Get(6, span))->i0 << ",C c.num=" << vget<1>(SpanUtil::Get(6, span)).num << std::endl;
 	std::cout << "span 7: A a.i0=" << vget_ptr<A, 0>(SpanUtil::Get(7, span))->i0 << ",C c.num=" << vget<1>(SpanUtil::Get(7, span)).num << std::endl;

@@ -57,17 +57,8 @@
     <ClInclude Include="..\..\vd3d12rhi\d3d12rhi.h">
       <Filter>vd3d12rhi</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\vcore\vector.h">
-      <Filter>vcore</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\vrender\RenderEngine.h">
       <Filter>vrender</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\vcore\array.h">
-      <Filter>vcore</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\vcore\queue.h">
-      <Filter>vcore</Filter>
     </ClInclude>
     <ClInclude Include="..\..\vmalloc\chunk.h">
       <Filter>vmalloc</Filter>

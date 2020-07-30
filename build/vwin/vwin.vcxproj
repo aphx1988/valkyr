@@ -156,9 +156,6 @@
     <ClInclude Include="..\..\vcontainer\span.h" />
     <ClInclude Include="..\..\vcontainer\tuple.h" />
     <ClInclude Include="..\..\vcontainer\vec.h" />
-    <ClInclude Include="..\..\vcore\array.h" />
-    <ClInclude Include="..\..\vcore\queue.h" />
-    <ClInclude Include="..\..\vcore\vector.h" />
     <ClInclude Include="..\..\vd3d12rhi\d3d12rhi.h" />
     <ClInclude Include="..\..\vecs\vecs.h" />
     <ClInclude Include="..\..\vmalloc\chunk.h" />
