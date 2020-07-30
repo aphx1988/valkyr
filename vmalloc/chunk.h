@@ -120,5 +120,14 @@ namespace valkyr {
 		static inline T* Get(unsigned int idx, Chunk* chunk) {
 			return reinterpret_cast<T*>(chunk->buff + idx);
 		}
+
+		static inline void Zero(Chunk* chunk, unsigned int idx, size_t n) {
+			memset(chunk->buff + idx, 0, n);
+		}
+
+		template <typename T>
+		static inline void Zero(Chunk* chunk, unsigned int idx,T* t) {
+			Zero(chunk, idx, sizeof(T));
+		}
 	};
 }

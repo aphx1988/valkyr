@@ -15,6 +15,7 @@ namespace valkyr{
 		Chunk* chunk;
 		Span<T>* next;
 		Span<T>* prev;
+		int pad;
 
 		Span() : firstHead(0), count(0), chunk(nullptr), next(nullptr), prev(nullptr)
 		{
@@ -30,9 +31,9 @@ namespace valkyr{
 	public:
 
 		template <typename ...T>
-		static inline Span<vtuple<T...>>* Create(Chunk* chunk,int num) {
+		static inline Span<Tuple<T...>>* Create(Chunk* chunk,int num) {
 			if (!CanCreate<T...>(chunk,num)) return nullptr;
-			Span<vtuple<T...>>* span = ChunkUtil::NewObjFrom<Span<vtuple<T...>>>(chunk);
+			Span<Tuple<T...>>* span = ChunkUtil::NewObjFrom<Span<Tuple<T...>>>(chunk);
 			span->chunk = chunk;
 			//then all types
 			//in memory:span-types...-types...
@@ -45,9 +46,9 @@ namespace valkyr{
 		}
 
 		template <typename ...T>
-		static inline Span<vtuple<T...>>* Create(Chunk* chunk, int num, T... prototype) {
+		static inline Span<Tuple<T...>>* Create(Chunk* chunk, int num, T... prototype) {
 			if (!CanCreate<T...>(chunk, num)) return nullptr;
-			Span<vtuple<T...>>* span = ChunkUtil::NewObjFrom<Span<vtuple<T...>>>(chunk);
+			Span<Tuple<T...>>* span = ChunkUtil::NewObjFrom<Span<Tuple<T...>>>(chunk);
 			span->chunk = chunk;
 			span->firstHead = ChunkUtil::GetInfo(chunk)->head;
 			//then all types
@@ -91,8 +92,8 @@ namespace valkyr{
 
 		template <typename ...T>
 		static inline bool CanCreate(Chunk* chunk, int num) {
-			size_t elementSize = sizeof(vtuple<T...>);
-			size_t spanSize = sizeof(Span<vtuple<T...>>);
+			size_t elementSize = sizeof(Tuple<T...>);
+			size_t spanSize = sizeof(Span<Tuple<T...>>);
 			ChunkInfo* info = ChunkUtil::GetInfo(chunk);
 			return CHUNK_SIZE - info->usedSize >= elementSize * num + spanSize;
 		}
@@ -100,7 +101,7 @@ namespace valkyr{
 		template <typename T>
 		static inline bool CanCreate(Chunk* chunk,int num) {
 			size_t elementSize = sizeof(T);
-			size_t spanSize = sizeof(Span<vtuple<T...>>);
+			size_t spanSize = sizeof(Span<Tuple<T...>>);
 			ChunkInfo* info = ChunkUtil::GetInfo(chunk);
 			return CHUNK_SIZE - info->usedSize >= elementSize*num + spanSize;
 		}
@@ -118,11 +119,21 @@ namespace valkyr{
 			}
 		}
 
-		template <typename T>
+		/*template <typename T>
 		static inline void ForEach(Span<T>* span, std::function<void(T*,int)> func) {
 			for (int i = 0; i < span->count; ++i) {
 				func(Get(i,span),i);
 			}
+		}*/
+
+		template <typename T>
+		static inline void Zero(Span<T>* span, unsigned int startIdx, size_t n) {
+			ChunkUtil::Zero(span->chunk, span->firstHead + startIdx * sizeof(T), (n > span->count ? span->count : n) * sizeof(T));
+		}
+
+		template <typename T>
+		static inline void ZeroAll(Span<T>* span) {
+			ChunkUtil::Zero(span->chunk, span->firstHead, span->count * sizeof(T));
 		}
 	};
 }

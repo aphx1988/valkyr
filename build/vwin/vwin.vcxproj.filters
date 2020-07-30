@@ -87,6 +87,12 @@
     <ClInclude Include="..\..\vcontainer\vec.h">
       <Filter>vcontainer</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\vmalloc\ChunkMgr.h">
+      <Filter>vmalloc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\vcontainer\algorithm.h">
+      <Filter>vcontainer</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="vwin.cpp">

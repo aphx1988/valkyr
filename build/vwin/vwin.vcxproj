@@ -151,6 +151,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\vcontainer\algorithm.h" />
     <ClInclude Include="..\..\vcontainer\ContainerChunkNode.h" />
     <ClInclude Include="..\..\vcontainer\span.h" />
     <ClInclude Include="..\..\vcontainer\tuple.h" />
@@ -161,6 +162,7 @@
     <ClInclude Include="..\..\vd3d12rhi\d3d12rhi.h" />
     <ClInclude Include="..\..\vecs\vecs.h" />
     <ClInclude Include="..\..\vmalloc\chunk.h" />
+    <ClInclude Include="..\..\vmalloc\ChunkMgr.h" />
     <ClInclude Include="..\..\vrender\RenderEngine.h" />
     <ClInclude Include="..\..\vrhi\rhi.h" />
     <ClInclude Include="framework.h" />

@@ -47,7 +47,7 @@ namespace valkyr {
 	struct Arch {
 		ArchChunkNode* firstCpt;  //after init, create these cpts in chunk as template or ref
 		unsigned int cptNum;
-		Chunk* firstChunk;
+		Chunk* m_firstChunk;
 		Chunk* lastChunkCanUse;  //unused size >= sizeof...(cpts)
 	};
 
