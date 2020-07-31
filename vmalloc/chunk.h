@@ -14,7 +14,7 @@ namespace valkyr {
 		Chunk* next;
 		Chunk* prev;
 		unsigned int head;
-		size_t usedSize;
+		unsigned int usedSize;
 
 		ChunkInfo() {
 			//isFull = false;

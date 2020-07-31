@@ -14,6 +14,10 @@ namespace valkyr {
 		Chunk* chunk;
 		Span<T>* firstSpan;
 		unsigned int spanCount;
-		int pad[2];
+		int pad[2] = {0,0};
+
+		ContainerChunkNode():prev(nullptr),next(nullptr),chunkInfo(nullptr),
+			chunk(nullptr),spanCount(0),firstSpan(nullptr)
+		{}
 	};
 }

@@ -18,16 +18,16 @@ namespace valkyr {
 			m_chunkCount(0), m_numUseNext(0) {}
 
 		static ChunkMgr* Create(size_t n,std::function<void(ChunkMgr*)> f) {
-			Chunk* m_lastChunk = ChunkAllocator::Malloc();
-			ChunkMgr* chunkMgr = ChunkUtil::NewObjFrom<ChunkMgr>(m_lastChunk);
-			chunkMgr->m_firstChunk = m_lastChunk;
-			chunkMgr->m_currChunk = m_lastChunk;
+			Chunk* lastChunk = ChunkAllocator::Malloc();
+			ChunkMgr* chunkMgr = ChunkUtil::NewObjFrom<ChunkMgr>(lastChunk);
+			chunkMgr->m_firstChunk = lastChunk;
+			chunkMgr->m_currChunk = lastChunk;
 			for (int i = 1; i < n; i++) {
 				Chunk* chunk = ChunkAllocator::Malloc();
-				ChunkUtil::Connect(m_lastChunk, chunk);
-				m_lastChunk = chunk;
+				ChunkUtil::Connect(lastChunk, chunk);
+				lastChunk = chunk;
 			}
-			chunkMgr->m_lastChunk = m_lastChunk;
+			chunkMgr->m_lastChunk = lastChunk;
 			chunkMgr->m_chunkCount = n;
 			chunkMgr->m_numUseNext = 0;
 			//g_currChunk = chunkMgr->m_currChunk;
@@ -42,7 +42,7 @@ namespace valkyr {
 			m_chunkCount++;
 		}
 
-		Chunk* UseNextChunk(std::function<void(Chunk*)> f) {
+		Chunk* UseNextChunk(std::function<void(Chunk*)> onChangeCurrChunk) {
 			if (ChunkUtil::GetNext(m_currChunk) == nullptr) {
 				AddChunk();
 			}
@@ -52,7 +52,7 @@ namespace valkyr {
 				m_numUseNext = 0;
 				m_currChunk = next;
 				//g_currChunk = m_currChunk;
-				if(f) f(m_currChunk); 
+				if(onChangeCurrChunk) onChangeCurrChunk(m_currChunk);
 			}
 			return next;
 		};
@@ -79,7 +79,5 @@ namespace valkyr {
 	};
 
 	Chunk* g_currChunk = nullptr;
-	ChunkMgr* g_chunkMgr = ChunkMgr::Create(8, [&](ChunkMgr* chunkMgr) {
-		g_currChunk = chunkMgr->m_currChunk;
-		});
+	ChunkMgr* g_chunkMgr = nullptr;
 }

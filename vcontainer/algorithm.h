@@ -13,6 +13,13 @@ namespace valkyr {
 		}
 	}
 
+	template <class T>
+	void vfor_each_entt(Span<T>* container, std::function<void(SpanEntity*, int)> f) {
+		for (int i = 0; i < container->count; ++i) {
+			f(SpanUtil::GetEntity(i, container), i);
+		}
+	}
+
 	void vfor_each(ChunkMgr* container, std::function<void(Chunk*, int)> f) {
 		Chunk* curr = container->m_firstChunk;
 		int i = 0;
