@@ -17,36 +17,43 @@ namespace valkyr {
 		ChunkMgr() :m_currChunk(nullptr), m_firstChunk(nullptr), m_lastChunk(nullptr),
 			m_chunkCount(0), m_numUseNext(0) {}
 
-		static ChunkMgr* Create(size_t n,std::function<void(ChunkMgr*)> f) {
+		static ChunkMgr* Create(std::function<void(ChunkMgr*)> f) {
 			Chunk* lastChunk = ChunkAllocator::Malloc();
 			ChunkMgr* chunkMgr = ChunkUtil::NewObjFrom<ChunkMgr>(lastChunk);
 			chunkMgr->m_firstChunk = lastChunk;
 			chunkMgr->m_currChunk = lastChunk;
-			for (int i = 1; i < n; i++) {
-				Chunk* chunk = ChunkAllocator::Malloc();
-				ChunkUtil::Connect(lastChunk, chunk);
-				lastChunk = chunk;
-			}
 			chunkMgr->m_lastChunk = lastChunk;
-			chunkMgr->m_chunkCount = n;
+			chunkMgr->m_chunkCount = 1;
 			chunkMgr->m_numUseNext = 0;
 			//g_currChunk = chunkMgr->m_currChunk;
 			if(f) f(chunkMgr);
 			return chunkMgr;
 		}
 
-		inline void AddChunk() {
+		inline Chunk* AddChunk() {
 			Chunk* chunk = ChunkAllocator::Malloc();
 			ChunkUtil::Connect(m_lastChunk, chunk);
 			m_lastChunk = chunk;
 			m_chunkCount++;
+			return chunk;
+		}
+
+		Chunk* ImmediateUseNextChunk(std::function<void(Chunk*)> onChangeCurrChunk) {
+			Chunk* next = ChunkUtil::GetNext(m_currChunk);
+			if (next == nullptr) {
+				next = AddChunk();
+			}
+			m_numUseNext = 0;
+			m_currChunk = next;
+			if (onChangeCurrChunk) onChangeCurrChunk(m_currChunk);
+			return next;
 		}
 
 		Chunk* UseNextChunk(std::function<void(Chunk*)> onChangeCurrChunk) {
-			if (ChunkUtil::GetNext(m_currChunk) == nullptr) {
-				AddChunk();
-			}
 			Chunk* next = ChunkUtil::GetNext(m_currChunk);
+			if (next == nullptr) {
+				next = AddChunk();
+			}
 			m_numUseNext++;
 			if (m_numUseNext >= MAX_USE_NEXT_CHUNK) {
 				m_numUseNext = 0;
@@ -57,13 +64,14 @@ namespace valkyr {
 			return next;
 		};
 
-		void FreeExceptFirst() {
+		void FreeExceptFirst(std::function<void()> f) {
 			Chunk* curr = m_lastChunk;
 			while (curr != m_firstChunk) {
 				Chunk* prev = ChunkUtil::GetPrev(curr);
 				ChunkAllocator::Free(curr);
 				curr = prev;
 			}
+			if (f) f();
 		}
 
 		void Destroy(std::function<void()> f) {

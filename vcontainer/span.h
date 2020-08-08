@@ -8,39 +8,40 @@ namespace valkyr{
 	//can be multiple in a single chunk, so has prev and next for connection
 	//all elements are fixed, can not add more or remove
 
-	int g_EntityId = -1;
-
+	template <typename T>
 	struct SpanEntity {
 		unsigned int id;
-		unsigned int version;
+		Span<T>* span;
+		alignas(4) bool isZero;
+		int pad = 0;
 	};
 
 	template <typename T>
 	struct Span {
 		unsigned int firstHead;
 		unsigned int count;
-		Chunk* chunk;
+ 		Chunk* chunk;
 		Span<T>* next;
 		Span<T>* prev;
-		int pad[3] = { 0,0,0 };
+		int autoIdxValue;
+		int pad[2] = { 0,0 };
 
-		Span() : firstHead(0), count(0), chunk(nullptr), next(nullptr), prev(nullptr)
+		Span() : firstHead(0), count(0),chunk(nullptr), 
+			next(nullptr), prev(nullptr),autoIdxValue(-1)
 		{
 		}
 
 		Span(Chunk* chunk) :
-			count(0), chunk(chunk), next(nullptr), prev(nullptr) {
+			count(0), chunk(chunk), next(nullptr), prev(nullptr),autoIdxValue(-1) {
 			firstHead = ChunkUtil::GetInfo(chunk)->head;
 		}
 	};
-
-	
 
 	class SpanUtil {
 	public:
 
 		template <typename ...T>
-		static inline Span<Tuple<T...>>* Create(Chunk* chunk,int num) {
+		static Span<Tuple<T...>>* Create(Chunk* chunk,int num) {
 			if (!CanCreate<T...>(chunk,num)) return nullptr;
 			Span<Tuple<T...>>* span = ChunkUtil::NewObjFrom<Span<Tuple<T...>>>(chunk);
 			span->chunk = chunk;
@@ -49,17 +50,18 @@ namespace valkyr{
 			span->firstHead = ChunkUtil::GetInfo(chunk)->head;
 			for (int i = 0; i < num; i++) {
 				vmake_tuple<T...>(chunk);
-				SpanEntity* entity = ChunkUtil::NewObjFrom<SpanEntity>(chunk);
-				g_EntityId++;
-				entity->id = g_EntityId;
-				entity->version = 0;
+				SpanEntity<Tuple<T...>>* entity = ChunkUtil::NewObjFrom<SpanEntity<Tuple<T...>>>(chunk);
+				span->autoIdxValue++;
+				entity->id = span->autoIdxValue;
+				entity->span = span;
+				entity->isZero = false;
 			}
 			span->count = num;
 			return span;
 		}
 
 		template <typename ...T>
-		static inline Span<Tuple<T...>>* Create(Chunk* chunk, int num, T... prototype) {
+		static Span<Tuple<T...>>* Create(Chunk* chunk, int num, T... prototype) {
 			if (!CanCreate<T...>(chunk, num)) return nullptr;
 			Span<Tuple<T...>>* span = ChunkUtil::NewObjFrom<Span<Tuple<T...>>>(chunk);
 			span->chunk = chunk;
@@ -68,17 +70,18 @@ namespace valkyr{
 			//in memory:span-types...-types...
 			for (int i = 0; i < num; i++) {
 				vmake_tuple<T...>(chunk,prototype...);
-				SpanEntity* entity = ChunkUtil::NewObjFrom<SpanEntity>(chunk);
-				g_EntityId++;
-				entity->id = g_EntityId;
-				entity->version = 0;
+				SpanEntity<Tuple<T...>>* entity = ChunkUtil::NewObjFrom<SpanEntity<Tuple<T...>>>(chunk);
+				span->autoIdxValue++;
+				entity->id = span->autoIdxValue;
+				entity->span = span;
+				entity->isZero = false;
 			}
 			span->count = num;
 			return span;
 		}
 
 		template <typename T, typename ...Args>
-		static inline Span<T>* Create(Chunk* chunk, int num, Args... args) {
+		static Span<T>* Create(Chunk* chunk, int num, Args... args) {
 			if (!CanCreate<T>(chunk,num)) return nullptr;
 			Span<T>* span = ChunkUtil::NewObjFrom<Span<T>>(chunk);
 			span->chunk = chunk;
@@ -87,17 +90,18 @@ namespace valkyr{
 			//in memory:span-types...-types...
 			for (int i = 0; i < num; i++) {
 				ChunkUtil::NewObjFrom<T>(chunk,args...);
-				SpanEntity* entity = ChunkUtil::NewObjFrom<SpanEntity>(chunk);
-				g_EntityId++;
-				entity->id = g_EntityId;
-				entity->version = 0;
+				SpanEntity<T>* entity = ChunkUtil::NewObjFrom<SpanEntity<T>>(chunk);
+				span->autoIdxValue++;
+				entity->id = span->autoIdxValue;
+				entity->span = span;
+				entity->isZero = false;
 			}
 			span->count = num;
 			return span;
 		}
 
 		template <typename T>
-		static inline Span<T>* Create(Chunk* chunk, int num) {
+		static Span<T>* Create(Chunk* chunk, int num) {
 			if (!CanCreate<T>(chunk, num)) return nullptr;
 			Span<T>* span = ChunkUtil::NewObjFrom<Span<T>>(chunk);
 			span->chunk = chunk;
@@ -106,10 +110,11 @@ namespace valkyr{
 			//in memory:span-types...-types...
 			for (int i = 0; i < num; i++) {
 				ChunkUtil::NewObjFrom<T>(chunk);
-				SpanEntity* entity = ChunkUtil::NewObjFrom<SpanEntity>(chunk);
-				g_EntityId++;
-				entity->id = g_EntityId;
-				entity->version = 0;
+				SpanEntity<T>* entity = ChunkUtil::NewObjFrom<SpanEntity<T>>(chunk);
+				span->autoIdxValue++;
+				entity->id = span->autoIdxValue;
+				entity->span = span;
+				entity->isZero = false;
 			}
 			span->count = num;
 			return span;
@@ -117,7 +122,7 @@ namespace valkyr{
 
 		template <typename ...T>
 		static inline bool CanCreate(Chunk* chunk, int num) {
-			size_t elementSize = sizeof(Tuple<T...>)+sizeof(SpanEntity);
+			size_t elementSize = sizeof(Tuple<T...>)+sizeof(SpanEntity<Tuple<T...>>);
 			size_t spanSize = sizeof(Span<Tuple<T...>>);
 			ChunkInfo* info = ChunkUtil::GetInfo(chunk);
 			return CHUNK_SIZE - info->usedSize >= elementSize * num + spanSize;
@@ -125,7 +130,7 @@ namespace valkyr{
 
 		template <typename T>
 		static inline bool CanCreate(Chunk* chunk,int num) {
-			size_t elementSize = sizeof(T)+sizeof(SpanEntity);
+			size_t elementSize = sizeof(T)+sizeof(SpanEntity<T);
 			size_t spanSize = sizeof(Span<Tuple<T...>>);
 			ChunkInfo* info = ChunkUtil::GetInfo(chunk);
 			return CHUNK_SIZE - info->usedSize >= elementSize*num + spanSize;
@@ -133,14 +138,44 @@ namespace valkyr{
 
 		template <typename T>
 		static inline T* Get(unsigned int idx, Span<T>* span) {
-			size_t tsize = sizeof(T) + sizeof(SpanEntity);
+			size_t tsize = sizeof(T) + sizeof(SpanEntity<T>);
 			return ChunkUtil::Get<T>(span->firstHead + idx * tsize, span->chunk);
 		}
 
 		template <typename T>
-		static inline SpanEntity* GetEntity(unsigned int idx, Span<T>* span) {
-			size_t tsize = sizeof(T) + sizeof(SpanEntity);
+		static inline SpanEntity<T>* GetEntity(unsigned int idx, Span<T>* span) {
+			size_t tsize = sizeof(T) + sizeof(SpanEntity<T>);
 			return ChunkUtil::Get<SpanEntity>(span->firstHead + idx * tsize + sizeof(T), span->chunk);
+		}
+
+		template <typename T>
+		static inline std::pair<T*,SpanEntity<T>*> GetWithEntity(unsigned int idx, Span<T>* span) {
+			size_t tsize = sizeof(T) + sizeof(SpanEntity<T>);
+			return std::make_pair(Get(idx,span),GetEntity(idx,span));
+		}
+
+		template <typename T>
+		static T* PickZero(Span<T>* span) {
+			for (int i = 0; i < span->count; i++) {
+				auto entity = SpanUtil::GetEntity<T>(i, span);
+				if (entity->isZero) {
+					entity->isZero = false;
+					return SpanUtil::Get(i,span);
+				}
+			}
+			return nullptr;
+		}
+
+		template <typename T>
+		static std::pair<T*,SpanEntity<T>*> PickZeroWithEntity(Span<T>* span) {
+			for (int i = 0; i < span->count; i++) {
+				auto entity = SpanUtil::GetEntity<T(i, span);
+				if (entity->isZero) {
+					entity->isZero = false;
+					return SpanUtil::GetWithEntity(i, span);
+				}
+			}
+			return std::make_pair(nullptr,nullptr);
 		}
 
 		template <typename T>
@@ -159,14 +194,14 @@ namespace valkyr{
 		}*/
 
 		template <typename T>
-		static inline void Zero(Span<T>* span, int idx) {
+		static void Zero(Span<T>* span, int idx) {
 			size_t tsize = sizeof(T) + sizeof(SpanEntity);
 			ChunkUtil::Zero(span->chunk, span->firstHead + idx * tsize,sizeof(T));
-			GetEntity(idx, span)->version++;
+			SpanUtil::GetEntity(idx, span)->isZero = true;
 		}
 
 		template <typename T>
-		static inline void ZeroRange(Span<T>* span, int startIdx, size_t n) {
+		static void ZeroRange(Span<T>* span, int startIdx, size_t n) {
 			//ChunkUtil::Zero(span->chunk, span->firstHead + startIdx * sizeof(T), (n > span->count ? span->count : n) * sizeof(T));
 			//zero data but not span entity
 			for (int i = 0; i < n; i++) {
@@ -175,7 +210,7 @@ namespace valkyr{
 		}
 
 		template <typename T>
-		static inline void ZeroAll(Span<T>* span) {
+		static void ZeroAll(Span<T>* span) {
 			SpanUtil::ZeroRange(span, 0, span->count);
 		}
 	};

@@ -3,10 +3,11 @@
 
 #include <iostream>
 //#include "../../vmalloc/chunk.h"
-#include "../../vcontainer/span.h"
-#include "../../vmalloc/ChunkMgr.h"
-#include "../../vcontainer/algorithm.h";
+//#include "../../vcontainer/span.h"
+//#include "../../vmalloc/ChunkMgr.h"
+//#include "../../vcontainer/algorithm.h";
 //#include "../../vcontainer/tuple.h"
+#include "../../vcontainer/pool.h"
 
 using namespace valkyr;
 
@@ -68,7 +69,7 @@ void chunkTest() {
 }
 
 void chunkMgrTest() {
-	g_chunkMgr = ChunkMgr::Create(8, [&](ChunkMgr* chunkMgr) {
+	g_chunkMgr = ChunkMgr::Create([&](ChunkMgr* chunkMgr) {
 		g_currChunk = chunkMgr->m_currChunk;
 	});
 	vfor_each(g_chunkMgr, [&](Chunk* chunk, int i) {
@@ -76,33 +77,15 @@ void chunkMgrTest() {
 	});
 	std::cout <<"g_currChunk="<<  g_currChunk << std::endl;
 	Chunk* next = nullptr;
-	for (int i = 0; i < MAX_USE_NEXT_CHUNK+6; i++) {
+	for (int i = 0; i < MAX_USE_NEXT_CHUNK; i++) {
 		next = g_chunkMgr->UseNextChunk([](Chunk* chunk) {g_currChunk = chunk; });
 		std::cout << "next" << i << " address=" << next << ",after use next, curr" << i << " address:" << g_currChunk << std::endl;
 	}
-	g_chunkMgr->AddChunk();
+	//g_chunkMgr->AddChunk();
 	vfor_each(g_chunkMgr, [&](Chunk* chunk, int i) {
 		std::cout << i << ":head=" << ChunkUtil::GetInfo(chunk)->head<<",address="<<chunk << std::endl;
 		});
 	g_chunkMgr->Destroy([]() {g_currChunk = nullptr; g_chunkMgr = nullptr; });
-}
-
-template <typename ...T>
-void printAll(T... args) {
-	int s = sizeof...(args);
-	std::cout << "sizeof...args=" << s << std::endl;
-	std::initializer_list<void*> argList{
-		([&] {
-			std::cout << args << std::endl;
-		}(), &args)...
-	};
-	std::cout << "argList size=" << argList.size() << std::endl;
-	int idx = 0;
-	for (auto it = argList.begin(); it != argList.end(); it++) {
-		idx++;
-		int* pOrigin = (int*)*it;
-		std::cout << idx << ":" << typeid(*it).name() << " " << *pOrigin << std::endl;
-	}
 }
 
 void myTupleTest() {
@@ -145,31 +128,67 @@ void spanTest() {
 		std::cout << "span" << i << ": A a.i0=" << vget_ptr<A, 0>(pv)->i0 << ",C c.num=" << vget<1>(pv).num << std::endl;
 	});
 	vfor_each_entt<Tuple<A, C>>(span, [&](SpanEntity* ent, int i) {
-		std::cout << "span" << i << " entt:id= " << ent->id << ",version=" << ent->version << std::endl;
+		std::cout << "span" << i << " entt:id= " << ent->id << ",version=" << ent->isZero << std::endl;
 		});
+	SpanUtil::Zero(span, 2);
+	auto azero = SpanUtil::PickZero(span);
+	std::cout << "zero one:"<<azero<<", A a.10=" << vget_ptr<A, 0>(azero)->i0 << ",C c.num=" << vget<1>(azero).num << std::endl;
 	SpanUtil::ZeroRange(span, 6, 2);
 	std::cout << "span 6: A a.i0=" << vget_ptr<A, 0>(SpanUtil::Get(6, span))->i0 << ",C c.num=" << vget<1>(SpanUtil::Get(6, span)).num << std::endl;
 	std::cout << "span 7: A a.i0=" << vget_ptr<A, 0>(SpanUtil::Get(7, span))->i0 << ",C c.num=" << vget<1>(SpanUtil::Get(7, span)).num << std::endl;
 	vfor_each_entt<Tuple<A, C>>(span, [&](SpanEntity* ent, int i) {
-		std::cout << "span" << i << " entt:id= " << ent->id << ",version=" << ent->version << std::endl;
+		std::cout << "span" << i << " entt:id= " << ent->id << ",version=" << ent->isZero << std::endl;
 	});
 	SpanUtil::ZeroAll(span);
 	vfor_each<Tuple<A, C>>(span, [&](auto* pv, int i) {
-		std::cout << "span" << i << ": A a.i0=" << vget_ptr<A, 0>(pv)->i0 << ",C c.num=" << vget<1>(pv).num << std::endl;
+		std::cout << "span" << i << ": "<<pv <<",A a.i0=" << vget_ptr<A, 0>(pv)->i0 << ",C c.num=" << vget<1>(pv).num << std::endl;
 	});
 	vfor_each_entt<Tuple<A, C>>(span, [&](SpanEntity* ent, int i) {
-		std::cout << "span" << i << " entt:id= " << ent->id << ",version=" << ent->version << std::endl;
+		std::cout << "span" << i << " entt:id= " << ent->id << ",version=" << ent->isZero << std::endl;
 	});
 	ChunkAllocator::Free(chunk);
+}
+
+void spanTest2() {
+	using Tuple_t = Tuple<A, C>;
+	Chunk* chunk = ChunkAllocator::Malloc();
+	auto span = SpanUtil::Create<A, C>(chunk, 8, A(2, 3), C(222, 333));
+	auto span2 = SpanUtil::Create<A, C>(chunk, 8, A(3, 2), C(333, 222));
+	SpanUtil::Connect(span, span2);
+	SpanUtil::Zero(span2,2);
+	//Tuple<A,C>* tgt = vpick<Span<Tuple<A,C>>,Tuple<A,C>>(span,[&](Span<Tuple<A,C>>* curr) { {SpanUtil::PickZero(curr); });
+	
+	/*Tuple_t* azero = vpick<Span<Tuple_t>,Tuple_t>(span,
+		[&](auto* curr) { return SpanUtil::PickZero(curr); });
+	std::cout << "zero one:" << azero << ", A a.10=" << vget_ptr<A, 0>(azero)->i0 << ",C c.num=" << vget<1>(azero).num << std::endl;
+	std::cout << "span 2 has zero:" << SpanUtil::Get(2, span2) << std::endl;
+	*/
+	auto res = vpick_with_entity<Span<Tuple_t>, Tuple_t>(span, [&](auto* curr) { return SpanUtil::PickZeroWithEntity(curr); });
+	std::cout << "zero one:" << res.first << ", A a.10=" << vget_ptr<A, 0>(res.first)->i0 << ",C c.num=" << vget<1>(res.first).num << std::endl;
+	std::cout << "res entity is zero=" << (res.second->isZero ? "true" : "false") << std::endl;
+	std::cout << "span 2 has zero:" << SpanUtil::Get(2, span2) << std::endl;
+	ChunkAllocator::Free(chunk);
+}
+
+void vecTest() {
+	g_chunkMgr = ChunkMgr::Create([&](ChunkMgr* chunkMgr) {
+		g_currChunk = chunkMgr->m_currChunk;
+	});
+	Pool<A>* pool = PoolUtil::Create<A>(g_chunkMgr);
+	auto item = PoolUtil::Pop(pool);
+	A* a = item.first;
+	std::cout << "new a:" << a->i0 <<",entity id="<<item.second->id<< std::endl;
+	g_chunkMgr->Destroy([]() {g_currChunk = nullptr; g_chunkMgr = nullptr; });
 }
 
 int main()
 {
 	//chunkTest();
 	//chunkMgrTest();
-	spanTest();
+	spanTest2();
 	//myTupleTest();
 	system("pause");
+	return 0;
 }
 
 // 运行程序: Ctrl + F5 或调试 >“开始执行(不调试)”菜单
