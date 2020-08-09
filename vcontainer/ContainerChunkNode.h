@@ -55,8 +55,8 @@ namespace valkyr {
 		template <typename T>
 		static std::pair<T*,SpanEntity*> PickZeroWithEntity(ContainerChunkNode<T>* node,std::function<void()> onNewSpan) {
 			Span<T>* span = node->lastChunkNode->firstSpan;
-			auto azero = nullptr;
-			while (span != nullptr && azero == nullptr) {
+			std::pair<T*, SpanEntity*> azero;
+			while (span != nullptr && azero.first == nullptr) {
 				azero = vpick_with_entity<Span<T>, T>(span,
 					[&](auto curr) { return SpanUtil::PickZeroWithEntity(curr); });
 				span = span->next;
@@ -67,6 +67,7 @@ namespace valkyr {
 			span = NewSpan(node);
 			if (span != nullptr) {
 				azero = SpanUtil::GetWithEntity<T>(0, span);
+				azero.second->isZero = false;
 				if (onNewSpan) onNewSpan();
 			}
 			return azero;

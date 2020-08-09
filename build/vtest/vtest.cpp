@@ -170,14 +170,14 @@ void spanTest2() {
 	ChunkAllocator::Free(chunk);
 }
 
-void vecTest() {
+void poolTest() {
 	g_chunkMgr = ChunkMgr::Create([&](ChunkMgr* chunkMgr) {
 		g_currChunk = chunkMgr->m_currChunk;
 	});
 	Pool<A>* pool = PoolUtil::Create<A>(g_chunkMgr);
 	auto item = PoolUtil::Pop(pool);
 	A* a = item.first;
-	std::cout << "new a:" << a->i0 <<",entity id="<<item.second->id<< std::endl;
+	std::cout << "new a:" << a->i0 <<",entity id="<<item.second->id<<" isZero="<<item.second->isZero<< std::endl;
 	g_chunkMgr->Destroy([]() {g_currChunk = nullptr; g_chunkMgr = nullptr; });
 }
 

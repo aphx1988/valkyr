@@ -130,7 +130,7 @@ namespace valkyr {
 				return azero;
 			}
 			node = pool->lastChunkNode;
-			Chunk* chunk = pool->chunkMgr->ImmediateUseNextChunk(0);
+			Chunk* chunk = pool->chunkMgr->UseNextChunk(0);
 			ContainerChunkNode<T>* chunkNode = ChunkUtil::NewObjFrom<ContainerChunkNode<T>>(chunk);
 			chunkNode->firstSpan = SpanUtil::Create(chunk, NUM_PRECREATED);
 			int capacity = NUM_PRECREATED;
@@ -148,7 +148,7 @@ namespace valkyr {
 			pool->size++;
 			pool->capacity += capacity;
 			azero = SpanUtil::GetWithEntity(0, chunkNode->firstSpan);
-			azero.second->isZero = true;
+			azero.second->isZero = false;
 			return azero;
 		}
 
