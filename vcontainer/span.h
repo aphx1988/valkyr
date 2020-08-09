@@ -8,12 +8,9 @@ namespace valkyr{
 	//can be multiple in a single chunk, so has prev and next for connection
 	//all elements are fixed, can not add more or remove
 
-	template <typename T>
 	struct SpanEntity {
 		unsigned int id;
-		Span<T>* span;
 		alignas(4) bool isZero;
-		int pad = 0;
 	};
 
 	template <typename T>
@@ -50,10 +47,9 @@ namespace valkyr{
 			span->firstHead = ChunkUtil::GetInfo(chunk)->head;
 			for (int i = 0; i < num; i++) {
 				vmake_tuple<T...>(chunk);
-				SpanEntity<Tuple<T...>>* entity = ChunkUtil::NewObjFrom<SpanEntity<Tuple<T...>>>(chunk);
+				SpanEntity* entity = ChunkUtil::NewObjFrom<SpanEntity<Tuple<T...>>>(chunk);
 				span->autoIdxValue++;
 				entity->id = span->autoIdxValue;
-				entity->span = span;
 				entity->isZero = false;
 			}
 			span->count = num;
@@ -70,10 +66,9 @@ namespace valkyr{
 			//in memory:span-types...-types...
 			for (int i = 0; i < num; i++) {
 				vmake_tuple<T...>(chunk,prototype...);
-				SpanEntity<Tuple<T...>>* entity = ChunkUtil::NewObjFrom<SpanEntity<Tuple<T...>>>(chunk);
+				SpanEntity* entity = ChunkUtil::NewObjFrom<SpanEntity<Tuple<T...>>>(chunk);
 				span->autoIdxValue++;
 				entity->id = span->autoIdxValue;
-				entity->span = span;
 				entity->isZero = false;
 			}
 			span->count = num;
@@ -90,10 +85,9 @@ namespace valkyr{
 			//in memory:span-types...-types...
 			for (int i = 0; i < num; i++) {
 				ChunkUtil::NewObjFrom<T>(chunk,args...);
-				SpanEntity<T>* entity = ChunkUtil::NewObjFrom<SpanEntity<T>>(chunk);
+				SpanEntity* entity = ChunkUtil::NewObjFrom<SpanEntity>(chunk);
 				span->autoIdxValue++;
 				entity->id = span->autoIdxValue;
-				entity->span = span;
 				entity->isZero = false;
 			}
 			span->count = num;
@@ -110,10 +104,9 @@ namespace valkyr{
 			//in memory:span-types...-types...
 			for (int i = 0; i < num; i++) {
 				ChunkUtil::NewObjFrom<T>(chunk);
-				SpanEntity<T>* entity = ChunkUtil::NewObjFrom<SpanEntity<T>>(chunk);
+				SpanEntity* entity = ChunkUtil::NewObjFrom<SpanEntity>(chunk);
 				span->autoIdxValue++;
 				entity->id = span->autoIdxValue;
-				entity->span = span;
 				entity->isZero = false;
 			}
 			span->count = num;
@@ -138,19 +131,24 @@ namespace valkyr{
 
 		template <typename T>
 		static inline T* Get(unsigned int idx, Span<T>* span) {
-			size_t tsize = sizeof(T) + sizeof(SpanEntity<T>);
+			size_t tsize = sizeof(T) + sizeof(SpanEntity);
 			return ChunkUtil::Get<T>(span->firstHead + idx * tsize, span->chunk);
 		}
 
 		template <typename T>
-		static inline SpanEntity<T>* GetEntity(unsigned int idx, Span<T>* span) {
-			size_t tsize = sizeof(T) + sizeof(SpanEntity<T>);
+		static inline SpanEntity* GetEntity(unsigned int idx, Span<T>* span) {
+			size_t tsize = sizeof(T) + sizeof(SpanEntity);
 			return ChunkUtil::Get<SpanEntity>(span->firstHead + idx * tsize + sizeof(T), span->chunk);
 		}
 
 		template <typename T>
-		static inline std::pair<T*,SpanEntity<T>*> GetWithEntity(unsigned int idx, Span<T>* span) {
-			size_t tsize = sizeof(T) + sizeof(SpanEntity<T>);
+		static inline SpanEntity* GetEntitiy(T* t) {
+			return (SpanEntity*)(t + sizeof(T));
+		}
+
+		template <typename T>
+		static inline std::pair<T*,SpanEntity*> GetWithEntity(unsigned int idx, Span<T>* span) {
+			size_t tsize = sizeof(T) + sizeof(SpanEntity);
 			return std::make_pair(Get(idx,span),GetEntity(idx,span));
 		}
 
@@ -167,7 +165,7 @@ namespace valkyr{
 		}
 
 		template <typename T>
-		static std::pair<T*,SpanEntity<T>*> PickZeroWithEntity(Span<T>* span) {
+		static std::pair<T*,SpanEntity*> PickZeroWithEntity(Span<T>* span) {
 			for (int i = 0; i < span->count; i++) {
 				auto entity = SpanUtil::GetEntity<T(i, span);
 				if (entity->isZero) {

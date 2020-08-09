@@ -1,5 +1,6 @@
 #pragma once
 #include "chunk.h"
+#include <functional>
 
 namespace valkyr {
 	const int MAX_USE_NEXT_CHUNK = 4;

@@ -68,14 +68,15 @@ namespace valkyr {
 		}*/
 
 		template <typename T>
-		static void Push(T* t, SpanEntity* entity, Pool<T> pool) {
-			ContainerChunkNode<T>* node = pool->lastChunkNode;
-			std::tuple<T*, SpanEntity*> item;
-			//find the entity,need span entity has span pointer
-			while (node != nullptr) {
+		static inline void Push(T* t, SpanEntity* entity) {
+			entity->isZero = true;
+			memset(t, 0, sizeof(T));
+		}
 
-			}
-			
+		template <typename T>
+		static inline void Push(T* t) {
+			SpanEntity* entity = SpanUtil::GetEntitiy(t);
+			Push(t, entity);
 		}
 
 		/*template <typename T>
