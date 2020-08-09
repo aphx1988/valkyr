@@ -1,7 +1,6 @@
 #pragma once
 
 #include "span.h"
-//#include "vec.h"
 #include "../vmalloc/ChunkMgr.h"
 
 namespace valkyr {

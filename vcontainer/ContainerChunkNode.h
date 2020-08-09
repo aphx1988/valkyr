@@ -25,16 +25,18 @@ namespace valkyr {
 	class ContainerChunkNodeUtil {
 	public:
 		template <typename T>
-		static Span<T>* NewSpan(ContainerChunkNode<T>* node) {
-			Span<T>* span = SpanUtil::Create(node->chunk, NUM_PRECREATED);
-			if(span!=nullptr)
+		static Span<T>* NewSpan(ContainerChunkNode<T>* node,int baseId,std::function<void()> onNewSpan) {
+			Span<T>* span = SpanUtil::Create<T>(node->chunk, NUM_PRECREATED,baseId);
+			if (span != nullptr) {
 				node->spanCount++;
+				onNewSpan();
+			}
 			return span;
 		}
 
 		//check if node's chunk has zero T,or create one with a new span
 		template <typename T>
-		static T* PickZero(ContainerChunkNode<T>* node,std::function<void()> onNewSpan) {
+		static T* PickZero(ContainerChunkNode<T>* node,int baseId,std::function<void()> onNewSpan) {
 			Span<T>* span = node->firstSpan;
 			T* azero = nullptr;
 			while (span != nullptr && azero == nullptr) {
@@ -44,31 +46,29 @@ namespace valkyr {
 			}
 			if(azero!=nullptr)
 				return azero;
-			span = NewSpan(node);
+			span = NewSpan(node,baseId,onNewSpan);
 			if (span != nullptr) {
 				azero =  SpanUtil::Get(0, span);
-				if (onNewSpan) onNewSpan();
 			}
 			return azero;
 		}
 
 		template <typename T>
-		static std::pair<T*,SpanEntity*> PickZeroWithEntity(ContainerChunkNode<T>* node,std::function<void()> onNewSpan) {
-			Span<T>* span = node->lastChunkNode->firstSpan;
+		static std::pair<T*,SpanEntity*> PickZeroWithEntity(ContainerChunkNode<T>* node, int baseId, std::function<void()> onNewSpan) {
+			Span<T>* span = node->firstSpan;
 			std::pair<T*, SpanEntity*> azero;
 			while (span != nullptr && azero.first == nullptr) {
 				azero = vpick_with_entity<Span<T>, T>(span,
 					[&](auto curr) { return SpanUtil::PickZeroWithEntity(curr); });
 				span = span->next;
 			}
-			if (azero != nullptr) {
+			if (azero.first != nullptr) {
 				return azero;
 			}
-			span = NewSpan(node);
+			span = NewSpan(node, baseId, onNewSpan);
 			if (span != nullptr) {
 				azero = SpanUtil::GetWithEntity<T>(0, span);
 				azero.second->isZero = false;
-				if (onNewSpan) onNewSpan();
 			}
 			return azero;
 		}
