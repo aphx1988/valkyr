@@ -2,6 +2,11 @@
 //
 
 #include <iostream>
+#include <chrono>   
+#include <random>
+
+#include <unordered_set>
+#include <vector>
 //#include "../../vmalloc/chunk.h"
 //#include "../../vcontainer/span.h"
 //#include "../../vmalloc/ChunkMgr.h"
@@ -11,9 +16,24 @@
 
 using namespace valkyr;
 
+struct Position2D {
+	float x, y;
+	Position2D() :x(0), y(0) {}
+	Position2D(float x, float y) :x(x), y(y) {}
+};
+
+struct Position {
+	float x, y, z;
+	Position() :x(0), y(0), z(0) {}
+	Position(float x, float y, float z) :x(x), y(y), z(z) {}
+};
+
 struct A {
 	int i0;
 	int i1;
+	int i2;
+	Position pos;
+	Position2D uv;
 
 	A() :i0(0), i1(0) {}
 	A(int a, int b) :i0(a), i1(b) {}
@@ -28,17 +48,7 @@ struct Rot {
 	float angle;
 };
 
-struct Position2D {
-	float x, y;
-	Position2D() :x(0), y(0) {}
-	Position2D(float x, float y) :x(x), y(y) {}
-};
 
-struct Position {
-	float x, y, z;
-	Position() :x(0), y(0), z(0) {}
-	Position(float x, float y, float z) :x(x), y(y), z(z) {}
-};
 
 struct C {
 	float baseline;
@@ -185,13 +195,24 @@ void poolTest() {
 	a3->i0 = 333333;
 	a3->i1 = 333333;
 	std::cout << "new a:" << a3->i0 << ",entity id=" << item3.second->id << " isZero=" << item3.second->isZero << std::endl;
-	for (int i = 0; i < 65535*2; i++) {
+	std::default_random_engine randEngine;
+	std::uniform_int_distribution<unsigned> randDist(0, 9);
+	auto start = std::chrono::system_clock::now();
+	//旧的pool要11.438s
+	for (int i = 0; i <45*100*1024; i++) {
 		auto it = PoolUtil::Pop(pool);
 		it.first->i0 = i;
 		it.first->i1 = 0;
-		if(i%10000==0)
+		if (randDist(randEngine) > 5) {
+			PoolUtil::Push(it.first, it.second);
+		}
+		if(i%(100*1024)==0)
 			std::cout << i<<" a:" << it.first->i0 << ",entity id=" << it.second->id << " isZero=" << it.second->isZero << std::endl;
 	}
+	auto end = std::chrono::system_clock::now();
+	auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
+	auto sec = double(duration.count()) * std::chrono::microseconds::period::num / std::chrono::microseconds::period::den;
+	std::cout <<"耗时:"<< sec << std::endl;
 	std::cout << "pool:capacity=" << pool->capacity << ",chunkCount=" << pool->chunkCount<<",autoEntityId=" << pool->autoEntityId << std::endl;
 	std::cout << "======chunkNode:span count========" << std::endl;
 	auto* node = pool->firstChunkNode;

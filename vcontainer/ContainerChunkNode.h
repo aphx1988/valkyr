@@ -17,26 +17,22 @@ namespace valkyr {
 		Span<T>* firstSpan;
 		Span<T>* lastZeroSpan;
 		unsigned int spanCount;
-		int pad = 0;
+		T* lastZero;
 
 		ContainerChunkNode():prev(nullptr),next(nullptr),chunkInfo(nullptr),
-			chunk(nullptr),spanCount(0),firstSpan(nullptr){}
+			chunk(nullptr),spanCount(0),firstSpan(nullptr),lastZeroSpan(nullptr){}
 	};
 
 	class ContainerChunkNodeUtil {
 	public:
 		template <typename T>
-		static Span<T>* NewSpan(ContainerChunkNode<T>* node,int baseId,std::function<void(Span<T>*)> onNewSpan) {
+		static inline Span<T>* NewSpan(ContainerChunkNode<T>* node,int baseId) {
 			Span<T>* span = SpanUtil::Create<T>(node->chunk, NUM_PRECREATED,baseId);
-			if (span != nullptr) {
-				node->spanCount++;
-				onNewSpan(span);
-			}
 			return span;
 		}
 
 		//check if node's chunk has zero T,or create one with a new span
-		template <typename T>
+		/*template <typename T>
 		static T* PickZero(ContainerChunkNode<T>* node,int baseId,std::function<void()> onNewSpan) {
 			Span<T>* span = node->firstSpan;
 			T* azero = nullptr;
@@ -52,11 +48,11 @@ namespace valkyr {
 				azero =  SpanUtil::Get(0, span);
 			}
 			return azero;
-		}
+		}*/
 
 		template <typename T>
 		static std::pair<T*,SpanEntity*> PickZeroWithEntity(ContainerChunkNode<T>* node, int baseId, std::function<void(Span<T>*)> onNewSpan) {
-			Span<T>* span = node->firstSpan;
+			Span<T>* span = node->lastZeroSpan?node->lastZeroSpan:node->firstSpan;
 			Span<T>* lastUsedSpan = nullptr;
 			std::pair<T*, SpanEntity*> azero;
 			while (span != nullptr && azero.first == nullptr) {
@@ -66,10 +62,14 @@ namespace valkyr {
 				span = span->next;
 			}
 			if (azero.first != nullptr) {
+				node->lastZeroSpan = lastUsedSpan;
 				return azero;
 			}
-			span = NewSpan<T>(node, baseId, onNewSpan);
+			span = NewSpan<T>(node, baseId);
 			if (span != nullptr) {
+				node->spanCount++;
+				node->lastZeroSpan = span;
+				onNewSpan(span);
 				azero = SpanUtil::GetWithEntity<T>(0, span);
 				if(lastUsedSpan) lastUsedSpan->next = span;
 				azero.second->isZero = false;

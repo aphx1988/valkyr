@@ -5,6 +5,7 @@
 #include "algorithm.h"
 
 namespace valkyr {
+
 	template <typename T>
 	struct Pool {
 		unsigned int capacity;

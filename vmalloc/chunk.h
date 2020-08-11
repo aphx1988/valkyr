@@ -2,7 +2,7 @@
 #include <xmemory>
 
 namespace valkyr {
-	const unsigned int CHUNK_SIZE = 16 * 1024 * 1024;
+	const unsigned int CHUNK_SIZE = 8 * 1024 * 1024;
 
 	struct Chunk {
 		char buff[CHUNK_SIZE];
