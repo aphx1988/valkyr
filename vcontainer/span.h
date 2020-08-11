@@ -87,7 +87,7 @@ namespace valkyr{
 				SpanEntity* entity = ChunkUtil::NewObjFrom<SpanEntity>(chunk);
 				span->autoIdxValue++;
 				entity->id = span->autoIdxValue;
-				entity->isZero = false;
+				entity->isZero = true;
 			}
 			span->count = num;
 			return span;
@@ -105,9 +105,10 @@ namespace valkyr{
 			for (int i = 0; i < num; i++) {
 				ChunkUtil::NewObjFrom<T>(chunk);
 				SpanEntity* entity = ChunkUtil::NewObjFrom<SpanEntity>(chunk);
+				if (entity == nullptr) return nullptr;
 				span->autoIdxValue = autoEntityId+i;
 				entity->id = span->autoIdxValue;
-				entity->isZero = false;
+				entity->isZero = true;
 			}
 			span->count = num;
 			return span;
@@ -131,23 +132,27 @@ namespace valkyr{
 
 		template <typename T>
 		static inline T* Get(unsigned int idx, Span<T>* span) {
+			if (!span) return nullptr;
 			size_t tsize = sizeof(T) + sizeof(SpanEntity);
 			return ChunkUtil::Get<T>(span->firstHead + idx * tsize, span->chunk);
 		}
 
 		template <typename T>
 		static inline SpanEntity* GetEntity(unsigned int idx, Span<T>* span) {
+			if (!span) return nullptr;
 			size_t tsize = sizeof(T) + sizeof(SpanEntity);
 			return ChunkUtil::Get<SpanEntity>(span->firstHead + idx * tsize + sizeof(T), span->chunk);
 		}
 
 		template <typename T>
 		static inline SpanEntity* GetEntitiy(T* t) {
+			if (!t) return nullptr;
 			return (SpanEntity*)(t + sizeof(T));
 		}
 
 		template <typename T>
 		static inline std::pair<T*,SpanEntity*> GetWithEntity(unsigned int idx, Span<T>* span) {
+			if (!span) return std::make_pair(nullptr,nullptr);
 			size_t tsize = sizeof(T) + sizeof(SpanEntity);
 			return std::make_pair(Get(idx,span),GetEntity(idx,span));
 		}

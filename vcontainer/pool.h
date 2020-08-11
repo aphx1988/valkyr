@@ -83,49 +83,13 @@ namespace valkyr {
 			Push(t, entity);
 		}
 
-		/*template <typename T>
-		static T* Pop(Pool<T>* vec) {
-			T* azero = nullptr;
-			ContainerChunkNode<T>* node = vec->lastChunkNode;
-			while (node != nullptr && azero == nullptr) {
-				azero = ContainerChunkNodeUtil::PickZero(node, [&vec]() {
-					vec->capacity += NUM_PRECREATED;
-					vec->size++;
-				});
-				node = node->prev;
-			}
-			if (azero != nullptr) {
-				return azero;
-			}
-			node = vec->lastChunkNode;
-			Chunk* chunk = vec->chunkMgr->ImmediateUseNextChunk(0);
-			ContainerChunkNode<T>* chunkNode = ChunkUtil::NewObjFrom<ContainerChunkNode<T>>(chunk);
-			chunkNode->firstSpan = SpanUtil::Create(chunk, NUM_PRECREATED);
-			int capacity = NUM_PRECREATED;
-			if (!chunkNode->firstSpan) {
-				chunkNode->firstSpan = SpanUtil::Create(chunk, 1);
-				capacity = 1;
-			}
-			chunkNode->spanCount = 1;
-			chunkNode->chunk = chunk;
-			chunkNode->chunkInfo = ChunkUtil::GetInfo(chunk);
-			chunkNode->prev = node;
-			node->next = chunkNode;
-			vec->chunkCount++;
-			vec->lastChunkNode = chunkNode;
-			vec->size++;
-			vec->capacity += capacity;
-			azero = SpanUtil::Get(0, chunkNode->firstSpan);
-			return azero;
-		}*/
-
 		template <typename T>
 		static std::pair<T*,SpanEntity*> Pop(Pool<T>* pool) {
 			std::pair<T*,SpanEntity*> azero;
 			ContainerChunkNode<T>* node = pool->lastChunkNode;
 			while (node != nullptr && azero.first == nullptr) {
-				azero = ContainerChunkNodeUtil::PickZeroWithEntity(node,pool->autoEntityId,[&pool]() {
-					pool->capacity += NUM_PRECREATED;
+				azero = ContainerChunkNodeUtil::PickZeroWithEntity<T>(node,pool->autoEntityId,[&pool](Span<T>* span) {
+					pool->capacity += span->count;
 					pool->autoEntityId = pool->capacity;
 					});
 				node = node->prev;
@@ -134,7 +98,7 @@ namespace valkyr {
 				return azero;
 			}
 			node = pool->lastChunkNode;
-			Chunk* chunk = pool->chunkMgr->UseNextChunk(0);
+			Chunk* chunk = pool->chunkMgr->ImmediateUseNextChunk(0);
 			ContainerChunkNode<T>* chunkNode = ChunkUtil::NewObjFrom<ContainerChunkNode<T>>(chunk);
 			chunkNode->firstSpan = SpanUtil::Create<T>(chunk, NUM_PRECREATED,pool->autoEntityId);
 			int capacity = NUM_PRECREATED;
@@ -146,7 +110,7 @@ namespace valkyr {
 			chunkNode->chunk = chunk;
 			chunkNode->chunkInfo = ChunkUtil::GetInfo(chunk);
 			chunkNode->prev = node;
-			node->next = chunkNode;
+			node->next = chunkNode?chunkNode:nullptr;
 			pool->chunkCount++;
 			pool->lastChunkNode = chunkNode;
 			pool->capacity += capacity;

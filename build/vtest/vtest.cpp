@@ -185,6 +185,20 @@ void poolTest() {
 	a3->i0 = 333333;
 	a3->i1 = 333333;
 	std::cout << "new a:" << a3->i0 << ",entity id=" << item3.second->id << " isZero=" << item3.second->isZero << std::endl;
+	for (int i = 0; i < 65535*2; i++) {
+		auto it = PoolUtil::Pop(pool);
+		it.first->i0 = i;
+		it.first->i1 = 0;
+		if(i%10000==0)
+			std::cout << i<<" a:" << it.first->i0 << ",entity id=" << it.second->id << " isZero=" << it.second->isZero << std::endl;
+	}
+	std::cout << "pool:capacity=" << pool->capacity << ",chunkCount=" << pool->chunkCount<<",autoEntityId=" << pool->autoEntityId << std::endl;
+	std::cout << "======chunkNode:span count========" << std::endl;
+	auto* node = pool->firstChunkNode;
+	while (node != nullptr) {
+		std::cout << node << ":" << node->spanCount << std::endl;
+		node = node->next;
+	}
 	g_chunkMgr->Destroy([]() {g_currChunk = nullptr; g_chunkMgr = nullptr; });
 }
 

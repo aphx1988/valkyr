@@ -15,8 +15,9 @@ namespace valkyr {
 		ChunkInfo* chunkInfo;
 		Chunk* chunk;
 		Span<T>* firstSpan;
+		Span<T>* lastZeroSpan;
 		unsigned int spanCount;
-		int pad[2] = {0,0};
+		int pad = 0;
 
 		ContainerChunkNode():prev(nullptr),next(nullptr),chunkInfo(nullptr),
 			chunk(nullptr),spanCount(0),firstSpan(nullptr){}
@@ -25,11 +26,11 @@ namespace valkyr {
 	class ContainerChunkNodeUtil {
 	public:
 		template <typename T>
-		static Span<T>* NewSpan(ContainerChunkNode<T>* node,int baseId,std::function<void()> onNewSpan) {
+		static Span<T>* NewSpan(ContainerChunkNode<T>* node,int baseId,std::function<void(Span<T>*)> onNewSpan) {
 			Span<T>* span = SpanUtil::Create<T>(node->chunk, NUM_PRECREATED,baseId);
 			if (span != nullptr) {
 				node->spanCount++;
-				onNewSpan();
+				onNewSpan(span);
 			}
 			return span;
 		}
@@ -54,20 +55,23 @@ namespace valkyr {
 		}
 
 		template <typename T>
-		static std::pair<T*,SpanEntity*> PickZeroWithEntity(ContainerChunkNode<T>* node, int baseId, std::function<void()> onNewSpan) {
+		static std::pair<T*,SpanEntity*> PickZeroWithEntity(ContainerChunkNode<T>* node, int baseId, std::function<void(Span<T>*)> onNewSpan) {
 			Span<T>* span = node->firstSpan;
+			Span<T>* lastUsedSpan = nullptr;
 			std::pair<T*, SpanEntity*> azero;
 			while (span != nullptr && azero.first == nullptr) {
 				azero = vpick_with_entity<Span<T>, T>(span,
-					[&](auto curr) { return SpanUtil::PickZeroWithEntity(curr); });
+					[&](Span<T>* curr) { return SpanUtil::PickZeroWithEntity(curr); });
+				lastUsedSpan = span;
 				span = span->next;
 			}
 			if (azero.first != nullptr) {
 				return azero;
 			}
-			span = NewSpan(node, baseId, onNewSpan);
+			span = NewSpan<T>(node, baseId, onNewSpan);
 			if (span != nullptr) {
 				azero = SpanUtil::GetWithEntity<T>(0, span);
+				if(lastUsedSpan) lastUsedSpan->next = span;
 				azero.second->isZero = false;
 			}
 			return azero;
