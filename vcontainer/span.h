@@ -15,8 +15,8 @@ namespace valkyr{
 
 	template <typename T>
 	struct Span {
-		unsigned int firstHead;
-		unsigned int count;
+		uint32_t firstHead;
+		uint32_t count;
  		Chunk* chunk;
 		Span<T>* next;
 		Span<T>* prev;
@@ -76,12 +76,12 @@ namespace valkyr{
 		//}
 
 		template <typename T, typename ...Args>
-		static Span<T>* Create(Chunk* chunk, int num,int autoEntityId, Args... args) {
+		static Span<T>* Create(Chunk* chunk, int num,int autoEnttId, Args... args) {
 			if (!CanCreate<T>(chunk,num)) return nullptr;
 			Span<T>* span = ChunkUtil::NewObjFrom<Span<T>>(chunk);
 			span->chunk = chunk;
 			span->firstHead = ChunkUtil::GetInfo(chunk)->head;
-			span->autoIdxValue = autoEntityId;
+			span->autoIdxValue = autoEnttId;
 			for (int i = 0; i < num; i++) {
 				ChunkUtil::NewObjFrom<T>(chunk,args...);
 				SpanEntity* entity = ChunkUtil::NewObjFrom<SpanEntity>(chunk);
@@ -94,19 +94,19 @@ namespace valkyr{
 		}
 
 		template <typename T>
-		static Span<T>* Create(Chunk* chunk, int num, int autoEntityId) {
+		static Span<T>* Create(Chunk* chunk, int num, int autoEnttId) {
 			if (!CanCreate<T>(chunk, num)) return nullptr;
 			Span<T>* span = ChunkUtil::NewObjFrom<Span<T>>(chunk);
 			span->chunk = chunk;
 			span->firstHead = ChunkUtil::GetInfo(chunk)->head;
-			span->autoIdxValue = autoEntityId;
+			span->autoIdxValue = autoEnttId;
 			//then all types
 			//in memory:span-types...-types...
 			for (int i = 0; i < num; i++) {
 				ChunkUtil::NewObjFrom<T>(chunk);
 				SpanEntity* entity = ChunkUtil::NewObjFrom<SpanEntity>(chunk);
 				if (entity == nullptr) return nullptr;
-				span->autoIdxValue = autoEntityId+i;
+				span->autoIdxValue = autoEnttId+i;
 				entity->id = span->autoIdxValue;
 				entity->isZero = true;
 			}

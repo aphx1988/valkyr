@@ -213,7 +213,7 @@ void poolTest() {
 	auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
 	auto sec = double(duration.count()) * std::chrono::microseconds::period::num / std::chrono::microseconds::period::den;
 	std::cout <<"耗时:"<< sec << std::endl;
-	std::cout << "pool:capacity=" << pool->capacity << ",chunkCount=" << pool->chunkCount<<",autoEntityId=" << pool->autoEntityId << std::endl;
+	std::cout << "pool:capacity=" << pool->capacity << ",chunkCount=" << pool->chunkCount<<",autoEnttId=" << pool->autoEnttId << std::endl;
 	std::cout << "======chunkNode:span count========" << std::endl;
 	auto* node = pool->firstChunkNode;
 	while (node != nullptr) {
