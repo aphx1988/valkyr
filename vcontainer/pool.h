@@ -1,8 +1,6 @@
 #pragma once
 
-#include "ContainerChunkNode.h"
 #include "../vmalloc/ChunkMgr.h"
-#include "algorithm.h"
 
 namespace valkyr {
 	const uint32_t NUM_PRECREATED = 8;
@@ -14,12 +12,12 @@ namespace valkyr {
 	};
 
 	struct PoolProxy {
+		uint32_t autoEnttId;
 		uint32_t capacity;
 		uint32_t zeroCount;
-		uint32_t numZeroUsed;
-		uint32_t autoEnttId;
 		Chunk* chunk;
-		Entt* topZeroEntt;
+		Entt* frontZero;
+		Entt* rearZero;
 		PoolProxy* prev;
 		PoolProxy* next;
 	};
@@ -65,44 +63,60 @@ namespace valkyr {
 			firstProxy->autoEnttId = 0;
 			firstProxy->capacity = 0;
 			firstProxy->zeroCount = 0;
-			firstProxy->numZeroUsed = 0;
 			firstProxy->chunk = chunk;
 			firstProxy->prev = nullptr;
 			firstProxy->next = nullptr;
+			firstProxy->frontZero = nullptr;
+			firstProxy->rearZero = nullptr;
 			pool->firstProxy = firstProxy;
 			pool->lastProxy = firstProxy;
-
 			for (auto i = 0u; i < NUM_PRECREATED; i++) {
 				if (!CanContain<T>(chunk)) break;
 				T* t = ChunkUtil::NewObjFrom<T>(chunk);
 				Entt* entt = ChunkUtil::NewObjFrom<Entt>(chunk);
-				entt->id = 
-				if (i == 0u) firstProxy->topZeroEntt = entt;
+				entt->id = firstProxy->autoEnttId + i;
 				firstProxy->capacity++;
+				if (i == 0u) { 
+					firstProxy->frontZero = entt; 
+					firstProxy->rearZero = entt; 
+				}
 			}
 			firstProxy->autoEnttId = firstProxy->capacity;
-			firstProxy->numZeroUsed = 0;
-			firstProxy
 			return pool;
 		}
 
-		/*template <typename T>
-		static void Push(T* t,Pool<T> pool) {
-			ContainerChunkNode<T>* node = pool->lastChunkNode;
+		template <typename T>
+		static Entt* GetEntt(T* t) {
+			return (Entt*)(t + sizeof(T));
+		}
 
-		}*/
 
 		template <typename T>
-		static inline void Push(T* t, SpanEntity* entity,PoolProxy* proxy) {
+		static inline void Push(T* t, Entt* entity,PoolProxy* proxy) {
 			entity->isZero = true;
-
+			Entt* oldRear = proxy->rearZero;
+			oldRear->nextZero = t;
+			entity->prevZero = oldRear;
 			memset(t, 0, sizeof(T));
 		}
 
 		template <typename T>
-		static inline void Push(T* t) {
-			SpanEntity* entity = SpanUtil::GetEntitiy(t);
-			Push(t, entity);
+		static inline void Push(T* t, PoolProxy* proxy) {
+			Entt* entity = GetEntt<T>(t);
+			Push(t,entity,proxy);
+		}
+
+		template <typename T>
+		static std::pair<T*, Entt*> NewFrom(PoolProxy* proxy) {
+			if (!CanContain<T>(proxy->chunk)) return std::make_pair(nullptr,nullptr);
+			T* t = ChunkUtil::NewObjFrom<T>(chunk);
+			Entt* entt = ChunkUtil::NewObjFrom<Entt>(chunk);
+			entt->id = firstProxy->autoEnttId + i;
+			firstProxy->capacity++;
+			if (i == 0u) {
+				firstProxy->frontZero = entt;
+				firstProxy->rearZero = entt;
+			}
 		}
 
 		template <typename T>
