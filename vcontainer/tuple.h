@@ -9,12 +9,12 @@ namespace valkyr {
 
 	template <typename ...T>
 	std::tuple<T...>* vmake_tuple_ptr(Chunk* chunk) {
-		return ChunkUtil::NewObjFrom<std::tuple<T...>>(chunk);
+		return ChunkUtil::NewObjFrom<Tuple<T...>>(chunk);
 	}
 
 	template <typename ...T>
 	std::tuple<T...>* vmake_tuple_ptr(Chunk* chunk,T... args) {
-		return ChunkUtil::NewObjFrom<std::tuple<T...>,T...>(chunk,args...);
+		return ChunkUtil::NewObjFrom<Tuple<T...>,T...>(chunk,args...);
 	}
 
 	template <typename ...T>
@@ -32,19 +32,39 @@ namespace valkyr {
 		return std::get<N>(tuple);
 	}
 
+	template <class T, class Tuple>
+	decltype(auto) vget(Tuple tuple) {
+		return std::get<T>(tuple);
+	}
+
 	template <size_t N, class Tuple>
 	decltype(auto) vget(Tuple* tuple) {
 		return std::get<N>(*tuple);
 	}
 
-	template <class T, size_t N, class Tuple>
+	template <class T, class Tuple>
+	decltype(auto) vget(Tuple* tuple) {
+		return std::get<T>(*tuple);
+	}
+
+	template <size_t N, class T, class Tuple>
 	T* vget_ptr(Tuple tuple) {
 		return &std::get<N>(tuple);
 	}
 
-	template <class T, size_t N, class Tuple>
+	template < size_t N, class T, class Tuple>
 	T* vget_ptr(Tuple* tuple) {
 		return &std::get<N>(*tuple);
+	}
+
+	template <class T, class Tuple>
+	T* vget_ptr(Tuple tuple) {
+		return &std::get<T>(tuple);
+	}
+
+	template <class T,class Tuple>
+	T* vget_ptr(Tuple* tuple) {
+		return &std::get<T>(*tuple);
 	}
 
 //	template <typename ...Ts>

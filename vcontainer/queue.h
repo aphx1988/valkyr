@@ -12,7 +12,7 @@ namespace valkyr {
 	struct Queue {
 		QueueNode<T>* front;
 		QueueNode<T>* rear;
-		uint32_t length;
+		uint32_t capacity;
 		Chunk* chunk;
 	};
 
@@ -23,7 +23,7 @@ namespace valkyr {
 			Queue<T> queue =  ChunkUtil::NewObjFrom<Queue<T>>(chunk);
 			queue->front = nullptr;
 			queue->rear = nullptr;
-			queue->length = 0;
+			queue->capacity = 0;
 			queue->chunk = chunk;
 			return queue;
 		}

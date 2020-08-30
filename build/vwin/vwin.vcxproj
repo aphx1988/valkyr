@@ -90,7 +90,7 @@
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <LanguageStandard>stdcpp17</LanguageStandard>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -107,7 +107,7 @@
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <LanguageStandard>stdcpp17</LanguageStandard>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -124,7 +124,7 @@
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <LanguageStandard>stdcpp17</LanguageStandard>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -141,7 +141,7 @@
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <LanguageStandard>stdcpp17</LanguageStandard>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -158,10 +158,14 @@
     <ClInclude Include="..\..\vcontainer\span.h" />
     <ClInclude Include="..\..\vcontainer\tuple.h" />
     <ClInclude Include="..\..\vcontainer\pool.h" />
+    <ClInclude Include="..\..\vcontainer\vec.h" />
+    <ClInclude Include="..\..\vcontainer\graph.h" />
     <ClInclude Include="..\..\vd3d12rhi\d3d12rhi.h" />
-    <ClInclude Include="..\..\vecs\vecs.h" />
+    <ClInclude Include="..\..\vecs\arch.h" />
+    <ClInclude Include="..\..\vfg\fg.h" />
     <ClInclude Include="..\..\vmalloc\chunk.h" />
     <ClInclude Include="..\..\vmalloc\ChunkMgr.h" />
+    <ClInclude Include="..\..\vmalloc\ptr.h" />
     <ClInclude Include="..\..\vrender\RenderEngine.h" />
     <ClInclude Include="..\..\vrhi\rhi.h" />
     <ClInclude Include="framework.h" />

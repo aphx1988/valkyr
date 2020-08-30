@@ -2,7 +2,7 @@
 #include <xmemory>
 
 namespace valkyr {
-	const unsigned int CHUNK_SIZE = 8 * 1024 * 1024;
+	const size_t CHUNK_SIZE = 64 * 1024;
 
 	struct Chunk {
 		char buff[CHUNK_SIZE];
@@ -13,8 +13,8 @@ namespace valkyr {
 		//alignas(4) bool isFull;
 		Chunk* next;
 		Chunk* prev;
-		unsigned int head;
-		unsigned int usedSize;
+		size_t head;
+		size_t usedSize;
 
 		ChunkInfo() {
 			//isFull = false;

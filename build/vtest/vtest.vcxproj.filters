@@ -41,5 +41,8 @@
     <ClInclude Include="..\..\vmalloc\pool.h">
       <Filter>vmalloc</Filter>
     </ClInclude>
+    <ClInclude Include="20test.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

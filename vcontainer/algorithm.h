@@ -5,19 +5,6 @@
 
 namespace valkyr {
 
-	template <class T>
-	void vfor_each(Span<T>* container,std::function<void(T*,int)> f) {
-		for (int i = 0; i < container->count; ++i) {
-			f(SpanUtil::Get(i, container), i);
-		}
-	}
-
-	template <class T>
-	void vfor_each_entt(Span<T>* container, std::function<void(SpanEntity*, int)> f) {
-		for (int i = 0; i < container->count; ++i) {
-			f(SpanUtil::GetEntity(i, container), i);
-		}
-	}
 
 	void vfor_each(ChunkMgr* container, std::function<void(Chunk*, int)> f) {
 		Chunk* curr = container->m_firstChunk;
@@ -60,14 +47,4 @@ namespace valkyr {
 		return val;
 	}
 
-	template <class Node,class T>
-	std::pair<T*, SpanEntity*> vpick_with_entity(Node* first, std::function<std::pair<T*, SpanEntity*>(Node*)> pickAction) {
-		Node* node = first;
-		std::pair<T*, SpanEntity*> res;
-		while (node != nullptr && res.first == nullptr) {
-			res = pickAction(node);
-			node = node->next;
-		}
-		return res;
-	}
 }

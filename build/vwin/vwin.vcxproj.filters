@@ -34,6 +34,9 @@
     <Filter Include="vcontainer">
       <UniqueIdentifier>{db4e856c-8143-44fb-b108-740aef9119a6}</UniqueIdentifier>
     </Filter>
+    <Filter Include="vfg">
+      <UniqueIdentifier>{b5c521cc-db42-4755-a276-3c9e60392696}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="framework.h">
@@ -63,9 +66,6 @@
     <ClInclude Include="..\..\vmalloc\chunk.h">
       <Filter>vmalloc</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\vecs\vecs.h">
-      <Filter>vecs</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\vcontainer\span.h">
       <Filter>vcontainer</Filter>
     </ClInclude>
@@ -89,6 +89,21 @@
     </ClInclude>
     <ClInclude Include="..\..\vcontainer\queue.h">
       <Filter>vcontainer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\vcontainer\vec.h">
+      <Filter>vcontainer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\vmalloc\ptr.h">
+      <Filter>vmalloc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\vcontainer\graph.h">
+      <Filter>vcontainer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\vecs\arch.h">
+      <Filter>vecs</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\vfg\fg.h">
+      <Filter>vfg</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
