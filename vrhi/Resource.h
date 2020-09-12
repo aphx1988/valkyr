@@ -102,29 +102,13 @@ namespace valkyr{
         SAMPLER_FEEDBACK_MIP_REGION_USED_OPAQUE,
         FORCE_UINT
     };
-
-    enum TextureLayout{
-        Unknown,RowMajor,UndefinedSwizzle,StandardSwizzle
-    };
-
-    enum GfxResFlag{
-        None,AllowRT,AllowDS,AllowUA,AllowSR,AllowCrossAdapter,AllowSimultaneousAccess
-    };
     
-    struct Sampler{
-        unsigned int count;
-        unsigned int quality;
-    };
-    
-    class GfxRes{
-    public:
-        GfxResDimension m_dimension;
-        unsigned long long m_alignment;
-        unsigned long long m_width;
-        unsigned int m_height;
-        unsigned short m_depthOrArraySize;
-        unsigned short m_mipLevels;
-        Sampler m_sampler;
-        TextureLayout m_layout;
+    struct GfxRes{
+        GfxResDimension dimension;
+        GfxResFormat format;
+        unsigned int width;
+        unsigned int height;
+        unsigned short depthOrArraySize;
+        unsigned short mipLevels;
     };
 }

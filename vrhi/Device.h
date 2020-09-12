@@ -1,5 +1,0 @@
-namespace valkyr{
-    class Device{
-
-    };
-}
