@@ -13,9 +13,6 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="vrhi">
-      <UniqueIdentifier>{9ddff9c0-6adb-4a5a-91d2-e3bbe604947d}</UniqueIdentifier>
-    </Filter>
     <Filter Include="vd3d12rhi">
       <UniqueIdentifier>{a2d76b3c-c7c3-4597-bccb-80f4ee94003d}</UniqueIdentifier>
     </Filter>
@@ -37,6 +34,9 @@
     <Filter Include="vfg">
       <UniqueIdentifier>{b5c521cc-db42-4755-a276-3c9e60392696}</UniqueIdentifier>
     </Filter>
+    <Filter Include="vtask">
+      <UniqueIdentifier>{82b8ba6e-956a-487d-ab92-de4554afe41e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="framework.h">
@@ -53,9 +53,6 @@
     </ClInclude>
     <ClInclude Include="pch.h">
       <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\vrhi\rhi.h">
-      <Filter>vrhi</Filter>
     </ClInclude>
     <ClInclude Include="..\..\vd3d12rhi\d3d12rhi.h">
       <Filter>vd3d12rhi</Filter>
@@ -104,6 +101,9 @@
     </ClInclude>
     <ClInclude Include="..\..\vfg\fg.h">
       <Filter>vfg</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\vtask\task.h">
+      <Filter>vtask</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
