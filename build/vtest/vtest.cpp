@@ -7,6 +7,7 @@
 
 #include <unordered_set>
 #include <vector>
+#include <future>
 #include "../../vcontainer/span.h"
 //#include "../../vcontainer/tuple.h"
 #include "../../vcontainer/pool.h"
@@ -226,13 +227,48 @@ void poolGroupTest() {
 	ChunkAllocator::Free(chunk);*/
 }
 
+//using Job = std::future<void>;
+//
+//using JobGroup = std::vector<Job>;
+//
+//unsigned int vGetCpuCores(){ return std::thread::hardware_concurrency(); }
+//
+//template <typename F,typename ...Args>
+//Job NewJob(F f,Args... args) { 
+//	return std::async(std::launch::async, f,args...); 
+//}
+//
+//using JobSeq = std::vector<JobGroup>;
+//
+//void testAsync() {
+//	
+//	JobGroup jobs;
+//	auto cpuCores = vGetCpuCores();
+//	std::mutex mutex;
+//	for (auto i = 0u; i < cpuCores; i++) {
+//		jobs.push_back(NewJob([](int idx) {
+//			std::cout << std::this_thread::get_id() << " is " << idx << std::endl;
+//			std::this_thread::sleep_for(std::chrono::seconds(3));
+//		}, i));
+//	}
+//	
+//	for (auto it = jobs.begin(); it != jobs.end(); it++) {
+//		it->wait();
+//	}
+//}
+
+void testTasks() {
+
+}
+
 int main()
 {
 	/*chunkTest();
 	spanTest2();
 	myTupleTest();*/
-	poolTest();
+	//poolTest();
 	//poolGroupTest();
+	testTasks();
 	system("pause");
 	return 0;
 }
