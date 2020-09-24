@@ -11,6 +11,7 @@
 #include "../../vcontainer/span.h"
 //#include "../../vcontainer/tuple.h"
 #include "../../vcontainer/pool.h"
+#include "../../vtask/task.h"
 
 using namespace valkyr;
 
@@ -257,6 +258,36 @@ void poolGroupTest() {
 //	}
 //}
 
+struct Code {
+	RingQueue<unsigned>& codeRepo;
+	std::vector<bool> coderTouchingFish;
+
+	void coderGotoIcu(int no) {
+		while (true) {
+			std::this_thread::sleep_for(std::chrono::seconds(1));
+			std::cout <<std::this_thread::get_id()<<" get "<< codeRepo.get() << std::endl;
+		}
+	}
+
+};
+
+void testRing() {
+	auto cpuCores = std::thread::hardware_concurrency();
+	RingQueue<unsigned> queue(cpuCores);
+	std::shared_ptr<Code> code = std::make_shared<Code>(queue);
+	//or need use std::ref to pass queue
+	for (auto i = 0; i < cpuCores; i++) {
+		std::thread codeFarmer(&Code::coderGotoIcu,code,i);
+		codeFarmer.detach();
+	}
+	std::default_random_engine randEngine;
+	std::uniform_int_distribution<unsigned> randDist(0u, 65535u);
+	while (true) {
+		unsigned x = randDist(randEngine);
+		queue.put(x);
+	}
+}
+
 void testTasks() {
 
 }
@@ -268,7 +299,7 @@ int main()
 	myTupleTest();*/
 	//poolTest();
 	//poolGroupTest();
-	testTasks();
+	testRing();
 	system("pause");
 	return 0;
 }

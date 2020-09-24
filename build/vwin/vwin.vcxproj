@@ -167,6 +167,7 @@
     <ClInclude Include="..\..\vmalloc\ChunkMgr.h" />
     <ClInclude Include="..\..\vmalloc\ptr.h" />
     <ClInclude Include="..\..\vrender\RenderEngine.h" />
+    <ClInclude Include="..\..\vtask\RingQueue.h" />
     <ClInclude Include="..\..\vtask\task.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="pch.h" />

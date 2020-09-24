@@ -105,6 +105,9 @@
     <ClInclude Include="..\..\vtask\task.h">
       <Filter>vtask</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\vtask\RingQueue.h">
+      <Filter>vtask</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="vwin.cpp">

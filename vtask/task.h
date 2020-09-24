@@ -2,6 +2,7 @@
 #include <thread>
 #include <functional>
 #include <any>
+#include "RingQueue.h"
 #include "../vcontainer/vec.h"
 
 namespace valkyr {
@@ -60,6 +61,7 @@ namespace valkyr {
 		Vec<Worker> m_workers;
 		Vec<bool> m_workerIsFree;
 		Vec<int> m_freeWorkerNos;
+		//RingQueue<Task> m_taskQueue;
 
 
 	};
