@@ -258,26 +258,33 @@ void poolGroupTest() {
 //	}
 //}
 
-struct Code {
+struct CodeTeam {
 	RingQueue<unsigned>& codeRepo;
-	std::vector<bool> coderTouchingFish;
+	std::vector<bool> workersTouchingFish;
 
 	void coderGotoIcu(int no) {
 		while (true) {
-			std::this_thread::sleep_for(std::chrono::seconds(1));
-			std::cout <<std::this_thread::get_id()<<" get "<< codeRepo.get() << std::endl;
+			if (workersTouchingFish[no]) {
+				unsigned cv = codeRepo.get();
+				workersTouchingFish[no] = false;
+			}
+			std::cout <<"coder " << no << " name " <<std::this_thread::get_id()<<" get "<< cv << (workersTouchingFish[no] ?" isTouchingFish":"") << std::endl;
+			std::this_thread::sleep_for(std::chrono::seconds(2));
 		}
 	}
+
+	CodeTeam(RingQueue<unsigned>& queue):codeRepo(queue), workersTouchingFish(queue.len,false){}
 
 };
 
 void testRing() {
 	auto cpuCores = std::thread::hardware_concurrency();
-	RingQueue<unsigned> queue(cpuCores);
-	std::shared_ptr<Code> code = std::make_shared<Code>(queue);
+	auto maxWorkers = cpuCores < 3 ? 2 : cpuCores;
+	RingQueue<unsigned> queue(maxWorkers);
+	std::shared_ptr<CodeTeam> team = std::make_shared<CodeTeam>(queue);
 	//or need use std::ref to pass queue
-	for (auto i = 0; i < cpuCores; i++) {
-		std::thread codeFarmer(&Code::coderGotoIcu,code,i);
+	for (auto i = 0; i < maxWorkers-1; i++) {
+		std::thread codeFarmer(&CodeTeam::coderGotoIcu,team,i);
 		codeFarmer.detach();
 	}
 	std::default_random_engine randEngine;
@@ -285,6 +292,7 @@ void testRing() {
 	while (true) {
 		unsigned x = randDist(randEngine);
 		queue.put(x);
+		std::this_thread::sleep_for(std::chrono::milliseconds(300));
 	}
 }
 

@@ -13,9 +13,6 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="vd3d12rhi">
-      <UniqueIdentifier>{a2d76b3c-c7c3-4597-bccb-80f4ee94003d}</UniqueIdentifier>
-    </Filter>
     <Filter Include="vcore">
       <UniqueIdentifier>{f00e01b5-4441-49a2-b128-2b327ac98baf}</UniqueIdentifier>
     </Filter>
@@ -53,9 +50,6 @@
     </ClInclude>
     <ClInclude Include="pch.h">
       <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\vd3d12rhi\d3d12rhi.h">
-      <Filter>vd3d12rhi</Filter>
     </ClInclude>
     <ClInclude Include="..\..\vrender\RenderEngine.h">
       <Filter>vrender</Filter>
@@ -115,9 +109,6 @@
     </ClCompile>
     <ClCompile Include="pch.cpp">
       <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\vd3d12rhi\d3d12rhi.cpp">
-      <Filter>vd3d12rhi</Filter>
     </ClCompile>
     <ClCompile Include="..\..\vrender\RenderEngine.cpp">
       <Filter>vrender</Filter>
