@@ -13,9 +13,6 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="vcore">
-      <UniqueIdentifier>{f00e01b5-4441-49a2-b128-2b327ac98baf}</UniqueIdentifier>
-    </Filter>
     <Filter Include="vrender">
       <UniqueIdentifier>{44928bad-95db-4a78-b556-99c579a1b0fa}</UniqueIdentifier>
     </Filter>

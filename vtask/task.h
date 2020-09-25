@@ -8,29 +8,40 @@
 namespace valkyr {
 
 	struct Task {
-		std::function<void(Vec<std::any>)> fun;
-		Vec<std::any> params;
+		std::function<void(std::any[])> fun;
+		std::any params[8];
 
-		Task(std::function<void(Vec<std::any>)> f) {
+		Task(std::function<void(std::any[])> f) {
 			fun = f;
 		}
 	};
 
 	struct TaskGroup {
-		std::atomic<unsigned int> completedCount;
 		Vec<Task> tasks;
 	};
 
-	struct Worker {
-		bool free;
-		bool neverSleep;
+	using TaskSeq = Vec<TaskGroup>;
 
-		void doWork(Task task) {
-			free = false;
-			task.fun(task.params);
-			free = true;
-			if(!neverSleep)
-				std::this_thread::yield();
+	struct WorkerCtx {
+		RingQueue<Task&>& taskQueue;
+		std::atomic_size_t currGroupCompletedTask;
+		std::atomic_size_t currGroupSize;
+		bool running;
+
+		void workLoop(int no) {
+			while (running) {
+				auto taskItem = taskQueue.get();
+				if (taskItem) {
+					auto task = taskItem.value();
+					task.fun(task.params);
+				}
+			}
+			std::this_thread::yield();
+		}
+
+		WorkerCtx(RingQueue<Task&>& queue):taskQueue(queue),running(false)
+			,currGroupCompletedTask(0), currGroupSize(0)
+		{
 		}
 	};
 
@@ -38,17 +49,12 @@ namespace valkyr {
 	class TaskSys {
 	public:
 		void Init() {
-			m_maxWorkers = std::thread::hardware_concurrency();
-			for (int i = 1; i < m_maxWorkers; i++) {
-				m_workers.push_back(Worker());
-			}
+			
 		}
 
 		template <typename Task_t>
 		void Exec(TaskGroup& group) {
-			for (auto it = m_freeWorkerNos.begin(); it != m_freeWorkerNos.end(); it++) {
-				m_workers[it].detach();
-			}
+			
 		}
 
 		int m_maxWorkers;
@@ -58,10 +64,6 @@ namespace valkyr {
 
 		}
 
-		Vec<Worker> m_workers;
-		Vec<bool> m_workerIsFree;
-		Vec<int> m_freeWorkerNos;
-		//RingQueue<Task> m_taskQueue;
 
 
 	};

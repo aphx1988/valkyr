@@ -14,6 +14,8 @@
 #include "../../vtask/task.h"
 
 using namespace valkyr;
+using std::cout;
+using std::endl;
 
 struct Position2D {
 	float x, y;
@@ -258,22 +260,32 @@ void poolGroupTest() {
 //	}
 //}
 
+using std::thread;
+using std::this_thread::sleep_for;
+
 struct CodeTeam {
 	RingQueue<unsigned>& codeRepo;
-	std::vector<bool> workersTouchingFish;
+	//std::vector<bool> workersTouchingFish;
+	bool running;
 
 	void coderGotoIcu(int no) {
-		while (true) {
-			if (workersTouchingFish[no]) {
-				unsigned cv = codeRepo.get();
-				workersTouchingFish[no] = false;
+		while (running) {
+			unsigned waitTime = 1000u;
+			auto cv = codeRepo.get();
+			if (cv) {
+				waitTime = cv.value();
+				std::cout << "coder " << no << " name " << std::this_thread::get_id() << " will work " << cv.value() << std::endl;
 			}
-			std::cout <<"coder " << no << " name " <<std::this_thread::get_id()<<" get "<< cv << (workersTouchingFish[no] ?" isTouchingFish":"") << std::endl;
-			std::this_thread::sleep_for(std::chrono::seconds(2));
+			else {
+				std::cout << "coder " << no << " name " << std::this_thread::get_id() << " is moyuing"<< std::endl;
+			}
+			sleep_for(std::chrono::milliseconds(waitTime));
 		}
+		std::this_thread::yield();
 	}
 
-	CodeTeam(RingQueue<unsigned>& queue):codeRepo(queue), workersTouchingFish(queue.len,false){}
+	CodeTeam(RingQueue<unsigned>& queue):codeRepo(queue),running(true)//,workersTouchingFish(queue.len,true)
+	{}
 
 };
 
@@ -288,9 +300,13 @@ void testRing() {
 		codeFarmer.detach();
 	}
 	std::default_random_engine randEngine;
-	std::uniform_int_distribution<unsigned> randDist(0u, 65535u);
+	std::uniform_int_distribution<unsigned> randDist(0u, 2048u);
 	while (true) {
 		unsigned x = randDist(randEngine);
+		if (x > 2000) {
+			team->running = false;
+			break;
+		}
 		queue.put(x);
 		std::this_thread::sleep_for(std::chrono::milliseconds(300));
 	}
