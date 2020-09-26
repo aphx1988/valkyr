@@ -31,6 +31,9 @@
     <Filter Include="vtask">
       <UniqueIdentifier>{82b8ba6e-956a-487d-ab92-de4554afe41e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="vcore">
+      <UniqueIdentifier>{f2164f7d-13ae-4604-a281-d3d8b4398b92}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="framework.h">
@@ -98,6 +101,12 @@
     </ClInclude>
     <ClInclude Include="..\..\vtask\RingQueue.h">
       <Filter>vtask</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\vcore\vptr.h">
+      <Filter>vcore</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\vcontainer\stack.h">
+      <Filter>vcontainer</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

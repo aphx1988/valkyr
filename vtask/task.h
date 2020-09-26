@@ -4,16 +4,12 @@
 #include <any>
 #include "RingQueue.h"
 #include "../vcontainer/vec.h"
+#include "../vcore/vptr.h"
 
 namespace valkyr {
 
 	struct Task {
-		std::function<void(std::any[])> fun;
-		std::any params[8];
-
-		Task(std::function<void(std::any[])> f) {
-			fun = f;
-		}
+		virtual void fun() = 0;
 	};
 
 	struct TaskGroup {
@@ -23,7 +19,7 @@ namespace valkyr {
 	using TaskSeq = Vec<TaskGroup>;
 
 	struct WorkerCtx {
-		RingQueue<Task&>& taskQueue;
+		RingQueue<Task>& taskQueue;
 		std::atomic_size_t currGroupCompletedTask;
 		std::atomic_size_t currGroupSize;
 		bool running;
@@ -33,13 +29,13 @@ namespace valkyr {
 				auto taskItem = taskQueue.get();
 				if (taskItem) {
 					auto task = taskItem.value();
-					task.fun(task.params);
+					task.fun();
 				}
 			}
 			std::this_thread::yield();
 		}
 
-		WorkerCtx(RingQueue<Task&>& queue):taskQueue(queue),running(false)
+		WorkerCtx(RingQueue<Task>& queue):taskQueue(queue),running(false)
 			,currGroupCompletedTask(0), currGroupSize(0)
 		{
 		}

@@ -156,10 +156,12 @@
     <ClInclude Include="..\..\vcontainer\ContainerChunkNode.h" />
     <ClInclude Include="..\..\vcontainer\queue.h" />
     <ClInclude Include="..\..\vcontainer\span.h" />
+    <ClInclude Include="..\..\vcontainer\stack.h" />
     <ClInclude Include="..\..\vcontainer\tuple.h" />
     <ClInclude Include="..\..\vcontainer\pool.h" />
     <ClInclude Include="..\..\vcontainer\vec.h" />
     <ClInclude Include="..\..\vcontainer\graph.h" />
+    <ClInclude Include="..\..\vcore\vptr.h" />
     <ClInclude Include="..\..\vecs\arch.h" />
     <ClInclude Include="..\..\vfg\fg.h" />
     <ClInclude Include="..\..\vmalloc\chunk.h" />
