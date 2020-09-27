@@ -13,7 +13,7 @@ namespace valkyr {
 		unsigned int len;
 		std::mutex mtx;
 
-		RingQueue(unsigned int length):head(0),tail(0),len(length) {
+		RingQueue(unsigned int length):len(length),head(0),tail(0){ 
 			buff = new T[len];
 			memset(buff, 0, len);
 		}
@@ -34,20 +34,21 @@ namespace valkyr {
 
 		std::optional<T> get(){
 			if (!isEmpty()) {
-				T t = buff[head];
+				std::optional<T> o(buff[head]);
 				head = (head + 1) % len;
-				std::optional<T> o(t);
 				return o;
 			}
 			else
 				return std::nullopt;
 		}
 
-		void put(T t) {
+		bool put(T t) {
 			if (!isFull()) {
 				buff[tail] = t;
 				tail = (tail + 1) % len;
+				return true;
 			}
+			else return false;
 		}
 
 		/*void put(T&& t) {

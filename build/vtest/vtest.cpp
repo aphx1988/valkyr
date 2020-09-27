@@ -313,6 +313,8 @@ void testRing() {
 }
 
 void testTasks() {
+	auto cpuCores = std::thread::hardware_concurrency();
+	auto maxWorkers = cpuCores < 3 ? 2 : cpuCores;
 
 }
 

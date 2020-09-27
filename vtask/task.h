@@ -4,24 +4,28 @@
 #include <any>
 #include "RingQueue.h"
 #include "../vcontainer/vec.h"
+#include "../vcontainer/deque.h"
+#include "../vcontainer/stack.h"
 #include "../vcore/vptr.h"
 
 namespace valkyr {
 
 	struct Task {
-		virtual void fun() = 0;
+		std::function<void(Vec<std::any>)> fun;
+		Vec<std::any> params;
+
+		Task(std::function<void(Vec<std::any>)> f) {
+			fun = f;
+		}
 	};
 
-	struct TaskGroup {
-		Vec<Task> tasks;
-	};
+	using TaskGroup = Vec<Task>;
 
-	using TaskSeq = Vec<TaskGroup>;
+	using TaskSeq = Stack<TaskGroup>;
 
 	struct WorkerCtx {
 		RingQueue<Task>& taskQueue;
-		std::atomic_size_t currGroupCompletedTask;
-		std::atomic_size_t currGroupSize;
+		std::atomic_size_t currGroupCompletedTasks;
 		bool running;
 
 		void workLoop(int no) {
@@ -29,36 +33,49 @@ namespace valkyr {
 				auto taskItem = taskQueue.get();
 				if (taskItem) {
 					auto task = taskItem.value();
-					task.fun();
+					task.fun(task.params);
 				}
 			}
 			std::this_thread::yield();
 		}
 
 		WorkerCtx(RingQueue<Task>& queue):taskQueue(queue),running(false)
-			,currGroupCompletedTask(0), currGroupSize(0)
+			,currGroupCompletedTasks(0)
 		{
 		}
 	};
 
 	//小心子线程直接执行或detach后，主线程退出时子线程还在执行，导致内存泄漏或者异常
-	class TaskSys {
+	class Scheduler {
 	public:
-		void Init() {
-			
+		Scheduler(unsigned maxWorkers):m_maxWorkers(maxWorkers),m_taskQueue(maxWorkers),
+			m_taskSeq(),m_currTaskGroup(), m_unusedTasks()
+		{}
+
+		void Exec(TaskSeq seq) {
+			m_taskSeq = seq;
+			m_currTaskGroup = seq.top();
 		}
 
-		template <typename Task_t>
-		void Exec(TaskGroup& group) {
-			
+		void Add(Task task) {
+			if (m_taskQueue.put(task)) {
+				m_unusedTasks.push_back(task);
+			}
 		}
 
-		int m_maxWorkers;
+		void update() {
+
+		}
+
+		unsigned m_maxWorkers;
+		RingQueue<Task> m_taskQueue;
+		Deque<Task> m_unusedTasks;
+
+		TaskSeq m_taskSeq;
+		TaskGroup m_currTaskGroup;
 
 	private:
-		void doWork() {
-
-		}
+		
 
 
 
