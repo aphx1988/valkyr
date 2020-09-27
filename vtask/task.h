@@ -55,6 +55,9 @@ namespace valkyr {
 		void Exec(TaskSeq seq) {
 			m_taskSeq = seq;
 			m_currTaskGroup = seq.top();
+			for (auto it = m_currTaskGroup.begin(); it < m_currTaskGroup.end(); it++) {
+				Add(*it);
+			}
 		}
 
 		void Add(Task task) {
