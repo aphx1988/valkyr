@@ -14,6 +14,8 @@ namespace valkyr {
 		std::function<void(Vec<std::any>)> fun;
 		Vec<std::any> params;
 
+		Task():fun(nullptr){}
+
 		Task(std::function<void(Vec<std::any>)> f) {
 			fun = f;
 		}
@@ -67,7 +69,6 @@ namespace valkyr {
 		}
 
 		void update() {
-
 		}
 
 		unsigned m_maxWorkers;

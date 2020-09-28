@@ -44,7 +44,7 @@ namespace valkyr {
 
 		bool put(T t) {
 			if (!isFull()) {
-				buff[tail] = t;
+				buff[tail] = std::move(t);
 				tail = (tail + 1) % len;
 				return true;
 			}
