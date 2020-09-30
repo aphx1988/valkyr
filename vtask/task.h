@@ -21,6 +21,15 @@ namespace valkyr {
 		}
 	};
 
+	/*template <typename ...Args>
+	Task vCreateTask(std::function<void(Args...)> func,Args... args) {
+		Task task;
+		task.params = { args... };
+		task.fun = [](Vec<std::any> params) {
+			func();
+		};
+	}*/
+
 	using TaskGroup = Vec<Task>;
 
 	using TaskSeq = Stack<TaskGroup>;
