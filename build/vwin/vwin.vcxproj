@@ -154,6 +154,7 @@
     <ClInclude Include="..\..\vcontainer\algorithm.h" />
     <ClInclude Include="..\..\vcontainer\blob.h" />
     <ClInclude Include="..\..\vcontainer\ContainerChunkNode.h" />
+    <ClInclude Include="..\..\vcontainer\deque.h" />
     <ClInclude Include="..\..\vcontainer\queue.h" />
     <ClInclude Include="..\..\vcontainer\span.h" />
     <ClInclude Include="..\..\vcontainer\stack.h" />

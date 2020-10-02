@@ -108,6 +108,9 @@
     <ClInclude Include="..\..\vcontainer\stack.h">
       <Filter>vcontainer</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\vcontainer\deque.h">
+      <Filter>vcontainer</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="vwin.cpp">

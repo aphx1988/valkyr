@@ -315,6 +315,34 @@ void testRing() {
 void testTasks() {
 	auto cpuCores = std::thread::hardware_concurrency();
 	auto maxWorkers = cpuCores < 3 ? 2 : cpuCores;
+	Task task;
+	vptr<C> pC = vmake_ptr<C>(C(10.5f, 666));
+	task.params = { 2,'c',true };
+	task.exec = [&pC](Vec<std::any> params) {
+		cout << pC->num << endl;
+		cout << std::any_cast<int>(params[0]) << endl;
+		cout << std::any_cast<char>(params[1]) << endl;
+		cout << (std::any_cast<bool>(params[2]) ? "true" : "false") << endl;
+	};
+	Task task2;
+	task2.params = { 100.099f,30 };
+	task2.exec = [](Vec<std::any> params) {
+		cout << std::any_cast<float>(params[0]) << endl;
+		cout << std::any_cast<int>(params[1]) << endl;
+	};
+	//task.exec(task.params);
+	RingQueue<Task> taskQueue(cpuCores);
+	taskQueue.put(task);
+	taskQueue.put(task2);
+	Task t = taskQueue.get().value();
+	t.exec(t.params);
+	cout << "=================" << endl;
+	Task t2 = taskQueue.get().value();
+	t2.exec(t2.params);
+
+}
+
+void testScheduler() {
 
 }
 
@@ -325,7 +353,8 @@ int main()
 	myTupleTest();*/
 	//poolTest();
 	//poolGroupTest();
-	testRing();
+	//testRing();
+	testTasks();
 	system("pause");
 	return 0;
 }

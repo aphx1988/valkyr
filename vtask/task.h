@@ -4,31 +4,21 @@
 #include <any>
 #include "RingQueue.h"
 #include "../vcontainer/vec.h"
-#include "../vcontainer/deque.h"
 #include "../vcontainer/stack.h"
 #include "../vcore/vptr.h"
 
 namespace valkyr {
 
 	struct Task {
-		std::function<void(Vec<std::any>)> fun;
+		std::function<void(Vec<std::any>)> exec;
 		Vec<std::any> params;
 
-		Task():fun(nullptr){}
+		Task():exec(nullptr){}
 
 		Task(std::function<void(Vec<std::any>)> f) {
-			fun = f;
+			exec = f;
 		}
 	};
-
-	/*template <typename ...Args>
-	Task vCreateTask(std::function<void(Args...)> func,Args... args) {
-		Task task;
-		task.params = { args... };
-		task.fun = [](Vec<std::any> params) {
-			func();
-		};
-	}*/
 
 	using TaskGroup = Vec<Task>;
 
@@ -44,7 +34,7 @@ namespace valkyr {
 				auto taskItem = taskQueue.get();
 				if (taskItem) {
 					auto task = taskItem.value();
-					task.fun(task.params);
+					task.exec(task.params);
 				}
 			}
 			std::this_thread::yield();
@@ -72,25 +62,24 @@ namespace valkyr {
 		}
 
 		void Add(Task task) {
-			if (m_taskQueue.put(task)) {
+			if (!m_taskQueue.put(task)) {
+				//ÒªÈ¥ÖØ
 				m_unusedTasks.push_back(task);
 			}
 		}
 
 		void update() {
+			for (auto it = m_unusedTasks.begin(); it < m_unusedTasks.end(); it++) {
+				Add(*it);
+			}
 		}
 
 		unsigned m_maxWorkers;
 		RingQueue<Task> m_taskQueue;
-		Deque<Task> m_unusedTasks;
-
+		
+	private:
+		Vec<Task> m_unusedTasks;
 		TaskSeq m_taskSeq;
 		TaskGroup m_currTaskGroup;
-
-	private:
-		
-
-
-
 	};
 }
