@@ -47,7 +47,7 @@ namespace valkyr {
 		}
 
 		WorkerCtx(RingQueue<Task>& queue):taskQueue(queue),running(false)
-			,currGroupCompletedTasks(0)
+			,currGroupCompletedTasks(0),sleepingTime(0u)
 		{
 		}
 	};
@@ -55,7 +55,7 @@ namespace valkyr {
 	class Scheduler {
 	public:
 		Scheduler(unsigned maxWorkers):m_maxWorkers(maxWorkers),m_taskQueue(maxWorkers),m_threadWaitingTime(0),
-			m_taskSeq(),m_currTaskGroup(), m_unusedTasks()
+			m_taskSeq(),m_currTaskGroup(),m_unusedTasks(), m_currTaskGroupNum(0),
 		{}
 
 		void Exec(TaskSeq seq) {
