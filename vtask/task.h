@@ -28,7 +28,9 @@ namespace valkyr {
 	struct WorkerCtx {
 		RingQueue<Task>& taskQueue;
 		std::atomic_size_t currGroupCompletedTasks;
+		unsigned sleepingTime;
 		bool running;
+		
 
 		void workLoop(int no) {
 			while (running) {
@@ -39,6 +41,7 @@ namespace valkyr {
 						task.exec(task.params);
 					}
 				}
+				std::this_thread::sleep_for(std::chrono::milliseconds(sleepingTime));
 			}
 			std::this_thread::yield();
 		}
@@ -69,7 +72,7 @@ namespace valkyr {
 			}
 		}
 
-		void update() {
+		void tick() {
 			int visitedUnused = 0;
 			for (size_t i = 0; i < m_unusedTasks.size(); i++) {
 				Task task = m_unusedTasks.front();
@@ -87,5 +90,6 @@ namespace valkyr {
 		std::queue<Task> m_unusedTasks;
 		TaskSeq m_taskSeq;
 		TaskGroup m_currTaskGroup;
+		size_t m_currTaskGroupNum;
 	};
 }
