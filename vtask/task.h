@@ -2,6 +2,7 @@
 #include <thread>
 #include <functional>
 #include <any>
+#include <queue>
 #include "RingQueue.h"
 #include "../vcontainer/vec.h"
 #include "../vcontainer/stack.h"
@@ -34,7 +35,9 @@ namespace valkyr {
 				auto taskItem = taskQueue.get();
 				if (taskItem) {
 					auto task = taskItem.value();
-					task.exec(task.params);
+					if (task.exec) {
+						task.exec(task.params);
+					}
 				}
 			}
 			std::this_thread::yield();
@@ -46,10 +49,9 @@ namespace valkyr {
 		}
 	};
 
-	//小心子线程直接执行或detach后，主线程退出时子线程还在执行，导致内存泄漏或者异常
 	class Scheduler {
 	public:
-		Scheduler(unsigned maxWorkers):m_maxWorkers(maxWorkers),m_taskQueue(maxWorkers),
+		Scheduler(unsigned maxWorkers):m_maxWorkers(maxWorkers),m_taskQueue(maxWorkers),m_threadWaitingTime(0),
 			m_taskSeq(),m_currTaskGroup(), m_unusedTasks()
 		{}
 
@@ -63,22 +65,26 @@ namespace valkyr {
 
 		void Add(Task task) {
 			if (!m_taskQueue.put(task)) {
-				//要去重
-				m_unusedTasks.push_back(task);
+				m_unusedTasks.push(task);
 			}
 		}
 
 		void update() {
-			for (auto it = m_unusedTasks.begin(); it < m_unusedTasks.end(); it++) {
-				Add(*it);
+			int visitedUnused = 0;
+			for (size_t i = 0; i < m_unusedTasks.size(); i++) {
+				Task task = m_unusedTasks.front();
+				if (m_taskQueue.put(task)) {
+					m_unusedTasks.pop();
+				}
 			}
 		}
 
 		unsigned m_maxWorkers;
+		unsigned m_threadWaitingTime;
 		RingQueue<Task> m_taskQueue;
 		
 	private:
-		Vec<Task> m_unusedTasks;
+		std::queue<Task> m_unusedTasks;
 		TaskSeq m_taskSeq;
 		TaskGroup m_currTaskGroup;
 	};
