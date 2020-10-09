@@ -96,12 +96,6 @@
     <ClInclude Include="..\..\vfg\fg.h">
       <Filter>vfg</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\vtask\task.h">
-      <Filter>vtask</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\vtask\RingQueue.h">
-      <Filter>vtask</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\vcore\vptr.h">
       <Filter>vcore</Filter>
     </ClInclude>
@@ -110,6 +104,12 @@
     </ClInclude>
     <ClInclude Include="..\..\vcontainer\deque.h">
       <Filter>vcontainer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\vtask\TaskQueue.h">
+      <Filter>vtask</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\vtask\Scheduler.h">
+      <Filter>vtask</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

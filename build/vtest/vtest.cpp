@@ -11,7 +11,7 @@
 #include "../../vcontainer/span.h"
 //#include "../../vcontainer/tuple.h"
 #include "../../vcontainer/pool.h"
-#include "../../vtask/task.h"
+#include "../../vtask/Scheduler.h"
 
 using namespace valkyr;
 using std::cout;
@@ -32,12 +32,11 @@ struct Position {
 struct A {
 	int i0;
 	int i1;
-	int i2;
 	Position pos;
 	Position2D uv;
 
 	A() :i0(0), i1(0) {}
-	A(int a, int b) :i0(a), i1(b) {}
+	A(int a, int b) :i0(a), i1(b){}
 };
 
 struct B {
@@ -230,120 +229,85 @@ void poolGroupTest() {
 	ChunkAllocator::Free(chunk);*/
 }
 
-//using Job = std::future<void>;
-//
-//using JobGroup = std::vector<Job>;
-//
-//unsigned int vGetCpuCores(){ return std::thread::hardware_concurrency(); }
-//
-//template <typename F,typename ...Args>
-//Job NewJob(F f,Args... args) { 
-//	return std::async(std::launch::async, f,args...); 
-//}
-//
-//using JobSeq = std::vector<JobGroup>;
-//
-//void testAsync() {
-//	
-//	JobGroup jobs;
-//	auto cpuCores = vGetCpuCores();
-//	std::mutex mutex;
-//	for (auto i = 0u; i < cpuCores; i++) {
-//		jobs.push_back(NewJob([](int idx) {
-//			std::cout << std::this_thread::get_id() << " is " << idx << std::endl;
-//			std::this_thread::sleep_for(std::chrono::seconds(3));
-//		}, i));
-//	}
-//	
-//	for (auto it = jobs.begin(); it != jobs.end(); it++) {
-//		it->wait();
-//	}
-//}
-
 using std::thread;
 using std::this_thread::sleep_for;
 
 struct CodeTeam {
-	RingQueue<unsigned>& codeRepo;
+	TaskQueue<4>& codeRepo;
 	//std::vector<bool> workersTouchingFish;
 	bool running;
+	std::atomic_size_t currGroupCompletedTasks;
 
 	void coderGotoIcu(int no) {
 		while (running) {
 			unsigned waitTime = 1000u;
-			auto cv = codeRepo.get();
-			if (cv) {
-				waitTime = cv.value();
-				std::cout << "coder " << no << " name " << std::this_thread::get_id() << " will work " << cv.value() << std::endl;
-			}
-			else {
-				std::cout << "coder " << no << " name " << std::this_thread::get_id() << " is moyuing"<< std::endl;
-			}
+			auto task = codeRepo.get();
+			if (task)
+				task.value()->exec();
+			currGroupCompletedTasks++;
 			sleep_for(std::chrono::milliseconds(waitTime));
 		}
 		std::this_thread::yield();
 	}
 
-	CodeTeam(RingQueue<unsigned>& queue):codeRepo(queue),running(true)//,workersTouchingFish(queue.len,true)
+	CodeTeam(TaskQueue<4>& queue):codeRepo(queue),running(true)//,workersTouchingFish(queue.len,true)
 	{}
 
 };
 
-void testRing() {
-	auto cpuCores = std::thread::hardware_concurrency();
-	auto maxWorkers = cpuCores < 3 ? 2 : cpuCores;
-	RingQueue<unsigned> queue(maxWorkers);
-	std::shared_ptr<CodeTeam> team = std::make_shared<CodeTeam>(queue);
-	//or need use std::ref to pass queue
-	for (auto i = 0; i < maxWorkers-1; i++) {
-		std::thread codeFarmer(&CodeTeam::coderGotoIcu,team,i);
-		codeFarmer.detach();
+class PrintTask : public Task {
+public:
+	unsigned m_v;
+
+	PrintTask(unsigned v):m_v(v){
+	}
+
+	void exec() {
+		cout <<std::this_thread::get_id()<<":"<< m_v << std::endl;
+	}
+};
+
+void testTasks() {
+	TaskQueue<4> queue;
+	vptr<CodeTeam> team = vmake_ptr<CodeTeam>(queue);
+	for (auto i = 0u; i < 4; i++) {
+		thread th(&CodeTeam::coderGotoIcu, team, 0);
+		th.detach();
 	}
 	std::default_random_engine randEngine;
 	std::uniform_int_distribution<unsigned> randDist(0u, 2048u);
-	while (true) {
+	size_t groupCount = 4;
+	while(true) {
 		unsigned x = randDist(randEngine);
-		if (x > 2000) {
+		if (x > 2000u) {
 			team->running = false;
-			break;
+			return;
 		}
-		queue.put(x);
+		if (team->currGroupCompletedTasks > 4) {
+			cout << "add tasks of next task group" << endl;
+			team->currGroupCompletedTasks = 0;
+		}
+		vptr<Task> t = vmake_ptr<PrintTask>(x);
+		queue.put(t);
 		std::this_thread::sleep_for(std::chrono::milliseconds(300));
 	}
 }
 
-void testTasks() {
-	auto cpuCores = std::thread::hardware_concurrency();
-	auto maxWorkers = cpuCores < 3 ? 2 : cpuCores;
-	Task task;
-	vptr<C> pC = vmake_ptr<C>(C(10.5f, 666));
-	task.params = { 2,'c',true };
-	task.exec = [&pC](Vec<std::any> params) {
-		cout << pC->num << endl;
-		cout << std::any_cast<int>(params[0]) << endl;
-		cout << std::any_cast<char>(params[1]) << endl;
-		cout << (std::any_cast<bool>(params[2]) ? "true" : "false") << endl;
-	};
-	Task task2;
-	task2.params = { 100.099f,30 };
-	task2.exec = [](Vec<std::any> params) {
-		cout << std::any_cast<float>(params[0]) << endl;
-		cout << std::any_cast<int>(params[1]) << endl;
-	};
-	//task.exec(task.params);
-	RingQueue<Task> taskQueue(cpuCores);
-	taskQueue.put(task);
-	taskQueue.put(task2);
-	Task t = taskQueue.get().value();
-	t.exec(t.params);
-	cout << "=================" << endl;
-	Task t2 = taskQueue.get().value();
-	t2.exec(t2.params);
-
-}
-
 void testScheduler() {
-
+	std::default_random_engine randEngine;
+	std::uniform_int_distribution<unsigned> randDist(0u, 2048u);
+	vptr<Scheduler<4>> scheduler = vmake_ptr<Scheduler<4>>();
+	while (true) {
+		unsigned x = randDist(randEngine);
+		if (x > 2000u) {
+			scheduler->m_workerCtx->running = false;
+			return;
+		}
+		vptr<Task> t = vmake_ptr<PrintTask>(x);
+		scheduler->Add(t);
+		scheduler->tick();
+		std::this_thread::sleep_for(std::chrono::milliseconds(300));
+	}
 }
 
 int main()
@@ -353,7 +317,6 @@ int main()
 	myTupleTest();*/
 	//poolTest();
 	//poolGroupTest();
-	//testRing();
 	testTasks();
 	system("pause");
 	return 0;
