@@ -15,52 +15,60 @@ namespace valkyr {
 		Task() {}
 	};
 
-
+	//thx: https://zhuanlan.zhihu.com/p/73640419
 	template <size_t N>
 	struct TaskQueue {
 		std::array<vptr<Task>,N> buff;
-		unsigned int head;
-		unsigned int tail;
-		unsigned int len;
+		unsigned in;
+		unsigned out;
+		unsigned len;
+		//unsigned int maxOut;
 		std::mutex mtx;
 
-		TaskQueue() :buff(), len(buff.size()), head(0), tail(0){
+		TaskQueue() :buff(), len(buff.size()), in(0), out(0){
 			buff.fill(nullptr);
 		}
 
-		unsigned int size() {
+		/*unsigned int size() {
 			return (tail + len - head) % len;
-		}
+		}*/
 
 		bool isFull(){ 
-			return head == ((tail + 1) % len);
+			//return head == ((tail + 1) % len);
+			return (in-out)==len;
 		}
 
 		bool isEmpty() {
-			std::lock_guard lock(mtx);
-			return head == tail;
+			//std::lock_guard lock(mtx);
+			return in == out;
 		}
 
-		std::optional<vptr<Task> > get(){
+		int step(int i) {
+			return ++i;
+		}
+
+		std::optional<vptr<Task>> get(){
+			std::lock_guard<std::mutex> guard(mtx);
 			if (!isEmpty()) {
-				std::optional<vptr<Task> > o(buff.at(head));
-				head = (head + 1) % len;
+				std::optional<vptr<Task>> o(buff.at(out&(len-1)));
+				out = step(out);
 				if (o.value() == nullptr) {
 					return std::nullopt;
 				}
 				return o;
 			}
-			else
+			else {
+				in = out = 0;
 				return std::nullopt;
+			}
 		}
 
-		bool put(vptr<Task> t) {
-			if (!isFull()) {
-				buff.at(tail) = t;
-				tail = (tail + 1) % len;
-				return true;
+		void put(vptr<Task> t) {
+			buff.at(in & (len - 1)) = t;
+			if (isFull()) {
+				out = step(out);
 			}
-			else return false;
+			in = step(in);
 		}
 
 		/*void put(T&& t) {

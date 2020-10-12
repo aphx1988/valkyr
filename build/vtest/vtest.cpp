@@ -8,6 +8,7 @@
 #include <unordered_set>
 #include <vector>
 #include <future>
+#include <numeric>
 #include "../../vcontainer/span.h"
 //#include "../../vcontainer/tuple.h"
 #include "../../vcontainer/pool.h"
@@ -267,6 +268,22 @@ public:
 	}
 };
 
+class ComputeTask : public Task {
+public:
+	Vec<int> input;
+	int output;
+
+	ComputeTask(std::initializer_list<int> inputs):input(inputs),output(0) 
+	{
+	}
+
+	void exec() {
+		output = std::accumulate(input.begin(), input.end(), 0);
+		cout <<"compute result:"<< output << std::endl;
+	}
+};
+
+
 void testTasks() {
 	TaskQueue<4> queue;
 	vptr<CodeTeam> team = vmake_ptr<CodeTeam>(queue);
@@ -276,7 +293,6 @@ void testTasks() {
 	}
 	std::default_random_engine randEngine;
 	std::uniform_int_distribution<unsigned> randDist(0u, 2048u);
-	size_t groupCount = 4;
 	while(true) {
 		unsigned x = randDist(randEngine);
 		if (x > 2000u) {
@@ -293,20 +309,41 @@ void testTasks() {
 	}
 }
 
+Vec<int> blackboard;
+
+TaskSeq genTaskSeq() {
+	TaskSeq seq;
+	vptr<Task> t10 = vmake_ptr<PrintTask>(10u);
+	vptr<Task> t11 = vmake_ptr<PrintTask>(11u);
+	TaskGroup group1 = {t10,t11};
+	seq.push(group1);
+	vptr<Task> t20 = vmake_ptr<ComputeTask>(std::initializer_list<int>{1,2,3,4,5,6});
+	vptr<Task> t21 = vmake_ptr<ComputeTask>(std::initializer_list<int>{1, 20, 300});
+	vptr<Task> t22 = vmake_ptr<PrintTask>(65535u);
+	TaskGroup group2 = { t20,t21,t22 };
+	seq.push(group2);
+	vptr<Task> t3 = vmake_ptr<PrintTask>(666u);
+	TaskGroup group3 = { t3 };
+	seq.push(group3);
+	return seq;
+}
+
 void testScheduler() {
 	std::default_random_engine randEngine;
 	std::uniform_int_distribution<unsigned> randDist(0u, 2048u);
 	vptr<Scheduler<4>> scheduler = vmake_ptr<Scheduler<4>>();
-	while (true) {
-		unsigned x = randDist(randEngine);
-		if (x > 2000u) {
+	scheduler->InitWorkers();
+	scheduler->Add(genTaskSeq());
+	/*vptr<Task> t = vmake_ptr<PrintTask>(0);
+	scheduler->Add(t);*/
+	while (scheduler->m_workerCtx->running) {
+		//vptr<Task> t = vmake_ptr<PrintTask>(x);
+		if (scheduler->m_taskSeq.empty()&&scheduler->m_taskQueue.isEmpty()) {
 			scheduler->m_workerCtx->running = false;
-			return;
+			break;
 		}
-		vptr<Task> t = vmake_ptr<PrintTask>(x);
-		scheduler->Add(t);
 		scheduler->tick();
-		std::this_thread::sleep_for(std::chrono::milliseconds(300));
+		//std::this_thread::sleep_for(std::chrono::milliseconds(500u));
 	}
 }
 
@@ -317,7 +354,7 @@ int main()
 	myTupleTest();*/
 	//poolTest();
 	//poolGroupTest();
-	testTasks();
+	testScheduler();
 	system("pause");
 	return 0;
 }
