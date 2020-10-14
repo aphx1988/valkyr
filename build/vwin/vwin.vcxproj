@@ -124,11 +124,13 @@
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <LanguageStandard>stdcpplatest</LanguageStandard>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>d3d12.lib;dxgi.lib;d3dcompiler.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <DelayLoadDLLs>d3d12.dll;%(DelayLoadDLLs)</DelayLoadDLLs>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -148,6 +150,8 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>d3d12.lib;dxgi.lib;d3dcompiler.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <DelayLoadDLLs>d3d12.dll;%(DelayLoadDLLs)</DelayLoadDLLs>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -164,7 +168,9 @@
     <ClInclude Include="..\..\vcontainer\graph.h" />
     <ClInclude Include="..\..\vcore\vptr.h" />
     <ClInclude Include="..\..\vecs\arch.h" />
+    <ClInclude Include="..\..\vfg\dx\d3d12Pipeline.h" />
     <ClInclude Include="..\..\vfg\fg.h" />
+    <ClInclude Include="..\..\vfg\pipeline.h" />
     <ClInclude Include="..\..\vmalloc\chunk.h" />
     <ClInclude Include="..\..\vmalloc\ChunkMgr.h" />
     <ClInclude Include="..\..\vmalloc\ptr.h" />

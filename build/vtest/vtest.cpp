@@ -339,6 +339,7 @@ void testScheduler() {
 	while (scheduler->m_workerCtx->running) {
 		//vptr<Task> t = vmake_ptr<PrintTask>(x);
 		if (scheduler->m_taskSeq.empty()&&scheduler->m_taskQueue.isEmpty()) {
+			std::this_thread::sleep_for(std::chrono::milliseconds(100u));
 			scheduler->m_workerCtx->running = false;
 			break;
 		}

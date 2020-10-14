@@ -63,11 +63,14 @@ namespace valkyr {
 			}
 		}
 
-		void put(vptr<Task> t) {
-			buff.at(in & (len - 1)) = t;
+		bool put(vptr<Task> t) {
 			if (isFull()) {
-				out = step(out);
+				return false;
 			}
+			buff.at(in & (len - 1)) = t;
+			/*if (isFull()) {
+				out = step(out);
+			}*/
 			in = step(in);
 		}
 

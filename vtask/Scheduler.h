@@ -45,7 +45,7 @@ namespace valkyr {
 	class Scheduler {
 	public:
 		Scheduler():m_taskQueue(),m_threadWaitingTime(0u),
-			m_taskSeq(),m_currTaskGroup()//,m_unusedTasks()
+			m_taskSeq(),m_currTaskGroup(),m_unusedTasks()
 		{
 			m_workerCtx = vmake_ptr<WorkerCtx<N>>(m_taskQueue,m_threadWaitingTime);
 		}
@@ -76,18 +76,18 @@ namespace valkyr {
 		}
 
 		void Add(vptr<Task> task) {
-			/*if (!m_taskQueue.put(task)) {
+			if (!m_taskQueue.put(task)) {
 				m_unusedTasks.emplace_back(task);
-			}*/
-			m_taskQueue.put(task);
+			}
+			//m_taskQueue.put(task);
 		}
 
 		void tick() {
-			/*for (auto it = m_unusedTasks.begin(); it < m_unusedTasks.end(); it++) {
+			for (auto it = m_unusedTasks.begin(); it < m_unusedTasks.end(); it++) {
 				if (m_taskQueue.put(*it)) {
 					m_unusedTasks.erase(it);
 				}
-			}*/
+			}
 			if (m_workerCtx->currGroupCompletedTasks >= m_currTaskGroup.size()&&!m_taskSeq.empty()) {
 				ExecSeq();
 			}
@@ -99,7 +99,7 @@ namespace valkyr {
 		TaskSeq m_taskSeq;
 		
 	private:
-		//Vec<vptr<Task>> m_unusedTasks;
+		Vec<vptr<Task>> m_unusedTasks;
 		TaskGroup m_currTaskGroup;
 	};
 }
