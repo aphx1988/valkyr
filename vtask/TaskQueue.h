@@ -33,17 +33,17 @@ namespace valkyr {
 			return (tail + len - head) % len;
 		}*/
 
-		bool isFull(){ 
+		inline bool isFull(){ 
 			//return head == ((tail + 1) % len);
 			return (in-out)==len;
 		}
 
-		bool isEmpty() {
+		inline bool isEmpty() {
 			//std::lock_guard lock(mtx);
 			return in == out;
 		}
 
-		int step(int i) {
+		inline int step(int i) {
 			return ++i;
 		}
 

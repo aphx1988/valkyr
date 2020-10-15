@@ -4,6 +4,9 @@
 #include "pch.h"
 #include "framework.h"
 #include "vwin.h"
+#include "vfg/dx/d3d12Renderer.h"
+
+valkyr::Renderer* g_pRenderer = new valkyr::d3d12Renderer();
 
 #define MAX_LOADSTRING 100
 
@@ -38,8 +41,10 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     {
         return FALSE;
     }
-
+    
     HACCEL hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_VWIN));
+
+    if(g_pRenderer) g_pRenderer->Init();
 
     MSG msg = {};
 
@@ -129,32 +134,16 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
     switch (message)
     {
-    case WM_COMMAND:
+    case WM_PAINT:
         {
-            int wmId = LOWORD(wParam);
-            // 分析菜单选择:
-            switch (wmId)
-            {
-            case IDM_ABOUT:
-                DialogBox(hInst, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, About);
-                break;
-            case IDM_EXIT:
-                DestroyWindow(hWnd);
-                break;
-            default:
-                return DefWindowProc(hWnd, message, wParam, lParam);
+            if (g_pRenderer) {
+                g_pRenderer->Update();
+                g_pRenderer->Render();
             }
         }
         break;
-    case WM_PAINT:
-        {
-            PAINTSTRUCT ps;
-            HDC hdc = BeginPaint(hWnd, &ps);
-            // TODO: 在此处添加使用 hdc 的任何绘图代码...
-            EndPaint(hWnd, &ps);
-        }
-        break;
     case WM_DESTROY:
+        g_pRenderer->Destroy();
         PostQuitMessage(0);
         break;
     default:

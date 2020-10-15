@@ -13,9 +13,6 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="vrender">
-      <UniqueIdentifier>{44928bad-95db-4a78-b556-99c579a1b0fa}</UniqueIdentifier>
-    </Filter>
     <Filter Include="vmalloc">
       <UniqueIdentifier>{78b81790-0af4-47c9-ab97-a50b50880bb0}</UniqueIdentifier>
     </Filter>
@@ -56,9 +53,6 @@
     </ClInclude>
     <ClInclude Include="pch.h">
       <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\vrender\RenderEngine.h">
-      <Filter>vrender</Filter>
     </ClInclude>
     <ClInclude Include="..\..\vmalloc\chunk.h">
       <Filter>vmalloc</Filter>
@@ -117,10 +111,16 @@
     <ClInclude Include="..\..\vtask\Scheduler.h">
       <Filter>vtask</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\vfg\pipeline.h">
+    <ClInclude Include="..\..\vfg\renderer.h">
       <Filter>vfg</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\vfg\dx\d3d12Pipeline.h">
+    <ClInclude Include="..\..\vfg\dx\d3d12Renderer.h">
+      <Filter>vfg\dx</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\vfg\dx\d3dcore.h">
+      <Filter>vfg\dx</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\vfg\dx\d3dx12.h">
       <Filter>vfg\dx</Filter>
     </ClInclude>
   </ItemGroup>
@@ -131,8 +131,8 @@
     <ClCompile Include="pch.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\vrender\RenderEngine.cpp">
-      <Filter>vrender</Filter>
+    <ClCompile Include="..\..\vfg\dx\d3d12Renderer.cpp">
+      <Filter>vfg\dx</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

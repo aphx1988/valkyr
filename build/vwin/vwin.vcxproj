@@ -122,9 +122,10 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <LanguageStandard>stdcpp17</LanguageStandard>
+      <AdditionalIncludeDirectories>$(SolutionDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -141,9 +142,10 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <LanguageStandard>stdcpplatest</LanguageStandard>
+      <AdditionalIncludeDirectories>$(SolutionDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -168,13 +170,14 @@
     <ClInclude Include="..\..\vcontainer\graph.h" />
     <ClInclude Include="..\..\vcore\vptr.h" />
     <ClInclude Include="..\..\vecs\arch.h" />
-    <ClInclude Include="..\..\vfg\dx\d3d12Pipeline.h" />
+    <ClInclude Include="..\..\vfg\dx\d3d12Renderer.h" />
+    <ClInclude Include="..\..\vfg\dx\d3dcore.h" />
+    <ClInclude Include="..\..\vfg\dx\d3dx12.h" />
     <ClInclude Include="..\..\vfg\fg.h" />
-    <ClInclude Include="..\..\vfg\pipeline.h" />
+    <ClInclude Include="..\..\vfg\renderer.h" />
     <ClInclude Include="..\..\vmalloc\chunk.h" />
     <ClInclude Include="..\..\vmalloc\ChunkMgr.h" />
     <ClInclude Include="..\..\vmalloc\ptr.h" />
-    <ClInclude Include="..\..\vrender\RenderEngine.h" />
     <ClInclude Include="..\..\vtask\TaskQueue.h" />
     <ClInclude Include="..\..\vtask\Scheduler.h" />
     <ClInclude Include="framework.h" />
@@ -184,12 +187,7 @@
     <ClInclude Include="vwin.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\vrender\RenderEngine.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
-    </ClCompile>
+    <ClCompile Include="..\..\vfg\dx\d3d12Renderer.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
