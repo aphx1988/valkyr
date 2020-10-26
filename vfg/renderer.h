@@ -1,17 +1,24 @@
 #pragma once
+#include "../vcore/vptr.h"
 
 namespace valkyr {
+
+	struct RenderSetting {
+		unsigned width;
+		unsigned height;
+		unsigned numFrames;
+		bool fullscreen;
+		bool softwareMode;
+	};
+
 	class Renderer {
 	public:
-		virtual void Init() = 0;
+		Renderer() {
+		}
+
+		virtual void Init(RenderSetting setting) = 0;
 		virtual void Update() = 0;
 		virtual void Render() = 0;
 		virtual void Destroy() = 0;
-
-		unsigned m_numFrameBuffer;
-		unsigned m_width;
-		unsigned m_height;
-		bool m_useWrap;
-		bool m_fullscreen;
 	};
 }

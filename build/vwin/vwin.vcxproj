@@ -161,6 +161,7 @@
     <ClInclude Include="..\..\vcontainer\blob.h" />
     <ClInclude Include="..\..\vcontainer\ContainerChunkNode.h" />
     <ClInclude Include="..\..\vcontainer\deque.h" />
+    <ClInclude Include="..\..\vcontainer\map.h" />
     <ClInclude Include="..\..\vcontainer\queue.h" />
     <ClInclude Include="..\..\vcontainer\span.h" />
     <ClInclude Include="..\..\vcontainer\stack.h" />
@@ -170,6 +171,9 @@
     <ClInclude Include="..\..\vcontainer\graph.h" />
     <ClInclude Include="..\..\vcore\vptr.h" />
     <ClInclude Include="..\..\vecs\arch.h" />
+    <ClInclude Include="..\..\vfg\cmd.h" />
+    <ClInclude Include="..\..\vfg\dx\d3d12cmd.h" />
+    <ClInclude Include="..\..\vfg\dx\d3d12fg.h" />
     <ClInclude Include="..\..\vfg\dx\d3d12Renderer.h" />
     <ClInclude Include="..\..\vfg\dx\d3dcore.h" />
     <ClInclude Include="..\..\vfg\dx\d3dx12.h" />
@@ -187,6 +191,7 @@
     <ClInclude Include="vwin.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\vfg\dx\d3d12cmd.cpp" />
     <ClCompile Include="..\..\vfg\dx\d3d12Renderer.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>

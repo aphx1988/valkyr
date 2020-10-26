@@ -6,7 +6,7 @@
 #include "vwin.h"
 #include "vfg/dx/d3d12Renderer.h"
 
-valkyr::Renderer* g_pRenderer = new valkyr::d3d12Renderer();
+valkyr::vptr<valkyr::Renderer> g_pRenderer = nullptr;
 
 #define MAX_LOADSTRING 100
 
@@ -43,8 +43,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     }
     
     HACCEL hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_VWIN));
-
-    if(g_pRenderer) g_pRenderer->Init();
+    
 
     MSG msg = {};
 
@@ -113,6 +112,9 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
    {
       return FALSE;
    }
+   g_pRenderer = vmake_ptr<valkyr::d3d12Renderer>(hWnd);
+   valkyr::RenderSetting setting {1920,1080,3,true,false};
+   if (g_pRenderer) g_pRenderer->Init(setting);
 
    ShowWindow(hWnd, nCmdShow);
    UpdateWindow(hWnd);
