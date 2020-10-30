@@ -126,9 +126,6 @@
     <ClInclude Include="..\..\vcontainer\map.h">
       <Filter>vcontainer</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\vfg\dx\d3d12fg.h">
-      <Filter>vfg\dx</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\vfg\cmd.h">
       <Filter>vfg</Filter>
     </ClInclude>

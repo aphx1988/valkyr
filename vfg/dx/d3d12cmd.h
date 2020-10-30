@@ -11,8 +11,8 @@ namespace valkyr {
 		d3d12CmdList(vptr<d3d12Renderer> renderer):m_renderer(renderer){
 		}
 
-		void ClearRTV(unsigned resId, float* color);
-		void ClearDSV(unsigned resId, float* color);
+		void ClearRTV(float* color);
+		void ClearDSV(float* color);
 
 		vptr<d3d12Renderer> m_renderer;
 

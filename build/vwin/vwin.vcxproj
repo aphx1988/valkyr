@@ -173,7 +173,6 @@
     <ClInclude Include="..\..\vecs\arch.h" />
     <ClInclude Include="..\..\vfg\cmd.h" />
     <ClInclude Include="..\..\vfg\dx\d3d12cmd.h" />
-    <ClInclude Include="..\..\vfg\dx\d3d12fg.h" />
     <ClInclude Include="..\..\vfg\dx\d3d12Renderer.h" />
     <ClInclude Include="..\..\vfg\dx\d3dcore.h" />
     <ClInclude Include="..\..\vfg\dx\d3dx12.h" />

@@ -77,12 +77,12 @@ void valkyr::d3d12Renderer::Init(RenderSetting setting) {
         rtvHeapDesc.NumDescriptors = setting.numFrames;
         rtvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
         rtvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
-        ThrowIfFailed(m_d3dDevice->CreateDescriptorHeap(&rtvHeapDesc, IID_PPV_ARGS(&m_rtvDsvHeap)));
+        ThrowIfFailed(m_d3dDevice->CreateDescriptorHeap(&rtvHeapDesc, IID_PPV_ARGS(&m_rtvHeap)));
 
         m_rtvDescriptorSize = m_d3dDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
     }
     {
-        CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle(m_rtvDsvHeap->GetCPUDescriptorHandleForHeapStart());
+        CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle(m_rtvHeap->GetCPUDescriptorHandleForHeapStart());
         for (UINT i = 0; i < setting.numFrames; i++)
         {
             ThrowIfFailed(m_swapChain->GetBuffer(i, IID_PPV_ARGS(&m_frameRT[i])));
@@ -116,7 +116,7 @@ void valkyr::d3d12Renderer::Render()
     ThrowIfFailed(m_graphicsCmdList->Reset(m_graphicsCmdAllocator.Get(), m_pso.Get()));
 
     m_graphicsCmdList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_frameRT[m_frameIdx].Get(), D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET));
-    CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle(m_rtvDsvHeap->GetCPUDescriptorHandleForHeapStart(), m_frameIdx, m_rtvDescriptorSize);
+    CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle(m_rtvHeap->GetCPUDescriptorHandleForHeapStart(), m_frameIdx, m_rtvDescriptorSize);
     // Record commands.
     const float clearColor[] = { 1.0f, 0.2f, 0.4f, 1.0f };
     m_graphicsCmdList->ClearRenderTargetView(rtvHandle, clearColor, 0, nullptr);

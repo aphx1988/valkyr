@@ -23,6 +23,26 @@ namespace valkyr {
 		void Render();
 		void Destroy();
 
+		Vec<ComPtr<ID3D12Resource>> m_resList;
+		Vec<ComPtr<ID3D12Resource>> m_tempResList;
+
+		ComPtr<ID3D12CommandAllocator> m_graphicsCmdAllocator;
+		ComPtr<ID3D12CommandAllocator> m_computeCmdAllocator;
+		ComPtr<ID3D12CommandQueue> m_graphicsCmdQueue;
+		ComPtr<ID3D12CommandQueue> m_computeCmdQueue;
+		ComPtr<ID3D12DescriptorHeap> m_rtvHeap;
+		ComPtr<ID3D12DescriptorHeap> m_dsvHeap;
+		//gpu visible
+		ComPtr<ID3D12DescriptorHeap> m_samplerHeap;
+		ComPtr<ID3D12DescriptorHeap> m_srvCbvUavHeap;
+
+		ComPtr<ID3D12PipelineState> m_pso;
+		ComPtr<ID3D12GraphicsCommandList> m_graphicsCmdList;
+		ComPtr<ID3D12CommandList> m_computeCmdList;
+		unsigned m_frameIdx;
+		unsigned m_rtvDescriptorSize;
+
+
 	private:
 		void getAdapter(IDXGIFactory1* factory,IDXGIAdapter1** adapter1);
 		void waitForPrevFrame();
@@ -31,22 +51,8 @@ namespace valkyr {
 		ComPtr<IDXGISwapChain3> m_swapChain;
 		Vec<ComPtr<ID3D12Resource>> m_frameRT;
 
-		Vec<ComPtr<ID3D12Resource>> m_resList;
-		Vec<ComPtr<ID3D12Resource>> m_tempResList;
-
-		ComPtr<ID3D12CommandAllocator> m_graphicsCmdAllocator;
-		ComPtr<ID3D12CommandAllocator> m_computeCmdAllocator;
-		ComPtr<ID3D12CommandQueue> m_graphicsCmdQueue;
-		ComPtr<ID3D12CommandQueue> m_computeCmdQueue;
-		ComPtr<ID3D12DescriptorHeap> m_rtvDsvHeap;
-		ComPtr<ID3D12DescriptorHeap> m_srvCbvUavHeap;
-		ComPtr<ID3D12PipelineState> m_pso;
-		ComPtr<ID3D12GraphicsCommandList> m_graphicsCmdList;
-		ComPtr<ID3D12CommandList> m_computeCmdList;
 		ComPtr<ID3D12Fence> m_fence;
 
-		unsigned m_rtvDescriptorSize;
-		unsigned m_frameIdx;
 		HANDLE m_fenceEvent;
 		UINT64 m_fenceValue;
 
