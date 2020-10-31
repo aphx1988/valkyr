@@ -1,5 +1,6 @@
 #pragma once
 #include "../vcore/vptr.h"
+#include "fg.h"
 
 namespace valkyr {
 
@@ -18,6 +19,7 @@ namespace valkyr {
 
 		virtual void Init(RenderSetting setting) = 0;
 		virtual void Update() = 0;
+		virtual void Setup(Fg fg) = 0;
 		virtual void Render() = 0;
 		virtual void Destroy() = 0;
 	};

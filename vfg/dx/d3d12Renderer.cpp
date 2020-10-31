@@ -137,6 +137,10 @@ void valkyr::d3d12Renderer::Destroy()
     CloseHandle(m_fenceEvent);
 }
 
+void valkyr::d3d12Renderer::Setup(Fg&& fg)
+{
+}
+
 void valkyr::d3d12Renderer::getAdapter(IDXGIFactory1* factory1, IDXGIAdapter1** adapter1)
 {
     *adapter1 = nullptr;

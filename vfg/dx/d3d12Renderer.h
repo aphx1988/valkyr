@@ -16,13 +16,18 @@ namespace valkyr {
 	public:
 		d3d12Renderer(HWND hwnd):Renderer(),m_hwnd(hwnd),m_frameRT(3),m_frameIdx(0),m_rtvDescriptorSize(0),m_fenceEvent(0),m_fenceValue(0)
 		{
+			m_currFg = vmake_ptr<Fg>();
+			m_scheduler = vmake_ptr<Scheduler<4>>();
 		}
 
 		void Init(RenderSetting setting);
 		void Update();
 		void Render();
 		void Destroy();
+		void Setup(Fg&& fg);
 
+		vptr<Fg> m_currFg;
+		vptr<Scheduler<4>> m_scheduler;
 		Vec<ComPtr<ID3D12Resource>> m_resList;
 		Vec<ComPtr<ID3D12Resource>> m_tempResList;
 

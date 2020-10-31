@@ -23,8 +23,28 @@ namespace valkyr {
 	};
 
 	class Fg {
+	public:
 		Vec<Res> resList;
 		Vec<Pass> passList;
 		Map<std::string_view, unsigned> passMap;
+
+		Fg(){}
+		Fg(Fg& fg) {
+
+		}
+		Fg(Fg&& fg){
+			resList = fg.resList;
+			passList = fg.passList;
+			passMap = fg.passMap;
+		}
+
+		Fg& operator =(Fg&& fg) {
+			if (this != &fg) {
+				resList = fg.resList;
+				passList = fg.passList;
+				passMap = fg.passMap;
+			}
+			return *this;
+		}
 	};
 }
