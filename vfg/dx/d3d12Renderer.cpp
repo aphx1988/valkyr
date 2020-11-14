@@ -4,6 +4,12 @@ using namespace valkyr;
 using Microsoft::WRL::ComPtr;
 
 void valkyr::d3d12Renderer::Init(RenderSetting setting) {
+    m_frameCount = setting.numFrames;
+    m_fenceEvents = new HANDLE[m_frameCount];
+    m_fenceValues = new UINT64[m_frameCount];
+    for (int i = 0; i < m_frameCount; i++) {
+        m_resList.push_back(nullptr);
+    }
 	UINT dxgiFactoryFlags = 0;
 #if defined(_DEBUG)
     {
@@ -77,16 +83,16 @@ void valkyr::d3d12Renderer::Init(RenderSetting setting) {
         rtvHeapDesc.NumDescriptors = setting.numFrames;
         rtvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
         rtvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
-        ThrowIfFailed(m_d3dDevice->CreateDescriptorHeap(&rtvHeapDesc, IID_PPV_ARGS(&m_rtvHeap)));
+        ThrowIfFailed(m_d3dDevice->CreateDescriptorHeap(&rtvHeapDesc, IID_PPV_ARGS(&m_heap[HEAP_RTV])));
 
         m_rtvDescriptorSize = m_d3dDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
     }
     {
-        CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle(m_rtvHeap->GetCPUDescriptorHandleForHeapStart());
-        for (UINT i = 0; i < setting.numFrames; i++)
+        CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle(m_heap[HEAP_RTV]->GetCPUDescriptorHandleForHeapStart());
+        for (UINT i = 0; i < m_frameCount; i++)
         {
-            ThrowIfFailed(m_swapChain->GetBuffer(i, IID_PPV_ARGS(&m_frameRT[i])));
-            m_d3dDevice->CreateRenderTargetView(m_frameRT[i].Get(), nullptr, rtvHandle);
+            ThrowIfFailed(m_swapChain->GetBuffer(i, IID_PPV_ARGS(&m_resList[i])));
+            m_d3dDevice->CreateRenderTargetView(m_resList[i].Get(), nullptr, rtvHandle);
             rtvHandle.Offset(1, m_rtvDescriptorSize);
         }
     }
@@ -97,9 +103,9 @@ void valkyr::d3d12Renderer::Init(RenderSetting setting) {
     ThrowIfFailed(m_graphicsCmdList->Close());
     {
         ThrowIfFailed(m_d3dDevice->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&m_fence)));
-        m_fenceValue = 1;
-        m_fenceEvent = CreateEvent(nullptr, FALSE, FALSE, nullptr);
-        if (m_fenceEvent == nullptr)
+        m_fenceValues[0] = 1;
+        m_fenceEvents[0] = CreateEvent(nullptr, FALSE, FALSE, nullptr);
+        if (m_fenceEvents[0] == nullptr)
         {
             ThrowIfFailed(HRESULT_FROM_WIN32(GetLastError()));
         }
@@ -115,12 +121,12 @@ void valkyr::d3d12Renderer::Render()
     ThrowIfFailed(m_graphicsCmdAllocator->Reset());
     ThrowIfFailed(m_graphicsCmdList->Reset(m_graphicsCmdAllocator.Get(), m_pso.Get()));
 
-    m_graphicsCmdList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_frameRT[m_frameIdx].Get(), D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET));
-    CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle(m_rtvHeap->GetCPUDescriptorHandleForHeapStart(), m_frameIdx, m_rtvDescriptorSize);
+    m_graphicsCmdList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_resList[m_frameIdx].Get(), D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET));
+    CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle(m_heap[HEAP_RTV]->GetCPUDescriptorHandleForHeapStart(), m_frameIdx, m_rtvDescriptorSize);
     // Record commands.
     const float clearColor[] = { 1.0f, 0.2f, 0.4f, 1.0f };
     m_graphicsCmdList->ClearRenderTargetView(rtvHandle, clearColor, 0, nullptr);
-    m_graphicsCmdList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_frameRT[m_frameIdx].Get(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT));
+    m_graphicsCmdList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_resList[m_frameIdx].Get(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT));
     ThrowIfFailed(m_graphicsCmdList->Close());
 
     ID3D12CommandList* ppCommandLists[] = { m_graphicsCmdList.Get() };
@@ -134,7 +140,7 @@ void valkyr::d3d12Renderer::Render()
 void valkyr::d3d12Renderer::Destroy()
 {
     waitForPrevFrame();
-    CloseHandle(m_fenceEvent);
+    CloseHandle(m_fenceEvents[0]);
 }
 
 void valkyr::d3d12Renderer::Setup(Fg&& fg)
@@ -194,13 +200,13 @@ void valkyr::d3d12Renderer::getAdapter(IDXGIFactory1* factory1, IDXGIAdapter1** 
 
 void valkyr::d3d12Renderer::waitForPrevFrame()
 {
-    const UINT64 fence = m_fenceValue;
+    const UINT64 fence = m_fenceValues[0];
     ThrowIfFailed(m_graphicsCmdQueue->Signal(m_fence.Get(), fence));
-    m_fenceValue++;
+    m_fenceValues[0]++;
     if (m_fence->GetCompletedValue() < fence)
     {
-        ThrowIfFailed(m_fence->SetEventOnCompletion(fence, m_fenceEvent));
-        WaitForSingleObject(m_fenceEvent, INFINITE);
+        ThrowIfFailed(m_fence->SetEventOnCompletion(fence, m_fenceEvents[0]));
+        WaitForSingleObject(m_fenceEvents[0], INFINITE);
     }
     m_frameIdx = m_swapChain->GetCurrentBackBufferIndex();
 }

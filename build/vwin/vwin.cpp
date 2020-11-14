@@ -113,7 +113,7 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
       return FALSE;
    }
    g_pRenderer = vmake_ptr<valkyr::d3d12Renderer>(hWnd);
-   valkyr::RenderSetting setting {1920,1080,3,true,false};
+   valkyr::RenderSetting setting {1920,1080,2,true,false};
    if (g_pRenderer) g_pRenderer->Init(setting);
 
    ShowWindow(hWnd, nCmdShow);

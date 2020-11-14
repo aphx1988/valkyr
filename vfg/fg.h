@@ -6,6 +6,16 @@
 #include "cmd.h"
 
 namespace valkyr {
+	enum ResState {
+		Created = 0 ,
+		NeverCreated,
+		Present, RenderTarget,SRV,UAV,CBV
+	};
+
+	enum class ResHeapType {
+		RTV,DSV,SRV_UAV_CBV,Sampler
+	};
+
 	struct Res {
 		unsigned id;
 		unsigned format;
@@ -13,38 +23,23 @@ namespace valkyr {
 		unsigned typeListIdx;
 		unsigned width;
 		unsigned height;
-		unsigned flag;
+		ResState state;
 		unsigned userTag;
 	};
 
 	struct Pass {
+		Vec<unsigned> inputs;
+		Vec<unsigned> outputs;
 		std::function<void(Vec<unsigned>, Vec<unsigned>)> setupFunc;
 		std::function<void(CmdList cmdList,Vec<unsigned>,Vec<unsigned>)> renderFunc;
 	};
 
-	class Fg {
+	struct Fg {
 	public:
 		Vec<Res> resList;
 		Vec<Pass> passList;
 		Map<std::string_view, unsigned> passMap;
 
-		Fg(){}
-		Fg(Fg& fg) {
-
-		}
-		Fg(Fg&& fg){
-			resList = fg.resList;
-			passList = fg.passList;
-			passMap = fg.passMap;
-		}
-
-		Fg& operator =(Fg&& fg) {
-			if (this != &fg) {
-				resList = fg.resList;
-				passList = fg.passList;
-				passMap = fg.passMap;
-			}
-			return *this;
-		}
+		Fg() {}
 	};
 }
