@@ -12,9 +12,8 @@ namespace valkyr {
 
 	using TaskSeq = std::queue<TaskGroup>;
 
-	template <size_t N>
 	struct WorkerCtx {
-		TaskQueue<N>& taskQueue;
+		TaskQueue& taskQueue;
 		std::atomic_size_t currGroupCompletedTasks;
 		unsigned threadWaitingTime;
 		//unsigned sleepingTime;
@@ -35,24 +34,23 @@ namespace valkyr {
 			std::this_thread::yield();
 		}
 
-		WorkerCtx(TaskQueue<N>& queue,unsigned waitingTime):taskQueue(queue),running(true)
+		WorkerCtx(TaskQueue& queue,unsigned waitingTime):taskQueue(queue),running(true)
 			,currGroupCompletedTasks(0),threadWaitingTime(waitingTime)
 		{
 		}
 	};
 
-	template <size_t N>
 	class Scheduler {
 	public:
-		Scheduler():m_taskQueue(),m_threadWaitingTime(0u),
+		Scheduler(unsigned num):m_taskQueue(num),m_threadWaitingTime(0u),
 			m_taskSeq(),m_currTaskGroup(),m_unusedTasks()
 		{
-			m_workerCtx = vmake_ptr<WorkerCtx<N>>(m_taskQueue,m_threadWaitingTime);
+			m_workerCtx = vmake_ptr<WorkerCtx>(m_taskQueue,m_threadWaitingTime);
 		}
 
 		void InitWorkers() {
 			for (auto i = 0u; i < m_taskQueue.len; i++) {
-				std::thread th(&WorkerCtx<N>::workLoop,m_workerCtx);
+				std::thread th(&WorkerCtx::workLoop,m_workerCtx);
 				th.detach();
 			}
 		}
@@ -94,8 +92,8 @@ namespace valkyr {
 		}
 
 		unsigned m_threadWaitingTime;
-		TaskQueue<N> m_taskQueue;
-		vptr<WorkerCtx<N>> m_workerCtx;
+		TaskQueue m_taskQueue;
+		vptr<WorkerCtx> m_workerCtx;
 		TaskSeq m_taskSeq;
 		
 	private:
