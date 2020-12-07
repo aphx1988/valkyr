@@ -16,17 +16,16 @@ namespace valkyr {
 	};
 
 	//thx: https://zhuanlan.zhihu.com/p/73640419
-	template <size_t N>
 	struct TaskQueue {
-		std::array<vptr<Task>,N> buff;
+		vptr<Task>* buff;
 		unsigned in;
 		unsigned out;
 		unsigned len;
 		//unsigned int maxOut;
 		std::mutex mtx;
 
-		TaskQueue() :buff(), len(buff.size()), in(0), out(0){
-			buff.fill(nullptr);
+		TaskQueue(unsigned length) :buff(), len(length), in(0), out(0){
+			buff = new vptr<Task>[len];
 		}
 
 		/*unsigned int size() {
@@ -50,7 +49,7 @@ namespace valkyr {
 		std::optional<vptr<Task>> get(){
 			std::lock_guard<std::mutex> guard(mtx);
 			if (!isEmpty()) {
-				std::optional<vptr<Task>> o(buff.at(out&(len-1)));
+				std::optional<vptr<Task>> o(buff[out&(len-1)]);
 				out = step(out);
 				if (o.value() == nullptr) {
 					return std::nullopt;
@@ -67,7 +66,7 @@ namespace valkyr {
 			if (isFull()) {
 				return false;
 			}
-			buff.at(in & (len - 1)) = t;
+			buff[in & (len - 1)] = t;
 			/*if (isFull()) {
 				out = step(out);
 			}*/

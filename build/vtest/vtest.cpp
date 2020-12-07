@@ -234,7 +234,7 @@ using std::thread;
 using std::this_thread::sleep_for;
 
 struct CodeTeam {
-	TaskQueue<4>& codeRepo;
+	TaskQueue& codeRepo;
 	//std::vector<bool> workersTouchingFish;
 	bool running;
 	std::atomic_size_t currGroupCompletedTasks;
@@ -251,7 +251,7 @@ struct CodeTeam {
 		std::this_thread::yield();
 	}
 
-	CodeTeam(TaskQueue<4>& queue):codeRepo(queue),running(true)//,workersTouchingFish(queue.len,true)
+	CodeTeam(TaskQueue& queue):codeRepo(queue),running(true)//,workersTouchingFish(queue.len,true)
 	{}
 
 };
@@ -285,7 +285,7 @@ public:
 
 
 void testTasks() {
-	TaskQueue<4> queue;
+	TaskQueue queue(4);
 	vptr<CodeTeam> team = vmake_ptr<CodeTeam>(queue);
 	for (auto i = 0u; i < 4; i++) {
 		thread th(&CodeTeam::coderGotoIcu, team, 0);
@@ -331,7 +331,7 @@ TaskSeq genTaskSeq() {
 void testScheduler() {
 	std::default_random_engine randEngine;
 	std::uniform_int_distribution<unsigned> randDist(0u, 2048u);
-	vptr<Scheduler<4>> scheduler = vmake_ptr<Scheduler<4>>();
+	vptr<Scheduler> scheduler = vmake_ptr<Scheduler>(4);
 	scheduler->InitWorkers();
 	scheduler->Add(genTaskSeq());
 	/*vptr<Task> t = vmake_ptr<PrintTask>(0);
