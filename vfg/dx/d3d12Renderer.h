@@ -20,12 +20,12 @@ namespace valkyr {
 		}
 	};
 
-	class d3d12Renderer : public Renderer {
+	class d3d12Renderer : public Renderer,public FgBuilder {
 	public:
 		d3d12Renderer(HWND hwnd):Renderer(),m_hwnd(hwnd),m_frameCount(0),m_frameIdx(0),m_rtvDescriptorSize(0)
 		{
 			m_currFg = vmake_ptr<Fg>();
-			m_scheduler = vmake_ptr<Scheduler<4>>();
+			m_scheduler = vmake_ptr<Scheduler>(4);
 		}
 
 		void Init(RenderSetting setting);
@@ -35,8 +35,9 @@ namespace valkyr {
 		void Setup(Fg&& fg);
 
 		vptr<Fg> m_currFg;
-		vptr<Scheduler<4>> m_scheduler;
+		vptr<Scheduler> m_scheduler;
 		Vec<ComPtr<ID3D12Resource>> m_resList;
+		Map<std::string_view, unsigned> resMap;
 		/*Vec<unsigned> m_tempResIdList;*/
 		
 
@@ -78,5 +79,9 @@ namespace valkyr {
 		UINT64* m_fenceValues;
 
 		HWND m_hwnd;
+
+		// Í¨¹ý FgBuilder ¼Ì³Ð
+		virtual void CreateRT(std::string_view name, unsigned format, unsigned downSampleRatio) override;
+		virtual void UseRT(std::string_view name) override;
 	};
 }

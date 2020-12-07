@@ -7,7 +7,7 @@ void valkyr::d3d12Renderer::Init(RenderSetting setting) {
     m_frameCount = setting.numFrames;
     m_fenceEvents = new HANDLE[m_frameCount];
     m_fenceValues = new UINT64[m_frameCount];
-    for (int i = 0; i < m_frameCount; i++) {
+    for (unsigned i = 0; i < m_frameCount; i++) {
         m_resList.push_back(nullptr);
     }
 	UINT dxgiFactoryFlags = 0;
@@ -120,13 +120,15 @@ void valkyr::d3d12Renderer::Render()
 {
     ThrowIfFailed(m_graphicsCmdAllocator->Reset());
     ThrowIfFailed(m_graphicsCmdList->Reset(m_graphicsCmdAllocator.Get(), m_pso.Get()));
-
-    m_graphicsCmdList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_resList[m_frameIdx].Get(), D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET));
+    ComPtr<ID3D12Resource> rtRes = m_resList[m_frameIdx];
+    CD3DX12_RESOURCE_BARRIER rtBarrier = CD3DX12_RESOURCE_BARRIER::Transition(m_resList[m_frameIdx].Get(), D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);
+    m_graphicsCmdList->ResourceBarrier(1, &rtBarrier);
     CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle(m_heap[HEAP_RTV]->GetCPUDescriptorHandleForHeapStart(), m_frameIdx, m_rtvDescriptorSize);
     // Record commands.
     const float clearColor[] = { 1.0f, 0.2f, 0.4f, 1.0f };
+    CD3DX12_RESOURCE_BARRIER prtBarrier = CD3DX12_RESOURCE_BARRIER::Transition(m_resList[m_frameIdx].Get(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
     m_graphicsCmdList->ClearRenderTargetView(rtvHandle, clearColor, 0, nullptr);
-    m_graphicsCmdList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_resList[m_frameIdx].Get(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT));
+    m_graphicsCmdList->ResourceBarrier(1, &prtBarrier);
     ThrowIfFailed(m_graphicsCmdList->Close());
 
     ID3D12CommandList* ppCommandLists[] = { m_graphicsCmdList.Get() };
@@ -211,4 +213,12 @@ void valkyr::d3d12Renderer::waitForPrevFrame()
         WaitForSingleObject(m_fenceEvents[0], INFINITE);
     }
     m_frameIdx = m_swapChain->GetCurrentBackBufferIndex();
+}
+
+void valkyr::d3d12Renderer::CreateRT(std::string_view name, unsigned format, unsigned downSampleRatio)
+{
+}
+
+void valkyr::d3d12Renderer::UseRT(std::string_view name)
+{
 }

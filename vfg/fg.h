@@ -38,16 +38,15 @@ namespace valkyr {
 	public:
 		Vec<Res> resList;
 		Vec<Pass> passList;
-		Map<std::string_view, unsigned> resMap;
 		Map<std::string_view, unsigned> passMap;
 
 		Fg() {}
 	};
 
-	struct FgBuilder {
+	class FgBuilder {
 	public:
-		void CreateRT(std::string_view name,unsigned format,unsigned downSampleRatio);
-		void UseRT(std::string_view name);
-		void CreateUAV()
+		virtual void CreateRT(std::string_view name,unsigned format,unsigned downSampleRatio)=0;
+		virtual void UseRT(std::string_view name)=0;
+		//virtual void CreateUAV() = 0;
 	};
 }
