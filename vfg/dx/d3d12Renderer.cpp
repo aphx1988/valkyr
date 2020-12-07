@@ -145,6 +145,8 @@ void valkyr::d3d12Renderer::Destroy()
 
 void valkyr::d3d12Renderer::Setup(Fg&& fg)
 {
+    //create global and scene res,including scn mtl,mvp, RTs are crreated during init
+    //create temp res in fg
 }
 
 void valkyr::d3d12Renderer::getAdapter(IDXGIFactory1* factory1, IDXGIAdapter1** adapter1)
