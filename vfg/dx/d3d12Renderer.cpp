@@ -221,4 +221,5 @@ void valkyr::d3d12Renderer::CreateRT(std::string_view name, unsigned format, uns
 
 void valkyr::d3d12Renderer::UseRT(std::string_view name)
 {
+
 }

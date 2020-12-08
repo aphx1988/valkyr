@@ -37,7 +37,8 @@ namespace valkyr {
 		vptr<Fg> m_currFg;
 		vptr<Scheduler> m_scheduler;
 		Vec<ComPtr<ID3D12Resource>> m_resList;
-		Map<std::string_view, unsigned> resMap;
+		Map<std::string_view, unsigned> m_resMap;
+
 		/*Vec<unsigned> m_tempResIdList;*/
 		
 
@@ -47,8 +48,10 @@ namespace valkyr {
 		ComPtr<ID3D12CommandQueue> m_computeCmdQueue;
 		ComPtr<ID3D12DescriptorHeap> m_heap[HEAP_NUM];
 		//for memory release
-		unsigned tempStart[HEAP_NUM];
-		unsigned tempSize[HEAP_NUM];
+		unsigned tempResStart[HEAP_NUM];
+		unsigned tempResSize[HEAP_NUM];
+		unsigned scnResStart[HEAP_NUM];
+		unsigned scnResSize[HEAP_NUM];
 
 		ComPtr<ID3D12PipelineState> m_pso;
 		ComPtr<ID3D12PipelineState> m_computeState;
