@@ -39,7 +39,7 @@ namespace valkyr {
 		Vec<ComPtr<ID3D12Resource>> m_resList;
 		Map<std::string_view, unsigned> m_resMap;
 
-		/*Vec<unsigned> m_tempResIdList;*/
+		Vec<unsigned> m_tempResIdList;
 		
 
 		ComPtr<ID3D12CommandAllocator> m_graphicsCmdAllocator;

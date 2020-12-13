@@ -31,7 +31,7 @@ namespace valkyr {
 		Vec<unsigned> inputs;
 		Vec<unsigned> outputs;
 		std::function<void(Vec<unsigned>, Vec<unsigned>)> setupFunc;
-		std::function<void(CmdList cmdList,Vec<unsigned>,Vec<unsigned>)> renderFunc;
+		std::function<void(FgBuilder builder,Vec<unsigned>,Vec<unsigned>)> renderFunc;
 	};
 
 	struct Fg {
