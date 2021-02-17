@@ -3,7 +3,9 @@ file(GLOB VTEST_H "*.h" "*.hpp")
 
 add_executable(vtest ${VTEST_SRC})
 
-set(THREADS_PREFER_PTHREAD_FLAG ON)
-find_package(Threads)
-target_link_libraries(vtest PUBLIC Threads::Threads)
+IF(LINUX)
+  set(THREADS_PREFER_PTHREAD_FLAG ON)
+  find_package(Threads REQUIRED)
+  target_link_libraries(vtest PUBLIC Threads::Threads)
+ENDIF()
 
