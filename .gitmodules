@@ -1,0 +1,6 @@
+[submodule "build/vkapp/external/glfw"]
+	path = build/vkapp/external/glfw
+	url = https://github.com/glfw/glfw.git
+[submodule "build/vkapp/external/glm"]
+	path = build/vkapp/external/glm
+	url = https://github.com/g-truc/glm.git
