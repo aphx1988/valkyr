@@ -71,6 +71,7 @@ namespace valkyr {
 				out = step(out);
 			}*/
 			in = step(in);
+      return true;
 		}
 
 		/*void put(T&& t) {

@@ -1,5 +1,11 @@
 #pragma once
+#ifdef _WIN32 
 #include <xmemory>
+#endif
+#ifdef _linux_
+#include <sys/types.h>
+#endif
+#include <cstring>
 
 namespace valkyr {
 	const size_t CHUNK_SIZE = 64 * 1024;

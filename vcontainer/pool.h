@@ -221,8 +221,9 @@ namespace valkyr {
 			Entt<T>* r = Pop(pool);
 			if(r == nullptr){
 				r = NewFrom<T>(pool);
-				return r;
+				//return r;
 			}
+      return r;
 		}
 
 		template <typename T>

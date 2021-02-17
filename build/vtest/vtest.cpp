@@ -329,8 +329,8 @@ TaskSeq genTaskSeq() {
 }
 
 void testScheduler() {
-	std::default_random_engine randEngine;
-	std::uniform_int_distribution<unsigned> randDist(0u, 2048u);
+	//std::default_random_engine randEngine;
+	//std::uniform_int_distribution<unsigned> randDist(0u, 2048u);
 	vptr<Scheduler> scheduler = vmake_ptr<Scheduler>(4);
 	scheduler->InitWorkers();
 	scheduler->Add(genTaskSeq());
@@ -356,7 +356,9 @@ int main()
 	//poolTest();
 	//poolGroupTest();
 	testScheduler();
+#ifdef _WIN32
 	system("pause");
+#endif
 	return 0;
 }
 
