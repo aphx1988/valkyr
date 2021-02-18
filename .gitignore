@@ -4,3 +4,5 @@
 .vs
 Debug
 /build/valkyr.sln
+/build/vkapp/*.sln
+x64

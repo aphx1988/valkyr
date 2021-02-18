@@ -2,19 +2,28 @@ file(GLOB VKAPP_SRC "*.cpp" "*.h")
 
 add_executable(vkapp ${VKAPP_SRC})
 
-include_directories(external/glm)
-include_directories(external/glfw)
-
 IF(LINUX)
   set(THREADS_PREFER_PTHREAD_FLAG ON)
   find_package(Threads REQUIRED)
-  target_link_libraries(vtest PUBLIC Threads::Threads)
+  target_link_libraries(vkapp PUBLIC Threads::Threads)
 ENDIF()
+
+#find_package(glm REQUIRED HINTS "external/glm")
+set(GLM_TEST_ENABLE OFF CACHE BOOL "" FORCE)
+add_subdirectory(external/glm)
+include_directories(external/glm)
+target_link_libraries(vkapp glm::glm)
+
+set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
+set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+add_subdirectory(external/glfw)
+include_directories(external/glfw)
+target_link_libraries(vkapp glfw)
 
 IF (NOT CMAKE_VERSION VERSION_LESS 3.7.0)
   find_package(Vulkan)
 ENDIF()
-
 IF (NOT Vulkan_FOUND)
 	find_library(Vulkan_LIBRARY NAMES vulkan HINTS "$ENV{VULKAN_SDK}/lib" REQUIRED)
 	IF (Vulkan_LIBRARY)
@@ -23,4 +32,6 @@ IF (NOT Vulkan_FOUND)
     MESSAGE("Using Vulkan SDK")
 	ENDIF()
 ENDIF()
+include_directories(${Vulkan_INCLUDE_DIRS})
+target_link_libraries(vkapp ${Vulkan_LIBRARIES})
 
