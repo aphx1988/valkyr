@@ -6,3 +6,5 @@ Debug
 /build/valkyr.sln
 /build/vkapp/*.sln
 x64
+.vscode
+cmake_build/*

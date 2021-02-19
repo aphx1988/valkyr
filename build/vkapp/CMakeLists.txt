@@ -1,5 +1,12 @@
 file(GLOB VKAPP_SRC "*.cpp" "*.h") 
 
+include_directories(${CMAKE_SOURCE_DIR}/vcore)
+include_directories(${CMAKE_SOURCE_DIR}/vmalloc)
+include_directories(${CMAKE_SOURCE_DIR}/vtask)
+include_directories(${CMAKE_SOURCE_DIR}/vcontainer)
+include_directories(${CMAKE_SOURCE_DIR}/vecs)
+include_directories(${CMAKE_SOURCE_DIR}/vfg)
+
 add_executable(vkapp ${VKAPP_SRC})
 
 IF(LINUX)
