@@ -4,6 +4,7 @@
 #include "../../vcontainer/map.h"
 #include "../../vtask/Scheduler.h"
 #include "d3dcore.h"
+#include <string_view>
 
 using Microsoft::WRL::ComPtr;
 
@@ -85,6 +86,14 @@ namespace valkyr {
 
 		// Í¨¹ý FgBuilder ¼Ì³Ð
 		virtual void CreateRT(std::string_view name, unsigned format, unsigned downSampleRatio) override;
-		virtual void UseRT(std::string_view name) override;
+		virtual void Read(std::string_view name) override;
+    virtual void Read(unsigned id) override;
+    virtual void Write(std::string_view name) override;
+    virtual void Write(unsigned id) override;
+    virtual void ReadTemp(std::string_view name) override;
+    virtual void ReadTemp(unsigned id) override;
+    virtual void WriteTemp(std::string_view name) override;
+    virtual void WriteTemp(unsigned id) override;
+
 	};
 }

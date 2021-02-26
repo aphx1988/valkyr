@@ -1,4 +1,5 @@
 #include "d3d12Renderer.h"
+#include <string_view>
 
 using namespace valkyr;
 using Microsoft::WRL::ComPtr;
@@ -219,7 +220,36 @@ void valkyr::d3d12Renderer::CreateRT(std::string_view name, unsigned format, uns
 {
 }
 
-void valkyr::d3d12Renderer::UseRT(std::string_view name)
+void valkyr::d3d12Renderer::Read(std::string_view name)
 {
 
+}
+
+void valkyr::d3d12Renderer::Read(unsigned id)
+{
+
+}
+
+void valkyr::d3d12Renderer::ReadTemp(std::string_view name){
+  
+}
+
+void valkyr::d3d12Renderer::ReadTemp(unsigned id){
+  
+}
+
+void valkyr::d3d12Renderer::Write(std::string_view name){
+  
+}
+
+void valkyr::d3d12Renderer::Write(unsigned id){
+  
+}
+
+void valkyr::d3d12Renderer::WriteTemp(std::string_view name){
+  
+}
+
+void valkyr::d3d12Renderer::WriteTemp(unsigned id){
+  
 }

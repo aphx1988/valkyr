@@ -165,7 +165,7 @@ void poolTest() {
 	std::default_random_engine randEngine;
 	std::uniform_int_distribution<unsigned> randDist(0, 9);
 	auto start = std::chrono::system_clock::now();
-	size_t maxCapacity = 4500000;// PoolUtil::GetMaxCapacityFor<Tuple<C,Rot,Position>>(chunk);
+	size_t maxCapacity = 10000000;// PoolUtil::GetMaxCapacityFor<Tuple<C,Rot,Position>>(chunk);
 	int usedSize;
 	Pool<MyEntt_t>* curr = pool;
 	for (size_t i = 0; i < maxCapacity; i++) {
@@ -350,12 +350,12 @@ void testScheduler() {
 
 int main()
 {
-	/*chunkTest();
-	spanTest2();
-	myTupleTest();*/
-	//poolTest();
+	//chunkTest();
+	//spanTest2();
+	//myTupleTest();
+	poolTest();
 	//poolGroupTest();
-	testScheduler();
+	//testScheduler();
 #ifdef _WIN32
 	system("pause");
 #endif

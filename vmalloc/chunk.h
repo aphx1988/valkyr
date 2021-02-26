@@ -103,14 +103,15 @@ namespace valkyr {
 			}
 			T* obj = new (chunk->buff + info->head)T();
 			info->usedSize += sizeof(T);
-			if (info->usedSize >= CHUNK_SIZE) {
-				info->usedSize = CHUNK_SIZE;
-				info->head = CHUNK_SIZE;
-			}
-			else {
-				info->head += sizeof(T);
-				info->usedSize += sizeof(T);
-			}
+      info->head+=sizeof(T);
+			//if (info->usedSize >= CHUNK_SIZE) {
+			//	info->usedSize = CHUNK_SIZE;
+			//	info->head = CHUNK_SIZE;
+			//}
+			//else {
+			//	info->head += sizeof(T);
+			//	info->usedSize += sizeof(T);
+			//}
 			return obj;
 		}
 
@@ -121,15 +122,16 @@ namespace valkyr {
 				return nullptr;
 			}
 			T* obj = new (chunk->buff + info->head)T(std::forward<Args>(args)...);
+      info->head += sizeof(T);
 			info->usedSize += sizeof(T);
-			if (info->usedSize >= CHUNK_SIZE) {
-				info->usedSize = CHUNK_SIZE;
-				info->head = CHUNK_SIZE;
-			}
-			else {
-				info->head += sizeof(T);
-				info->usedSize += sizeof(T);
-			}
+			//if (info->usedSize >= CHUNK_SIZE) {
+			//	info->usedSize = CHUNK_SIZE;
+			//	info->head = CHUNK_SIZE;
+			//}
+			//else {
+			//	info->head += sizeof(T);
+			//	info->usedSize += sizeof(T);
+			//}
 			return obj;
 		}
 

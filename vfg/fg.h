@@ -1,9 +1,10 @@
 #pragma once
-#include "../vcontainer/graph.h"
+//#include "../vcontainer/graph.h"
 #include "../vcontainer/vec.h"
 #include "../vcontainer/map.h"
 #include "../vtask/Scheduler.h"
 #include "cmd.h"
+#include <string_view>
 
 namespace valkyr {
 	enum ResState {
@@ -16,6 +17,10 @@ namespace valkyr {
 		RTV,DSV,SRV_UAV_CBV,Sampler
 	};
 
+  enum class ResActionType{
+    Create,Destroy,Read,Write
+  };
+
 	struct Res {
 		unsigned id;
 		unsigned format;
@@ -26,15 +31,28 @@ namespace valkyr {
 		ResState state;
 		unsigned userTag;
 	};
+  
+  struct ResNode {
+    unsigned resId;
+    unsigned action;
+  };
 
 	class FgBuilder {
 	public:
 		virtual void CreateRT(std::string_view name, unsigned format, unsigned downSampleRatio) = 0;
-		virtual void UseRT(std::string_view name) = 0;
+		virtual void Read(std::string_view name) = 0;
+    virtual void Read(unsigned id) = 0;
+    virtual void Write(std::string_view name) = 0; 
+    virtual void Write(unsigned id) = 0;
+    virtual void ReadTemp(std::string_view name) = 0;
+    virtual void ReadTemp(unsigned id) = 0;
+    virtual void WriteTemp(std::string_view name) = 0; 
+    virtual void WriteTemp(unsigned id) = 0;
 		//virtual void CreateUAV() = 0;
 	};
 
 	struct Pass {
+    unsigned id;
 		std::string_view name;
 		/*Vec<unsigned> inputs;
 		Vec<unsigned> outputs;*/
@@ -49,11 +67,23 @@ namespace valkyr {
 		}
 	};
 
+ // struct PassNode {
+ //   unsigned passId;
+ //   Vec<unsigned> readTempList;
+ //   Vec<unsigned> readList;
+ //   Vec<unsigned> writeTempList;
+ //   Vec<unsigned> writeList;
+ // };
+
 	struct Fg {
 	public:
-		Vec<Res> resList;
+		Vec<Res> tempResList;
+		Vec<Res> importedResList;
 		Vec<Pass> passList;
-		Map<std::string_view, unsigned> passMap;
+		Map<std::string_view,Pass> passMap;
+    Map<std::string_view,Res> resMap;
+
+    Map<unsigned,ResNode> passResMap;
 
 		Fg() {}
 	};
