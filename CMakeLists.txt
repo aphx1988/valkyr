@@ -20,7 +20,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin/")
 
 #file(GLOB SOURCE *.cpp )
 
-add_subdirectory(build/vtest)
-add_subdirectory(build/vkapp)
+add_subdirectory(example/vtest)
+add_subdirectory(example/vkapp)
 
 

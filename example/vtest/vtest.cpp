@@ -166,7 +166,6 @@ void poolTest() {
 	std::uniform_int_distribution<unsigned> randDist(0, 9);
 	auto start = std::chrono::system_clock::now();
 	size_t maxCapacity = 10000000;// PoolUtil::GetMaxCapacityFor<Tuple<C,Rot,Position>>(chunk);
-	int usedSize;
 	Pool<MyEntt_t>* curr = pool;
 	for (size_t i = 0; i < maxCapacity; i++) {
 		auto it = PoolUtil::PopOrCreate<MyEntt_t>(curr);
@@ -324,7 +323,7 @@ TaskSeq genTaskSeq() {
 	seq.push(group2);
 	vptr<Task> t3 = vmake_ptr<PrintTask>(666u);
 	TaskGroup group3 = { t3 };
-	seq.push(group3);
+	// seq.push(group3);
 	return seq;
 }
 
