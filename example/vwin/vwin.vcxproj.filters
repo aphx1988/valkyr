@@ -146,6 +146,9 @@
     <ClCompile Include="..\..\vfg\dx\d3d12cmd.cpp">
       <Filter>vfg\dx</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\vfg\fg.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="vwin.rc">

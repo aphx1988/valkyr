@@ -9,12 +9,15 @@
 using Microsoft::WRL::ComPtr;
 
 namespace valkyr {
-	const unsigned HEAP_NUM = 4u;
-	const unsigned HEAP_RTV = 0u;
-	const unsigned HEAP_DSV = 1u;
+	const unsigned DESCRIPTOR_HEAP_NUM = 6u;
+	const unsigned DECRIPTOR_HEAP_RTV = 0u;
+	const unsigned DECRIPTOR_HEAP_DSV = 1u;
 	//gpu visible
-	const unsigned HEAP_CBV_SRV_UAV = 2u;
-	const unsigned HEAP_SAMPLER = 3u;
+	const unsigned DECRIPTOR_HEAP_CBV_SRV_UAV = 2u;
+	const unsigned DECRIPTOR_HEAP_SAMPLER = 3u;
+	//upload is cpu access, default only gpu
+	const unsigned DECRIPTOR_HEAP_CBV_SRV_UAV_UPLOAD = 4u;
+	const unsigned DECRIPTOR_HEAP_SAMPLER_UPLOAD = 5u;
 
 	class dxRenderTask :public Task {
 		void exec() {
@@ -37,6 +40,7 @@ namespace valkyr {
 
 		vptr<Fg> m_currFg;
 		vptr<Scheduler> m_scheduler;
+		//first mFrameNum are frame buffers
 		Vec<ComPtr<ID3D12Resource>> m_resList;
 		Map<std::string_view, unsigned> m_resMap;
 
@@ -47,12 +51,13 @@ namespace valkyr {
 		ComPtr<ID3D12CommandAllocator> m_computeCmdAllocator;
 		ComPtr<ID3D12CommandQueue> m_graphicsCmdQueue;
 		ComPtr<ID3D12CommandQueue> m_computeCmdQueue;
-		ComPtr<ID3D12DescriptorHeap> m_heap[HEAP_NUM];
+		//first mFrameNum is frame buffer
+		ComPtr<ID3D12DescriptorHeap> m_descriptorHeap[DESCRIPTOR_HEAP_NUM];
 		//for memory release
-		unsigned tempResStart[HEAP_NUM];
-		unsigned tempResSize[HEAP_NUM];
-		unsigned scnResStart[HEAP_NUM];
-		unsigned scnResSize[HEAP_NUM];
+		unsigned tempResStart[DESCRIPTOR_HEAP_NUM];
+		unsigned tempResSize[DESCRIPTOR_HEAP_NUM];
+		unsigned scnResStart[DESCRIPTOR_HEAP_NUM];
+		unsigned scnResSize[DESCRIPTOR_HEAP_NUM];
 
 		ComPtr<ID3D12PipelineState> m_pso;
 		ComPtr<ID3D12PipelineState> m_computeState;
@@ -86,14 +91,14 @@ namespace valkyr {
 
 		// Í¨¹ý FgBuilder ¼Ì³Ð
 		virtual void CreateRT(std::string_view name, unsigned format, unsigned downSampleRatio) override;
+		virtual void Create(std::string_view name, ResType resType, unsigned format, unsigned width, unsigned height) override;
+		virtual void CreateCB(std::string_view name, void** constantData) override;
 		virtual void Read(std::string_view name) override;
-    virtual void Read(unsigned id) override;
-    virtual void Write(std::string_view name) override;
-    virtual void Write(unsigned id) override;
-    virtual void ReadTemp(std::string_view name) override;
-    virtual void ReadTemp(unsigned id) override;
-    virtual void WriteTemp(std::string_view name) override;
-    virtual void WriteTemp(unsigned id) override;
+		virtual void Read(unsigned id) override;
+		virtual void Write(std::string_view name) override;
+		virtual void Write(unsigned id) override;
+		virtual void Read(vptr<Res> res) override;
+		virtual void Write(vptr<Res> res) override;
 
 	};
 }

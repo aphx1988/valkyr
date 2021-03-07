@@ -54,7 +54,6 @@ void valkyr::d3d12Renderer::Init(RenderSetting setting) {
     queueDesc.Type = D3D12_COMMAND_LIST_TYPE_COMPUTE;
     ThrowIfFailed(m_d3dDevice->CreateCommandQueue(&queueDesc, IID_PPV_ARGS(&m_computeCmdQueue)));
 
-    // Describe and create the swap chain.
     DXGI_SWAP_CHAIN_DESC1 swapChainDesc = {};
     swapChainDesc.BufferCount = setting.numFrames;
     swapChainDesc.Width = setting.width;
@@ -66,7 +65,7 @@ void valkyr::d3d12Renderer::Init(RenderSetting setting) {
 
     ComPtr<IDXGISwapChain1> swapChain;
     ThrowIfFailed(dxgiFactory->CreateSwapChainForHwnd(
-        m_graphicsCmdQueue.Get(),        // Swap chain needs the queue so that it can force a flush on it.
+        m_graphicsCmdQueue.Get(),
         m_hwnd,
         &swapChainDesc,
         nullptr,
@@ -84,12 +83,12 @@ void valkyr::d3d12Renderer::Init(RenderSetting setting) {
         rtvHeapDesc.NumDescriptors = setting.numFrames;
         rtvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
         rtvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
-        ThrowIfFailed(m_d3dDevice->CreateDescriptorHeap(&rtvHeapDesc, IID_PPV_ARGS(&m_heap[HEAP_RTV])));
+        ThrowIfFailed(m_d3dDevice->CreateDescriptorHeap(&rtvHeapDesc, IID_PPV_ARGS(&m_descriptorHeap[DECRIPTOR_HEAP_RTV])));
 
         m_rtvDescriptorSize = m_d3dDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
     }
     {
-        CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle(m_heap[HEAP_RTV]->GetCPUDescriptorHandleForHeapStart());
+        CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle(m_descriptorHeap[DECRIPTOR_HEAP_RTV]->GetCPUDescriptorHandleForHeapStart());
         for (UINT i = 0; i < m_frameCount; i++)
         {
             ThrowIfFailed(m_swapChain->GetBuffer(i, IID_PPV_ARGS(&m_resList[i])));
@@ -124,32 +123,36 @@ void valkyr::d3d12Renderer::Render()
     ComPtr<ID3D12Resource> rtRes = m_resList[m_frameIdx];
     CD3DX12_RESOURCE_BARRIER rtBarrier = CD3DX12_RESOURCE_BARRIER::Transition(m_resList[m_frameIdx].Get(), D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);
     m_graphicsCmdList->ResourceBarrier(1, &rtBarrier);
-    CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle(m_heap[HEAP_RTV]->GetCPUDescriptorHandleForHeapStart(), m_frameIdx, m_rtvDescriptorSize);
+    CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle(m_descriptorHeap[DECRIPTOR_HEAP_RTV]->GetCPUDescriptorHandleForHeapStart(), m_frameIdx, m_rtvDescriptorSize);
     // Record commands.
     const float clearColor[] = { 1.0f, 0.2f, 0.4f, 1.0f };
     CD3DX12_RESOURCE_BARRIER prtBarrier = CD3DX12_RESOURCE_BARRIER::Transition(m_resList[m_frameIdx].Get(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
     m_graphicsCmdList->ClearRenderTargetView(rtvHandle, clearColor, 0, nullptr);
     m_graphicsCmdList->ResourceBarrier(1, &prtBarrier);
     ThrowIfFailed(m_graphicsCmdList->Close());
-
     ID3D12CommandList* ppCommandLists[] = { m_graphicsCmdList.Get() };
     m_graphicsCmdQueue->ExecuteCommandLists(_countof(ppCommandLists), ppCommandLists);
     ThrowIfFailed(m_swapChain->Present(1, 0));
-
     waitForPrevFrame();
 
-}
-
-void valkyr::d3d12Renderer::Destroy()
-{
-    waitForPrevFrame();
-    CloseHandle(m_fenceEvents[0]);
 }
 
 void valkyr::d3d12Renderer::Setup(Fg&& fg)
 {
     //create global and scene res,including scn mtl,mvp, RTs are crreated during init
     //create temp res in fg
+    Fg frameGraph = std::forward<Fg>(fg);
+    for (int i = 0; i < frameGraph.firstPassLayer.size(); i++) {
+        vptr<Pass> pass = frameGraph.firstPassLayer[i].pPass;
+        pass->setupFunc(*this);
+
+    }
+}
+
+void valkyr::d3d12Renderer::Destroy()
+{
+    waitForPrevFrame();
+    CloseHandle(m_fenceEvents[0]);
 }
 
 void valkyr::d3d12Renderer::getAdapter(IDXGIFactory1* factory1, IDXGIAdapter1** adapter1)
@@ -220,36 +223,46 @@ void valkyr::d3d12Renderer::CreateRT(std::string_view name, unsigned format, uns
 {
 }
 
+void valkyr::d3d12Renderer::Create(std::string_view name, ResType resType, unsigned format, unsigned width, unsigned height)
+{
+}
+
+void valkyr::d3d12Renderer::CreateCB(std::string_view name, void** constantData)
+{
+}
+
 void valkyr::d3d12Renderer::Read(std::string_view name)
 {
-
 }
 
 void valkyr::d3d12Renderer::Read(unsigned id)
 {
-
 }
 
-void valkyr::d3d12Renderer::ReadTemp(std::string_view name){
-  
-}
+//void valkyr::d3d12Renderer::ReadTemp(std::string_view name){
+//  
+//}
 
-void valkyr::d3d12Renderer::ReadTemp(unsigned id){
-  
-}
+//void valkyr::d3d12Renderer::ReadTemp(unsigned id){
+//}
 
 void valkyr::d3d12Renderer::Write(std::string_view name){
-  
 }
 
 void valkyr::d3d12Renderer::Write(unsigned id){
-  
 }
 
-void valkyr::d3d12Renderer::WriteTemp(std::string_view name){
-  
+void valkyr::d3d12Renderer::Read(vptr<Res> res)
+{
 }
 
-void valkyr::d3d12Renderer::WriteTemp(unsigned id){
-  
+void valkyr::d3d12Renderer::Write(vptr<Res> res)
+{
 }
+
+
+//void valkyr::d3d12Renderer::WriteTemp(std::string_view name){
+//}
+//void valkyr::d3d12Renderer::WriteTemp(unsigned id){
+//}
+
