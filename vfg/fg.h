@@ -9,8 +9,6 @@
 
 namespace valkyr {
 	enum ResState {
-		Created = 0,
-		NeverCreated,
 		Present,
 		RenderTarget,
 		SRV,
@@ -19,7 +17,7 @@ namespace valkyr {
 		Destroyed
 	};
 
-	enum class ResType { RTV = 0, DSV, SRV_UAV_CBV, Sampler };
+	enum class ResType { RTV = 0, FrameRT, DSV, SRV, UAV, CBV, Sampler, VB, IB };
 
 	enum class ResActionType { Create, Destroy, Read, Write };
 
@@ -28,7 +26,7 @@ namespace valkyr {
 	struct Res {
 		unsigned id;
 		unsigned format;
-		unsigned type;
+		ResType type;
 		unsigned typeListIdx;
 		unsigned width;
 		unsigned height;
@@ -45,34 +43,37 @@ namespace valkyr {
 
 	class FgBuilder {
 	public:
-		virtual void CreateRT(std::string_view name, unsigned format, unsigned downSampleRatio) = 0;
-		virtual void Create(std::string_view name, ResType resType, unsigned format, unsigned width, unsigned height) = 0;
-		virtual void CreateCB(std::string_view name, void** constantData) = 0;
-		virtual void Read(std::string_view name) = 0;
-		virtual void Read(unsigned id) = 0;
-		virtual void Read(vptr<Res> res) = 0;
-		virtual void Write(std::string_view name) = 0;
-		virtual void Write(unsigned id) = 0;
-		virtual void Write(vptr<Res> res) = 0;
-		//virtual void ReadTemp(std::string_view name) = 0;
-		//virtual void ReadTemp(unsigned id) = 0;
-		//virtual void WriteTemp(std::string_view name) = 0;
-		//virtual void WriteTemp(unsigned id) = 0;
+		virtual void CreateRT(std::string_view name, std::string_view passName, unsigned format, unsigned downSampleRatio) = 0;
+		virtual void CreateTex(std::string_view name, std::string_view passName, ResType resType, unsigned format, unsigned width, unsigned height) = 0;
+		virtual void CreateCB(std::string_view name, std::string_view passName, void** constantData) = 0;
+		virtual void CreateUAV(std::string_view name, std::string_view passName, unsigned width, unsigned height) = 0;
+		//create vb and ib
+		virtual void ReadTex(std::string_view name) = 0;
+		virtual void ReadRT(std::string_view name) = 0;
+		virtual void WriteRT(std::string_view name) = 0;
+		virtual void WriteUAV(std::string_view name) = 0;
 	};
 
 	struct Pass {
 		unsigned id;
 		std::string_view name;
+		std::string_view desc;
 		/*Vec<unsigned> inputs;
 		Vec<unsigned> outputs;*/
 		std::function<void(FgBuilder& builder)> setupFunc;
 		std::function<void(FgBuilder& builder, CmdList& cmd, Vec<unsigned>, Vec<unsigned>)> renderFunc;
+		alignas(8) bool isComputing;
+		size_t pads[2] = { 0,0 };
 
-		Pass(std::string_view tagName,const std::function<void(FgBuilder& builder)>& setupFun
+
+		Pass() { id = 0; isComputing = false; }
+		Pass(std::string_view tagName,bool computing,const std::function<void(FgBuilder& builder)>& setupFun
 			,const std::function<void(FgBuilder& builder, CmdList& cmd, Vec<unsigned>,Vec<unsigned>)>& renderFun) {
+			id = 0;
 			setupFunc = setupFun;
 			renderFunc = renderFun;
 			name = tagName;
+			isComputing = computing;
 		}
 	};
 	
@@ -83,25 +84,7 @@ namespace valkyr {
 		vptr<Pass> pNextPass;
 	};
 
-	// struct PassNode {
-	//   unsigned passId;
-	//   Vec<unsigned> readTempList;
-	//   Vec<unsigned> readList;
-	//   Vec<unsigned> writeTempList;
-	//   Vec<unsigned> writeList;
-	// };
-
 	struct Fg {
-		unsigned scnResStartIdx;
-		unsigned tempResStartIdx;
-		Vec<Res> resList;
-		Vec<Pass> passList;
-		Map<std::string_view, Res> resMap;
-		Map<std::string_view, Pass> passMap;
-
-		Map<unsigned, ResNode> passResMap;
-		std::array<PassNode, 8> firstPassLayer{};
-
-		Fg() {}
+		vptr<Pass> root;
 	};
 } // namespace valkyr

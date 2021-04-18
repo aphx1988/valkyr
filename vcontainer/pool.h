@@ -8,7 +8,7 @@ namespace valkyr {
 	template <typename T>
 	struct Entt {
 		size_t id;
-		alignas(4) bool isZero;
+		alignas(8) bool isZero;
 		T* data;
 		Entt* nextZero;
 	};
@@ -221,9 +221,8 @@ namespace valkyr {
 			Entt<T>* r = Pop(pool);
 			if(r == nullptr){
 				r = NewFrom<T>(pool);
-				//return r;
 			}
-      return r;
+			return r;
 		}
 
 		template <typename T>

@@ -16,7 +16,7 @@ namespace valkyr {
 	};
 
 	struct ChunkInfo {
-		//alignas(4) bool isFull;
+		//alignas(8) bool isFull;
 		Chunk* next;
 		Chunk* prev;
 		size_t head;
@@ -103,7 +103,7 @@ namespace valkyr {
 			}
 			T* obj = new (chunk->buff + info->head)T();
 			info->usedSize += sizeof(T);
-      info->head+=sizeof(T);
+			info->head+=sizeof(T);
 			//if (info->usedSize >= CHUNK_SIZE) {
 			//	info->usedSize = CHUNK_SIZE;
 			//	info->head = CHUNK_SIZE;

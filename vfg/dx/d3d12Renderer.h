@@ -1,10 +1,7 @@
 #pragma once
 #include "../renderer.h"
-#include "../../vcontainer/vec.h"
-#include "../../vcontainer/map.h"
 #include "../../vtask/Scheduler.h"
 #include "d3dcore.h"
-#include <string_view>
 
 using Microsoft::WRL::ComPtr;
 
@@ -26,26 +23,36 @@ namespace valkyr {
 
 	class d3d12Renderer : public Renderer,public FgBuilder {
 	public:
-		d3d12Renderer(HWND hwnd):Renderer(),m_hwnd(hwnd),m_frameCount(0),m_frameIdx(0),m_rtvDescriptorSize(0)
+		d3d12Renderer(HWND hwnd):Renderer(),m_hwnd(hwnd),m_currFg(nullptr),m_scheduler(nullptr),
+			m_rtvDescriptorSize(0),m_dsvDescriptorSize(0),m_cbvSrvUavDescriptorSize(0),m_samplerDescriptorSize(0)
 		{
 			m_currFg = vmake_ptr<Fg>();
 			m_scheduler = vmake_ptr<Scheduler>(4);
 		}
 
-		void Init(RenderSetting setting);
+		void Init(RenderSetting&& setting);
 		void Update();
 		void Render();
 		void Destroy();
-		void Setup(Fg&& fg);
+		void Setup(Fg& fg);
+		void CreateDeferredRes();
+		virtual void AddPass(std::string_view name, bool isComputing, std::string_view parentName, const std::function<void(FgBuilder& builder)>& setupFun
+			, const std::function<void(FgBuilder& builder, CmdList& cmd, Vec<unsigned>, Vec<unsigned>)>& renderFun) override;
+
+		// 通过 FgBuilder 继承
+		virtual void CreateRT(std::string_view name, std::string_view passName, unsigned format, unsigned downSampleRatio) override;
+		virtual void CreateTex(std::string_view name, std::string_view passName, ResType resType, unsigned format, unsigned width, unsigned height) override;
+		virtual void CreateCB(std::string_view name, std::string_view passName, void** constantData) override;
+		virtual void ReadTex(std::string_view name) override;
+		virtual void ReadRT(std::string_view name) override;
+		virtual void WriteRT(std::string_view name) override;
+		virtual void WriteUAV(std::string_view name) override;
 
 		vptr<Fg> m_currFg;
 		vptr<Scheduler> m_scheduler;
 		//first mFrameNum are frame buffers
-		Vec<ComPtr<ID3D12Resource>> m_resList;
-		Map<std::string_view, unsigned> m_resMap;
-
-		Vec<unsigned> m_tempResIdList;
-		
+		Vec<ComPtr<ID3D12Resource>> m_d3d12RTResList;
+		Vec<ComPtr<ID3D12Resource>> m_d3d12SRVResList;
 
 		ComPtr<ID3D12CommandAllocator> m_graphicsCmdAllocator;
 		ComPtr<ID3D12CommandAllocator> m_computeCmdAllocator;
@@ -66,8 +73,6 @@ namespace valkyr {
 		D3D12_VERTEX_BUFFER_VIEW m_vertexBufferView;*/
 		ComPtr<ID3D12GraphicsCommandList> m_graphicsCmdList;
 		ComPtr<ID3D12CommandList> m_computeCmdList;
-		unsigned m_frameIdx;
-		unsigned m_frameCount;
 		unsigned m_rtvDescriptorSize;
 		unsigned m_dsvDescriptorSize;
 		unsigned m_cbvSrvUavDescriptorSize;
@@ -76,10 +81,12 @@ namespace valkyr {
 	private:
 		void getAdapter(IDXGIFactory1* factory,IDXGIAdapter1** adapter1);
 		void waitForPrevFrame();
+		void loadAssets();
+		void initFrameRT();
 
 		ComPtr<ID3D12Device> m_d3dDevice;
 		ComPtr<IDXGISwapChain3> m_swapChain;
-		Vec<unsigned> m_frameRTIdList;
+		//Vec<unsigned> m_frameRTIdList;
 		//Vec<ComPtr<ID3D12Resource>> m_frameRT;
 
 		ComPtr<ID3D12Fence> m_fence;
@@ -89,16 +96,9 @@ namespace valkyr {
 
 		HWND m_hwnd;
 
-		// 通过 FgBuilder 继承
-		virtual void CreateRT(std::string_view name, unsigned format, unsigned downSampleRatio) override;
-		virtual void Create(std::string_view name, ResType resType, unsigned format, unsigned width, unsigned height) override;
-		virtual void CreateCB(std::string_view name, void** constantData) override;
-		virtual void Read(std::string_view name) override;
-		virtual void Read(unsigned id) override;
-		virtual void Write(std::string_view name) override;
-		virtual void Write(unsigned id) override;
-		virtual void Read(vptr<Res> res) override;
-		virtual void Write(vptr<Res> res) override;
-
+	
+		
+		//Vec<Res> rtList;
+		//Vec<Res> shaderResourceList;
 	};
 }

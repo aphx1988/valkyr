@@ -223,7 +223,7 @@ void poolTest() {
   std::vector<std::tuple<C, Rot, Position>> vec;
   auto start2 = std::chrono::system_clock::now();
   for (size_t i = 0; i < maxCapacity; i++) {
-    vec.push_back(std::make_tuple(C(), Rot(), Position()));
+    vec.emplace_back(std::make_tuple(C(), Rot(), Position()));
     /*if (randDist(randEngine) > 5) {
             std::get<0>(vec[i]).baseline = 2233;
     }*/

@@ -4,12 +4,13 @@
 using namespace valkyr;
 using Microsoft::WRL::ComPtr;
 
-void valkyr::d3d12Renderer::Init(RenderSetting setting) {
+void valkyr::d3d12Renderer::Init(RenderSetting&& setting) {
+    m_renderSetting = std::move(setting);
     m_frameCount = setting.numFrames;
     m_fenceEvents = new HANDLE[m_frameCount];
     m_fenceValues = new UINT64[m_frameCount];
     for (unsigned i = 0; i < m_frameCount; i++) {
-        m_resList.push_back(nullptr);
+        m_d3d12RTResList.emplace_back(nullptr);
     }
 	UINT dxgiFactoryFlags = 0;
 #if defined(_DEBUG)
@@ -78,7 +79,7 @@ void valkyr::d3d12Renderer::Init(RenderSetting setting) {
 
     ThrowIfFailed(swapChain.As(&m_swapChain));
     m_frameIdx = m_swapChain->GetCurrentBackBufferIndex();
-    {
+   /* {
         D3D12_DESCRIPTOR_HEAP_DESC rtvHeapDesc = {};
         rtvHeapDesc.NumDescriptors = setting.numFrames;
         rtvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
@@ -91,15 +92,13 @@ void valkyr::d3d12Renderer::Init(RenderSetting setting) {
         CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle(m_descriptorHeap[DECRIPTOR_HEAP_RTV]->GetCPUDescriptorHandleForHeapStart());
         for (UINT i = 0; i < m_frameCount; i++)
         {
-            ThrowIfFailed(m_swapChain->GetBuffer(i, IID_PPV_ARGS(&m_resList[i])));
-            m_d3dDevice->CreateRenderTargetView(m_resList[i].Get(), nullptr, rtvHandle);
+            ThrowIfFailed(m_swapChain->GetBuffer(i, IID_PPV_ARGS(&m_d3d12RTResList[i])));
+            m_d3dDevice->CreateRenderTargetView(m_d3d12RTResList[i].Get(), nullptr, rtvHandle);
             rtvHandle.Offset(1, m_rtvDescriptorSize);
         }
-    }
+    }*/
     ThrowIfFailed(m_d3dDevice->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&m_graphicsCmdAllocator)));
     ThrowIfFailed(m_d3dDevice->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, m_graphicsCmdAllocator.Get(), nullptr, IID_PPV_ARGS(&m_graphicsCmdList)));
-    // Command lists are created in the recording state, but there is nothing
-    // to record yet. The main loop expects it to be closed, so close it now.
     ThrowIfFailed(m_graphicsCmdList->Close());
     {
         ThrowIfFailed(m_d3dDevice->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&m_fence)));
@@ -110,6 +109,7 @@ void valkyr::d3d12Renderer::Init(RenderSetting setting) {
             ThrowIfFailed(HRESULT_FROM_WIN32(GetLastError()));
         }
     }
+    loadAssets();
 }
 
 void valkyr::d3d12Renderer::Update()
@@ -120,13 +120,13 @@ void valkyr::d3d12Renderer::Render()
 {
     ThrowIfFailed(m_graphicsCmdAllocator->Reset());
     ThrowIfFailed(m_graphicsCmdList->Reset(m_graphicsCmdAllocator.Get(), m_pso.Get()));
-    ComPtr<ID3D12Resource> rtRes = m_resList[m_frameIdx];
-    CD3DX12_RESOURCE_BARRIER rtBarrier = CD3DX12_RESOURCE_BARRIER::Transition(m_resList[m_frameIdx].Get(), D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);
+    ComPtr<ID3D12Resource> rtRes = m_d3d12RTResList[m_frameIdx];
+    CD3DX12_RESOURCE_BARRIER rtBarrier = CD3DX12_RESOURCE_BARRIER::Transition(m_d3d12RTResList[m_frameIdx].Get(), D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);
     m_graphicsCmdList->ResourceBarrier(1, &rtBarrier);
     CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle(m_descriptorHeap[DECRIPTOR_HEAP_RTV]->GetCPUDescriptorHandleForHeapStart(), m_frameIdx, m_rtvDescriptorSize);
     // Record commands.
     const float clearColor[] = { 1.0f, 0.2f, 0.4f, 1.0f };
-    CD3DX12_RESOURCE_BARRIER prtBarrier = CD3DX12_RESOURCE_BARRIER::Transition(m_resList[m_frameIdx].Get(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
+    CD3DX12_RESOURCE_BARRIER prtBarrier = CD3DX12_RESOURCE_BARRIER::Transition(m_d3d12RTResList[m_frameIdx].Get(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
     m_graphicsCmdList->ClearRenderTargetView(rtvHandle, clearColor, 0, nullptr);
     m_graphicsCmdList->ResourceBarrier(1, &prtBarrier);
     ThrowIfFailed(m_graphicsCmdList->Close());
@@ -137,16 +137,45 @@ void valkyr::d3d12Renderer::Render()
 
 }
 
-void valkyr::d3d12Renderer::Setup(Fg&& fg)
+void valkyr::d3d12Renderer::Setup(Fg& fg)
 {
     //create global and scene res,including scn mtl,mvp, RTs are crreated during init
     //create temp res in fg
-    Fg frameGraph = std::forward<Fg>(fg);
-    for (int i = 0; i < frameGraph.firstPassLayer.size(); i++) {
-        vptr<Pass> pass = frameGraph.firstPassLayer[i].pPass;
-        pass->setupFunc(*this);
+    //D3D12_DESCRIPTOR_HEAP_DESC srvUavHeapDesc = {};
+    ////rtv as srv, mtl srv + mtl cbv, temp srv/cbv/uav, also some for sampler
+    //unsigned decriptorCount = 10;
+    //srvUavHeapDesc.NumDescriptors = decriptorCount;
+    //srvUavHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
+    //srvUavHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
+    //ThrowIfFailed(m_d3dDevice->CreateDescriptorHeap(&srvUavHeapDesc, IID_PPV_ARGS(&m_descriptorHeap[DECRIPTOR_HEAP_CBV_SRV_UAV])));
+    initFrameRT();
+    fg.root->setupFunc(*this);
+}
+
+void valkyr::d3d12Renderer::CreateDeferredRes() 
+{
+    {
+        D3D12_DESCRIPTOR_HEAP_DESC rtvHeapDesc = {};
+        rtvHeapDesc.NumDescriptors = m_rtResList.size();
+        rtvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
+        rtvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
+        ThrowIfFailed(m_d3dDevice->CreateDescriptorHeap(&rtvHeapDesc, IID_PPV_ARGS(&m_descriptorHeap[DECRIPTOR_HEAP_RTV])));
+        m_rtvDescriptorSize = m_d3dDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
+    }
+    {
+        CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle(m_descriptorHeap[DECRIPTOR_HEAP_RTV]->GetCPUDescriptorHandleForHeapStart());
+        for (UINT i = 0; i < m_frameCount; i++)
+        {
+            ThrowIfFailed(m_swapChain->GetBuffer(i, IID_PPV_ARGS(&m_d3d12RTResList[i])));
+            m_d3dDevice->CreateRenderTargetView(m_d3d12RTResList[i].Get(), nullptr, rtvHandle);
+            rtvHandle.Offset(1, m_rtvDescriptorSize);
+        }
+    }
+    //create rt based on m_rtResList
+    for (auto i = m_frameCount; i < m_rtResList.size(); i++) {
 
     }
+
 }
 
 void valkyr::d3d12Renderer::Destroy()
@@ -219,46 +248,92 @@ void valkyr::d3d12Renderer::waitForPrevFrame()
     m_frameIdx = m_swapChain->GetCurrentBackBufferIndex();
 }
 
-void valkyr::d3d12Renderer::CreateRT(std::string_view name, unsigned format, unsigned downSampleRatio)
+void valkyr::d3d12Renderer::loadAssets()
+{
+    
+    Setup();
+}
+
+void valkyr::d3d12Renderer::initFrameRT()
+{
+    for (unsigned i = 0; i < m_frameCount; i++) {
+        Res frameRT = {};
+        frameRT.width = m_renderSetting.width;
+        frameRT.height = m_renderSetting.height;
+        frameRT.type = ResType::FrameRT;
+        frameRT.format = 0;
+        frameRT.typeListIdx = i;
+        frameRT.state = ResState::Present;
+        frameRT.id = i;
+        frameRT.lifeType = ResLifeType::Imported;
+        m_rtResList.emplace_back(frameRT);
+        m_importedNum++;
+    }
+
+}
+
+void valkyr::d3d12Renderer::AddPass(std::string_view name, bool isComputing, std::string_view parentName, const std::function<void(FgBuilder& builder)>& setupFun, const std::function<void(FgBuilder& builder, CmdList& cmd, Vec<unsigned>, Vec<unsigned>)>& renderFun)
+{
+    Pass pass = Pass(name,isComputing,setupFun,renderFun);
+    pass.id = m_passList.size();
+    m_passList.emplace_back(pass);
+    m_passMap.emplace(name,pass.id);
+    PassNode passNode;
+    passNode.passId = pass.id;
+    passNode.pPass = vmake_ptr<Pass>(pass);
+    m_passNodeList.emplace_back(passNode);
+    unsigned parentId = m_passMap.at(parentName);
+    m_passNodeList[parentId].pNextPass = passNode.pPass;
+    m_passNodeList[parentId].nextPassId = pass.id;
+}
+
+void valkyr::d3d12Renderer::CreateRT(std::string_view name, std::string_view passName, unsigned format, unsigned downSampleRatio)
+{
+    //at that time, res always created
+    ComPtr<ID3D12Resource> d3dRes;
+    unsigned resId = m_resList.size();
+    Res res;
+    res.id = resId;
+    res.format = format;
+    res.type = ResType::RTV;
+    res.typeListIdx = m_rtResList.size();
+    res.width = m_renderSetting.width * downSampleRatio;
+    res.height = m_renderSetting.height * downSampleRatio;
+    res.state = ResState::RenderTarget;
+    res.lifeType = ResLifeType::Temp;
+    m_resList.emplace_back(res);
+    m_resMap.emplace(name, resId);
+    m_rtResList.emplace_back(res.typeListIdx);
+    //m_rtvDescriptorSize = m_d3dDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
+    CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle(m_descriptorHeap[DECRIPTOR_HEAP_RTV]->GetCPUDescriptorHandleForHeapStart());
+    rtvHandle.Offset(res.typeListIdx,m_rtvDescriptorSize);
+    m_d3dDevice->CreateRenderTargetView(d3dRes.Get(), nullptr, rtvHandle);
+    m_d3d12RTResList.emplace_back(d3dRes);
+}
+
+void valkyr::d3d12Renderer::CreateTex(std::string_view name, std::string_view passName, ResType resType, unsigned format, unsigned width, unsigned height)
 {
 }
 
-void valkyr::d3d12Renderer::Create(std::string_view name, ResType resType, unsigned format, unsigned width, unsigned height)
+void valkyr::d3d12Renderer::CreateCB(std::string_view name, std::string_view passName, void** constantData)
 {
 }
 
-void valkyr::d3d12Renderer::CreateCB(std::string_view name, void** constantData)
+void valkyr::d3d12Renderer::ReadRT(std::string_view name) {
+
+}
+
+void valkyr::d3d12Renderer::ReadTex(std::string_view name)
 {
 }
 
-void valkyr::d3d12Renderer::Read(std::string_view name)
+void valkyr::d3d12Renderer::WriteRT(std::string_view name){
+}
+
+void valkyr::d3d12Renderer::WriteUAV(std::string_view name)
 {
 }
 
-void valkyr::d3d12Renderer::Read(unsigned id)
-{
-}
-
-//void valkyr::d3d12Renderer::ReadTemp(std::string_view name){
-//  
-//}
-
-//void valkyr::d3d12Renderer::ReadTemp(unsigned id){
-//}
-
-void valkyr::d3d12Renderer::Write(std::string_view name){
-}
-
-void valkyr::d3d12Renderer::Write(unsigned id){
-}
-
-void valkyr::d3d12Renderer::Read(vptr<Res> res)
-{
-}
-
-void valkyr::d3d12Renderer::Write(vptr<Res> res)
-{
-}
 
 
 //void valkyr::d3d12Renderer::WriteTemp(std::string_view name){
