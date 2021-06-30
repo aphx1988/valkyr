@@ -26,22 +26,25 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\vcore\array.h">
-      <Filter>vcore</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\vcore\queue.h">
-      <Filter>vcore</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\vcore\vector.h">
-      <Filter>vcore</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\vmalloc\chunk.h">
       <Filter>vmalloc</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\vmalloc\pool.h">
+    <ClInclude Include="20test.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\vcore\vptr.h">
+      <Filter>vcore</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\vmalloc\ChunkMgr.h">
       <Filter>vmalloc</Filter>
     </ClInclude>
-    <ClInclude Include="20test.h">
+    <ClInclude Include="test_mem.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\vmalloc\vslab.h">
+      <Filter>vmalloc</Filter>
+    </ClInclude>
+    <ClInclude Include="test_slab.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

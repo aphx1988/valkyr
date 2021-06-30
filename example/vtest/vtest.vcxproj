@@ -146,12 +146,13 @@
     <ClCompile Include="vtest.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\vcore\array.h" />
-    <ClInclude Include="..\..\vcore\queue.h" />
-    <ClInclude Include="..\..\vcore\vector.h" />
+    <ClInclude Include="..\..\vcore\vptr.h" />
     <ClInclude Include="..\..\vmalloc\chunk.h" />
-    <ClInclude Include="..\..\vmalloc\pool.h" />
+    <ClInclude Include="..\..\vmalloc\ChunkMgr.h" />
+    <ClInclude Include="..\..\vmalloc\vslab.h" />
     <ClInclude Include="20test.h" />
+    <ClInclude Include="test_mem.h" />
+    <ClInclude Include="test_slab.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
