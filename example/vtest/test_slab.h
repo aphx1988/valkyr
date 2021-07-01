@@ -13,7 +13,7 @@ namespace valkyr {
 		}
 
 		void basic_test() {
-
+			//first alloc a chunk, then alloc preloaded cache and slab on this chunk, finally create obj
 		}
 	}
 	

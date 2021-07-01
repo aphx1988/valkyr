@@ -8,28 +8,38 @@
 */
 
 namespace valkyr {
-	template<class T>
-	struct Node {
-		T* data;
-		Node<T>* next;
-		Node<T>* prev;
-	};
+	namespace slab {
+		template<class T>
+		struct Node {
+			T* data;
+			Node<T>* next;
+			Node<T>* prev;
+		};
+		
+		template<class T>
+		struct Stack {
+			Node<T>* head;
+			size_t length;
+			size_t capacity;
+		public:
+			T* pop() {
 
-	template<class T>
-	struct LinkedList {
-		Node<T>* head;
-		Node<T>* tail;
-		size_t num;
-	};
+			}
+			void push(T* element) {
 
-	template<class T>
-	struct Stack {
-		LinkedList<T>* link;
-	};
+			}
+		};
 
-	template<class T>
-	struct Slab {
-		LinkedList<T>* obj_list;
-		LinkedList<T>* free_list
-	};
+		template<class T>
+		struct Slab {
+			Stack<T>* obj_list;
+			size_t remaining_num;
+		};
+
+		template<class T>
+		struct Cache {
+			Stack<Slab<T>>* slabs;
+			Stack<T>* free_list;
+		};
+	}
 }
