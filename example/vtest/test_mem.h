@@ -36,8 +36,8 @@ namespace valkyr {
 			assert(PAGE_CAPACITY >= 1 && PAGE_CAPACITY <= CHUNK_SIZE);
 			uintptr_t sz = (PAGE_CAPACITY - 1) * PAGE_SIZE;
 			size_t align = 16;
-			uintptr_t align_sz = (sz + (align - 1)) & ~(align - 1);
-			void* chunk = malloc(align_sz);
+			//uintptr_t align_sz = (sz + (align - 1)) & ~(align - 1);
+			void* chunk = _aligned_malloc(CHUNK_SIZE,align);
 			//<<针对char*做了重载，而void*没法加减，不得不转换回void*
 			std::cout << "chunk address=" << (void*)chunk << endl;
 			Color* p_color = new(chunk) Color(255, 223, 128);

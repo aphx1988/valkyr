@@ -24,6 +24,9 @@
     <ClCompile Include="vtest.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\vcore\vslab.cpp">
+      <Filter>vcore</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\vmalloc\chunk.h">
@@ -41,11 +44,17 @@
     <ClInclude Include="test_mem.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\vmalloc\vslab.h">
-      <Filter>vmalloc</Filter>
+    <ClInclude Include="..\..\vcore\vhzptr.h">
+      <Filter>vcore</Filter>
     </ClInclude>
-    <ClInclude Include="test_slab.h">
+    <ClInclude Include="test_hzptr.h">
       <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\vcore\vslab.h">
+      <Filter>vcore</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\vcore\bitop.h">
+      <Filter>vcore</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
