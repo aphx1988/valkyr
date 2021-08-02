@@ -158,6 +158,7 @@
     <ClInclude Include="20test.h" />
     <ClInclude Include="test_hzptr.h" />
     <ClInclude Include="test_mem.h" />
+    <ClInclude Include="test_slab.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
