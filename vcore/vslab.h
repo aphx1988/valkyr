@@ -32,8 +32,16 @@ struct Slab
 		if (next_off == std::nullopt) {
 			return;
 		}
-		this->free_item = this->start_item + next_off;
+		this->free_item = this->start_item + next_off.value();
 		this->usage_bits = next_usage;
+	}
+
+	SlabItem<T>* get(uint16_t i) {
+		return this->start_item + i * sizeof(SlabItem<T>);
+	}
+
+	SlabItem<T>* operator[](int i) {
+		return this->start_item + i*sizeof(SlabItem<T>);
 	}
 };
 
@@ -42,6 +50,8 @@ struct SlabItem {
 	Slab<T>* slab;
 	uint16_t offset;
 	T data;
+
+	SlabItem<T>() {}
 };
 
 template<class T>
@@ -56,7 +66,7 @@ struct Cache {
 		slab->color_offset = col_off;
 		auto slab_start = data_start + sizeof(Slab<T>);
 		for (auto i = 0; i < cap; i++) {
-			auto item_start = slab_start + sizeof(SlabItem<T>*i);
+			auto item_start = slab_start + sizeof(SlabItem<T>)*i;
 			SlabItem<T>* item = new(item_start)SlabItem<T>();
 			item->slab = slab;
 			item->offset = i;
