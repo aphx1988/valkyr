@@ -12,7 +12,6 @@ Debug
 /example/vkapp/CMakeFiles
 build/*
 x64
-.vscode
 cmake_build/*
 Makefile
 */Makefile
