@@ -15,9 +15,9 @@ namespace valkyr {
 		bool softwareMode;
 	};
 
-	class Renderer {
+	class vkRenderer {
 	public:
-		Renderer() :m_frameIdx(0), m_frameCount(2), m_renderSetting{} {
+		vkRenderer() :m_frameIdx(0), m_frameCount(2), m_renderSetting{} {
 		}
 
 		virtual void Init(RenderSetting&& setting) = 0;

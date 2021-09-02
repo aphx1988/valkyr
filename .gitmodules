@@ -4,3 +4,6 @@
 [submodule "example/vkapp/external/glfw"]
 	path = example/vkapp/external/glfw
 	url = https://github.com/glfw/glfw.git
+[submodule "example/vkapp/external/vma"]
+	path = example/vkapp/external/vma
+	url = https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator.git

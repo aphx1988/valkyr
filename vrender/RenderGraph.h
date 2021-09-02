@@ -1,23 +1,18 @@
 #pragma once
-#include "../vcontainer/FrameGraph.h"
-#include "cmd.h"
+#include "ResBuilder.h"
 
 namespace valkyr {
 	namespace render {
-		using RPass = Pass<unsigned,CmdList>;
+		
 
-		const unsigned RES_RTV = 0, RES_FrameRT = 1, RES_DSV = 2, RES_SRV = 3, RES_UAV = 4, 
-			RES_CBV = 5, RES_Sampler = 6, RES_VB = 7, RES_IB = 8;
+		class RenderGraph :public FrameGraph<RRes, CmdList> {
+		public:
+			RenderGraph(){}
+			~RenderGraph(){}
 
-		struct Tex
-		{
-			unsigned width;
-			unsigned height;
-			unsigned format;
+		private:
+			vptr<ResBuilder> res_builder;
+			vptr<CmdList> cmd_list;
 		};
-
-		using RRes = Res<Tex>;
-
-		using RenderGraph = FrameGraph<RRes,CmdList>;
 	}
 }

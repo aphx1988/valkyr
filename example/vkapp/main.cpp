@@ -3,15 +3,16 @@
 //#define GLM_FORCE_RADIANS
 //#define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #include <iostream>
-#include "RenderGraph.h"
+#include "vk/vkRenderer.h"
 
 int main(){
     glfwInit();
     glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-    GLFWwindow* window = glfwCreateWindow(1920, 1080, "vkapp", nullptr, nullptr);
-    uint32_t extensionCount = 0;
-    vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, nullptr);
-    std::cout << "has " << extensionCount << " extensions" << std::endl;
+    valkyr::RenderSetting setting = {};
+    setting.width = 1920;
+    setting.height = 1080;
+    GLFWwindow* window = glfwCreateWindow(setting.width, setting.height, "vkapp", nullptr, nullptr);
+
     while(!glfwWindowShouldClose(window)) {
         glfwPollEvents();
     }
