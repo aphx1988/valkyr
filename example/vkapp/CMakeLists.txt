@@ -6,6 +6,7 @@ include_directories(${CMAKE_SOURCE_DIR}/vtask)
 include_directories(${CMAKE_SOURCE_DIR}/vcontainer)
 include_directories(${CMAKE_SOURCE_DIR}/vecs)
 include_directories(${CMAKE_SOURCE_DIR}/vfg)
+include_directories(${CMAKE_SOURCE_DIR}/vrender)
 
 add_executable(vkapp ${VKAPP_SRC})
 
@@ -31,7 +32,7 @@ target_link_libraries(vkapp glfw)
 
 IF (NOT CMAKE_VERSION VERSION_LESS 3.7.0)
   find_package(Vulkan) 
-  MESSAGE("Using Vulkan SDK")
+  MESSAGE("Find Vulkan")
 ENDIF()
 IF (NOT Vulkan_FOUND)
   find_library(Vulkan_LIBRARY NAMES vulkan HINTS "$ENV{VULKAN_SDK}/lib" REQUIRED)

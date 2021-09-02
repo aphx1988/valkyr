@@ -14,7 +14,7 @@ namespace valkyr {
 		SRV,
 		UAV,
 		CBV,
-		Destroyed
+		Destroyed = 0;
 	};
 
 	enum class ResType { RTV = 0, FrameRT, DSV, SRV, UAV, CBV, Sampler, VB, IB };
