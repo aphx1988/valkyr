@@ -23,3 +23,11 @@ compile_commands.json
 CMakeFiles
 bin
 *CMakeCache*
+/out/build/x64-Debug/example/vkapp/external/glfw/src/glfw_config.h
+/out/build/x64-Debug/example/vkapp/external/glfw/src/glfw3.pc
+/out/build/x64-Debug/example/vkapp/external/glfw/src/glfw3.lib
+/out/build/x64-Debug/Testing/Temporary/LastTest.log
+/out/build/x64-Debug/VSInheritEnvironments.txt
+/out/build/x64-Debug/build.ninja
+/out/build/x64-Debug/.ninja_log
+/out/build/x64-Debug/.ninja_deps
