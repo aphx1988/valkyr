@@ -1,4 +1,3 @@
-file(GLOB VKAPP_SRC "*.cpp" "*.h") 
 
 include_directories(${CMAKE_SOURCE_DIR}/vcore)
 include_directories(${CMAKE_SOURCE_DIR}/vmalloc)
@@ -7,8 +6,12 @@ include_directories(${CMAKE_SOURCE_DIR}/vcontainer)
 include_directories(${CMAKE_SOURCE_DIR}/vecs)
 include_directories(${CMAKE_SOURCE_DIR}/vfg)
 include_directories(${CMAKE_SOURCE_DIR}/vrender)
+include_directories(${CMAKE_SOURCE_DIR}/vrender/vk)
 
-add_executable(vkapp ${VKAPP_SRC})
+file(GLOB VKAPP_SRC "*.cpp" "*.h" "*.hpp")
+aux_source_directory(${CMAKE_SOURCE_DIR}/vrender/vk VRENDER_SRC)
+
+add_executable(vkapp ${VKAPP_SRC} ${VRENDER_SRC})
 
 IF(LINUX)
   set(THREADS_PREFER_PTHREAD_FLAG ON)

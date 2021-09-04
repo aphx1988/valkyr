@@ -24,26 +24,15 @@ namespace valkyr {
 		T data;
 	};
 
-	struct RenderSetting {
-		unsigned width;
-		unsigned height;
-		unsigned num_fb;
-		bool fullscreen;
-		bool software;
-	};
-
 	template<class R,class ...P>
-	class FrameGraph
+	struct FrameGraph
 	{
 	public:
-		FrameGraph(){}
+		FrameGraph():thread_count(0){}
 		~FrameGraph(){}
 
-		virtual void init(RenderSetting setting) = 0;
-		virtual void build()=0;
-		virtual void exec()=0;
-
-	private:
+		std::function<void()> fn_build;
+		std::function<void()> fn_exec;
 		Vec<Pass<P...>> pass_list;
 		Vec<Res<R>> res_list;
 		size_t thread_count;
