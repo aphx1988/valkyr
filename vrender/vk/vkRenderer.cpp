@@ -43,7 +43,44 @@ void valkyr::render::vkRenderer::init(RenderSetting setting)
 	createInfo.enabledExtensionCount = activeExts.size();
 	createInfo.ppEnabledExtensionNames = activeExts.data();
 	createInfo.enabledLayerCount = 0;
-	VK_CHECK(vkCreateInstance(&createInfo,nullptr, &instance));
+	VK_CHECK(vkCreateInstance(&createInfo,nullptr, &m_instance));
+	uint32_t deviceCount=0;
+	vkEnumeratePhysicalDevices(m_instance, &deviceCount, nullptr);
+	if (deviceCount == 0) {
+		throw std::runtime_error("no vulkan physical device");
+	}
+	std::vector<VkPhysicalDevice> devices(deviceCount);
+	vkEnumeratePhysicalDevices(m_instance, &deviceCount, devices.data());
+	VkPhysicalDeviceProperties prop;
+	VkPhysicalDeviceFeatures feature;
+	for (const auto& dev : devices) {
+		VkPhysicalDeviceProperties deviceProps;
+		VkPhysicalDeviceFeatures deviceFeatures;
+		vkGetPhysicalDeviceProperties(dev, &deviceProps);
+		vkGetPhysicalDeviceFeatures(dev, &deviceFeatures);
+		if (checkDevice(dev,deviceProps, deviceFeatures)) {
+			m_phy_device = dev;
+			prop = deviceProps;
+			break;
+		}
+	}
+	if (m_phy_device == VK_NULL_HANDLE) {
+		throw std::runtime_error("no suitable vulkan physical device");
+	}
+	VkDeviceQueueCreateInfo queue_info{ VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO };
+	queue_info.queueFamilyIndex = m_g_queue_family_index;
+	queue_info.queueCount = 1;
+	float queue_priority = 1.0f;
+	queue_info.pQueuePriorities = &queue_priority;
+
+	VkDeviceCreateInfo device_info{ VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO };
+	device_info.queueCreateInfoCount = 1;
+	device_info.pQueueCreateInfos = &queue_info;
+	device_info.enabledExtensionCount = activeExts.size();
+	device_info.ppEnabledExtensionNames = activeExts.data();
+	vkCreateDevice(m_phy_device, &device_info, nullptr, &m_device);
+	vkGetDeviceQueue(m_device, m_g_queue_family_index, 0, &m_g_queue);
+	int x = 0;
 }
 
 void valkyr::render::vkRenderer::perFrame()
@@ -52,5 +89,5 @@ void valkyr::render::vkRenderer::perFrame()
 
 void valkyr::render::vkRenderer::destroy()
 {
-	vkDestroyInstance(instance, nullptr);
+	vkDestroyInstance(m_instance, nullptr);
 }

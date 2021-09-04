@@ -24,9 +24,9 @@ namespace valkyr {
 			virtual void destroy() = 0;
 
 		private:
-			FrameGraph<RRes, CmdList> fg;
-			vptr<ResBuilder> res_builder;
-			vptr<CmdList> cmd_list;
+			FrameGraph<RRes, CmdList,ResBuilder> m_fg;
+			vptr<ResBuilder> m_res_builder;
+			vptr<CmdList> m_cmd_list;
 		};
 	}
 }
