@@ -12,6 +12,7 @@ namespace valkyr {
 			unsigned num_fb;
 			bool fullscreen;
 			bool software;
+			void* window;
 		};
 
 		class Renderer {

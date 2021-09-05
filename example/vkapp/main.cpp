@@ -1,4 +1,3 @@
-#include <GLFW/glfw3.h>
 #include <iostream>
 #include <string>
 #include "vk/vkRenderer.h"
@@ -13,6 +12,7 @@ int main(){
     setting.height = 1080;
     GLFWwindow* window = glfwCreateWindow(setting.width, setting.height, setting.title.data(), nullptr, nullptr);
     valkyr::vptr<valkyr::render::Renderer> renderer = vmake_ptr<valkyr::render::vkRenderer>();
+    setting.window = (void*)window;
     renderer->init(setting);
     while(!glfwWindowShouldClose(window)) {
         glfwPollEvents();

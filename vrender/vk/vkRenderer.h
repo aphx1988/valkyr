@@ -3,6 +3,16 @@
 #include "ResBuilder.h"
 #include <vulkan/vulkan.h>
 #include <string>
+#ifdef _WIN32
+#include <Windows.h>
+#define VK_USE_PLATFORM_WIN32_KHR
+#include <vulkan/vulkan_win32.h>
+#endif
+#define GLFW_INCLUDE_VULKAN
+#include <GLFW/glfw3.h>
+#define GLFW_EXPOSE_NATIVE_WIN32
+#include <GLFW/glfw3native.h>
+
 
 #define VK_CHECK(x)                                                 \
 	do                                                              \
@@ -17,8 +27,43 @@
 		}                                                           \
 	} while (0)
 
+#if defined(_DEBUG)
+/// @brief A debug callback called from Vulkan validation layers.
+static VKAPI_ATTR VkBool32 VKAPI_CALL debug_callback(VkDebugReportFlagsEXT flags, VkDebugReportObjectTypeEXT type,
+	uint64_t object, size_t location, int32_t message_code,
+	const char* layer_prefix, const char* message, void* user_data)
+{
+	if (flags & VK_DEBUG_REPORT_ERROR_BIT_EXT)
+	{
+		//LOGE("Validation Layer: Error: {}: {}", layer_prefix, message);
+	}
+	else if (flags & VK_DEBUG_REPORT_WARNING_BIT_EXT)
+	{
+		//LOGE("Validation Layer: Warning: {}: {}", layer_prefix, message);
+	}
+	else if (flags & VK_DEBUG_REPORT_PERFORMANCE_WARNING_BIT_EXT)
+	{
+		//LOGI("Validation Layer: Performance warning: {}: {}", layer_prefix, message);
+	}
+	else
+	{
+		//LOGI("Validation Layer: Information: {}: {}", layer_prefix, message);
+	}
+	return VK_FALSE;
+}
+#endif
+
 namespace valkyr {
 	namespace render {
+
+		struct vkFrameInfo{
+			VkFence fence;
+			VkCommandPool cmd_pool;
+			VkCommandBuffer cmd_buff;
+			VkSemaphore sp_acquire;
+			VkSemaphore sp_release;
+		};
+
 		class vkRenderer :public Renderer
 		{
 		public:
@@ -30,6 +75,11 @@ namespace valkyr {
 			void destroy();
 
 		private:
+			void initDevice(Vec<const char*>& activeExts);
+			void initSwapchain();
+			void initFrame(vkFrameInfo& frameInfo);
+			void teardownFrame(vkFrameInfo& frameInfo);
+
 			bool validateExts(const Vec<const char*>& required, const Vec<VkExtensionProperties>& available) {
 				for (auto extension : required)
 				{
@@ -50,39 +100,26 @@ namespace valkyr {
 				return true;
 			}
 
-			bool checkDevice(const VkPhysicalDevice& device,const VkPhysicalDeviceProperties& deviceProps,const VkPhysicalDeviceFeatures& deviceFeatures) {
-				uint32_t queueFamilyCount = 0;
-				Vec<VkQueueFamilyProperties> queueFamilyProps;
-				vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, queueFamilyProps.data());
-				if (deviceProps.deviceType == VK_PHYSICAL_DEVICE_TYPE_MAX_ENUM || deviceProps.deviceType == VK_PHYSICAL_DEVICE_TYPE_OTHER) {
-					return false;
-				}
-				for (int i = 0; i < queueFamilyProps.size();i++) {
-					const auto& prop = queueFamilyProps[i];
-					if (prop.queueFlags & VK_QUEUE_GRAPHICS_BIT) {
-						m_g_queue_family_index = i;
-						if (prop.queueFlags & VK_QUEUE_COMPUTE_BIT) {
-							m_g_queue_family_index = i;
-							break;
-						}
-						else {
-							return false;
-						}
-					}
-				}
-				return true;
+			VkPhysicalDevice findPhyDevice(std::vector<VkPhysicalDevice>& devices) {
+				return devices[0];
 			}
 
 			VkInstance m_instance = VK_NULL_HANDLE;
 			VkPhysicalDevice m_phy_device = VK_NULL_HANDLE;
 			VkDevice m_device = VK_NULL_HANDLE;
+			VkSurfaceKHR m_surface = VK_NULL_HANDLE;
 			VkQueue m_g_queue = VK_NULL_HANDLE;
 			VkQueue m_c_queue = VK_NULL_HANDLE;
 			uint32_t m_g_queue_family_index = 0;
 			uint32_t m_c_queue_family_index = 0;
-
+			VkSwapchainKHR m_swapchain = VK_NULL_HANDLE;
+			Vec<VkImageView> m_swapchain_imageviews;
+			Vec<VkFramebuffer> m_swapchain_framebuffers;
 			unsigned m_width, m_height;
-
+			VkFormat m_swapchain_format;
+			Vec<vkFrameInfo> m_frame_info_list;
+			int m_queue_index;
+			GLFWwindow* m_window;
 		};
 
 	}

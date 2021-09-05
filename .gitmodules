@@ -1,9 +1,9 @@
 [submodule "vrender/external/glm"]
 	path = vrender/external/glm
 	url = https://github.com/g-truc/glm.git
-[submodule "example/vkapp/external/glfw"]
-	path = example/vkapp/external/glfw
-	url = https://github.com/glfw/glfw.git
 [submodule "vrender/external/vma"]
 	path = vrender/external/vma
 	url = https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator.git
+[submodule "vrender/external/glfw"]
+	path = vrender/external/glfw
+	url = https://github.com/glfw/glfw.git

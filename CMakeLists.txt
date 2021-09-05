@@ -22,5 +22,5 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin/")
 
 add_subdirectory(example/vtest)
 add_subdirectory(example/vkapp)
-
+add_subdirectory(vrender/external/glfw)
 
