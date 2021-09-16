@@ -4,7 +4,8 @@
 #include <vulkan/vulkan.h>
 #include <string>
 #ifdef _WIN32
-#include <Windows.h>
+//#pragma comment(linker, "/subsystem:windows")
+#include <windows.h>
 #define VK_USE_PLATFORM_WIN32_KHR
 #include <vulkan/vulkan_win32.h>
 #endif
@@ -75,7 +76,7 @@ namespace valkyr {
 			void destroy();
 
 		private:
-			void initDevice(Vec<const char*>& activeExts);
+			void initDevice(const char** activeExts, uint32_t extCounts);
 			void initSwapchain();
 			void initFrame(vkFrameInfo& frameInfo);
 			void teardownFrame(vkFrameInfo& frameInfo);
@@ -98,6 +99,17 @@ namespace valkyr {
 					}
 				}
 				return true;
+			}
+
+			bool checkLayers() {
+				const std::vector<const char*> validationLayers = {
+					"VK_LAYER_KHRONOS_validation"
+				};
+				uint32_t layerCount;
+				VK_CHECK(vkEnumerateInstanceLayerProperties(&layerCount, nullptr));
+				std::vector<VkLayerProperties> availableLayers(layerCount);
+				VK_CHECK(vkEnumerateInstanceLayerProperties(&layerCount, availableLayers.data()));
+
 			}
 
 			VkPhysicalDevice findPhyDevice(std::vector<VkPhysicalDevice>& devices) {

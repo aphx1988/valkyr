@@ -5,6 +5,7 @@
 int main(){
     glfwInit();
     glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+    glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
     valkyr::render::RenderSetting setting = {};
     std::string szTitle = "vkapp";
     setting.title = std::string_view(szTitle.c_str(), szTitle.size());

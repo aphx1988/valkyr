@@ -4,32 +4,8 @@
 void valkyr::render::vkRenderer::init(RenderSetting setting)
 {
 	uint32_t extCount = 0;
-	VK_CHECK(vkEnumerateInstanceExtensionProperties(nullptr, &extCount, nullptr));
-	Vec<VkExtensionProperties> extProps;
-	VK_CHECK(vkEnumerateInstanceExtensionProperties(nullptr, &extCount, extProps.data()));
-	Vec<const char*> activeExts = {};
-#if defined _DEBUG || defined DEBUG
-	//activeExts.push_back(VK_EXT_DEBUG_REPORT_EXTENSION_NAME);
-#if defined VK_USE_PLATFORM_WIN32_KHR
-	activeExts.push_back(VK_KHR_WIN32_SURFACE_EXTENSION_NAME);
-#elif  VK_USE_PLATFORM_ANDROID_KHR
-	activeExts.push_back(VK_KHR_ANDROID_SURFACE_EXTENSION_NAME);
-#elif  VK_USE_PLATFORM_XCB_KHR
-	activeExts.push_back(VK_KHR_XCB_SURFACE_EXTENSION_NAME);
-#elif  VK_USE_PLATFORM_DISPLAY_KHR
-	activeExts.push_back(VK_KHR_DISPLAY_EXTENSION_NAME);
-#else
-#pragma error "Platform not supported"
-#endif
-#endif
-	if (extProps.size() == 0) {
-		//activeExts.clear();
-
-	}
-	else if (!validateExts(activeExts, extProps))
-	{
-		throw std::runtime_error("Required instance extensions are missing.");
-	}
+	const char** activeExts;
+	activeExts = glfwGetRequiredInstanceExtensions(&extCount);
 	VkApplicationInfo appInfo = {};
 	appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO; 
 	appInfo.pApplicationName = setting.title.data();
@@ -41,14 +17,15 @@ void valkyr::render::vkRenderer::init(RenderSetting setting)
 	VkInstanceCreateInfo createInfo = {};
 	createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
 	createInfo.pApplicationInfo = &appInfo;
-	createInfo.enabledExtensionCount = activeExts.size();
-	createInfo.ppEnabledExtensionNames = activeExts.data();
+	createInfo.enabledExtensionCount = extCount;
+	createInfo.ppEnabledExtensionNames = activeExts;
 	createInfo.enabledLayerCount = 0;
 #ifdef _DEBUG
 	VkDebugReportCallbackCreateInfoEXT debug_report_create_info = { VK_STRUCTURE_TYPE_DEBUG_REPORT_CREATE_INFO_EXT };
 	debug_report_create_info.flags = VK_DEBUG_REPORT_ERROR_BIT_EXT | VK_DEBUG_REPORT_WARNING_BIT_EXT;
 	debug_report_create_info.pfnCallback = debug_callback;
 	createInfo.pNext = &debug_report_create_info;
+	
 #endif
 	VK_CHECK(vkCreateInstance(&createInfo,nullptr, &m_instance));
 	m_window = (GLFWwindow*)setting.window;
@@ -57,8 +34,8 @@ void valkyr::render::vkRenderer::init(RenderSetting setting)
 	sufCreateInfo.hwnd = glfwGetWin32Window(m_window);
 	sufCreateInfo.hinstance = GetModuleHandle(nullptr);
 	VK_CHECK(vkCreateWin32SurfaceKHR(m_instance, &sufCreateInfo, nullptr, &m_surface));
-	initDevice(activeExts);
-	initSwapchain();
+	initDevice(activeExts,extCount);
+	//initSwapchain();
 	int x = 0;
 }
 
@@ -71,7 +48,7 @@ void valkyr::render::vkRenderer::destroy()
 	vkDestroyInstance(m_instance, nullptr);
 }
 
-void valkyr::render::vkRenderer::initDevice(Vec<const char*>& activeExts)
+void valkyr::render::vkRenderer::initDevice(const char** activeExts,uint32_t extCounts)
 {
 	uint32_t deviceCount = 0;
 	VK_CHECK(vkEnumeratePhysicalDevices(m_instance, &deviceCount, nullptr));
@@ -127,8 +104,8 @@ void valkyr::render::vkRenderer::initDevice(Vec<const char*>& activeExts)
 	VkDeviceCreateInfo device_info{ VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO };
 	device_info.queueCreateInfoCount = 2;
 	device_info.pQueueCreateInfos = queueCreateInfo.data();
-	device_info.enabledExtensionCount = activeExts.size();
-	device_info.ppEnabledExtensionNames = activeExts.data();
+	device_info.enabledExtensionCount = extCounts;
+	device_info.ppEnabledExtensionNames = activeExts;
 	vkCreateDevice(m_phy_device, &device_info, nullptr, &m_device);
 	vkGetDeviceQueue(m_device, m_g_queue_family_index, 0, &m_g_queue);
 }
